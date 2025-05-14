@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     Animated,
     Dimensions,
@@ -19,6 +19,14 @@ const TwisterSpinner = () => {
   const [spinning, setSpinning] = useState(false);
   const [currentRotation, setCurrentRotation] = useState(0);
   const [baseRotation, setBaseRotation] = useState(0);
+  const isMounted = useRef(true);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
 
   const spin = () => {
     if (spinning) return;
@@ -35,6 +43,7 @@ const TwisterSpinner = () => {
       easing: Easing.out(Easing.cubic), // nice deceleration feel
       useNativeDriver: true,
     }).start(() => {
+      if (!isMounted.current) return;
       setSpinning(false);
       setBaseRotation(targetRotation); // accumulate total rotation
     });
