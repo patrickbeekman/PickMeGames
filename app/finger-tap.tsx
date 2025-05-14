@@ -6,8 +6,9 @@ import {
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from 'react-native';
+import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
 
 const COUNTDOWN_SECONDS = 4;
@@ -21,7 +22,7 @@ export default function FingerTapScreen() {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [phase, setPhase] = useState<'waiting' | 'countdown' | 'flickering' | 'winner'>('waiting');
 
-  const flashColor = useRef(new Animated.Value(0)).current;
+  const backgroundColor = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (countdown !== null && countdown > 0) {
@@ -32,9 +33,34 @@ export default function FingerTapScreen() {
     } else if (countdown === 0) {
       setCountdown(null);
       setPhase('flickering');
-      runSuspenseSequence();
+      chooseWinner()
     }
   }, [countdown]);
+
+  useEffect(() => {
+    let toValue = 0;
+    switch (phase) {
+      case 'waiting':
+        toValue = 0;
+        break;
+      case 'countdown':
+        toValue = 1;
+        break;
+      case 'flickering':
+        toValue = 2;
+        break;
+      case 'winner':
+        toValue = 3;
+        break;
+    }
+  
+    Animated.timing(backgroundColor, {
+      toValue,
+      duration: 750,
+      easing: Easing.inOut(Easing.ease),
+      useNativeDriver: false,
+    }).start();
+  }, [phase]);
 
   const onTouchStart = (e: any) => {
     if (phase === 'winner' || phase === 'flickering') return;
@@ -66,40 +92,8 @@ export default function FingerTapScreen() {
     }
   };
 
-  const runSuspenseSequence = () => {
-    const flickerTimings = [300, 250];
-    let step = 0;
-
-    const flicker = () => {
-      if (step >= flickerTimings.length) {
-        chooseWinner();
-        return;
-      }
-
-      Animated.sequence([
-        Animated.timing(flashColor, {
-          toValue: 1,
-          duration: flickerTimings[step] / 2,
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: false,
-        }),
-        Animated.timing(flashColor, {
-          toValue: 0,
-          duration: flickerTimings[step] / 2,
-          easing: Easing.out(Easing.quad),
-          useNativeDriver: false,
-        }),
-      ]).start(() => {
-        step++;
-        flicker();
-      });
-    };
-
-    flicker();
-  };
-
   const chooseWinner = () => {
-    if (touches.length < 2) {
+    if (touches.length < 1) {
       setPhase('waiting');
       return;
     }
@@ -133,12 +127,13 @@ export default function FingerTapScreen() {
     setPhase('waiting');
   };
 
-  const bgColor = flashColor.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#fff9c4', '#D69A54'], // light yellow to poppy
+  const bgColor = backgroundColor.interpolate({
+    inputRange: [0, 1, 2, 3],
+    outputRange: ['#F3E889', '#FBF272', '#E0FF4F', '#C4EF5F'],
   });
 
   return (
+    <Animated.View style={[styles.container, { backgroundColor: bgColor }]}>
     <Animated.View
       style={[styles.container, { backgroundColor: bgColor || '#F3E889' }]}
       onTouchStart={onTouchStart}
@@ -205,9 +200,21 @@ export default function FingerTapScreen() {
         />
       ))}
 
+        {phase === 'winner' && (
+        <ConfettiCannon
+            count={100}
+            origin={{ x: width / 2, y: 0 }}
+            fadeOut={true}
+            explosionSpeed={300}
+            fallSpeed={3000}
+        />
+        )}
+
+
       <TouchableOpacity style={styles.resetButton} onPress={reset}>
         <Text style={styles.resetText}>Reset</Text>
       </TouchableOpacity>
+    </Animated.View>
     </Animated.View>
   );
 }

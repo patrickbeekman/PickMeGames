@@ -4,7 +4,7 @@ import { Pressable, Text, View } from 'react-native';
 export default function HomeScreen() {
   const options = [
     { title: 'Multifinger Tap', route: '/finger-tap' },
-    // You can add more methods later here
+    { title: 'Spinner', route: '/spinner' },
   ];
 
   return (

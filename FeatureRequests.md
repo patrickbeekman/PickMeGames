@@ -1,4 +1,3 @@
-
 # UI improvements
 - nicer back button and no black bar at top
 - the flashing lights is crazy rn
