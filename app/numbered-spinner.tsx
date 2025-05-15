@@ -26,14 +26,7 @@ export default function SpinnerSelector() {
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     }).start(() => {
-    setSpinning(false);
-    
-    // const normalizedRotation = targetRotation % 360;
-    // const pointerAngle = 180; // The arrow is pointing downwards at 180°
-    // const effectiveAngle = (normalizedRotation - pointerAngle + 360) % 360;
-
-    // const segmentSize = 360 / playerCount;
-
+        setSpinning(false);
     });
   };
 
@@ -136,7 +129,7 @@ const styles = StyleSheet.create({
 arrow: {
   position: 'absolute',
   top: '20%',
-  transform: [{ rotate: '0deg' }], // <-- now points down
+  transform: [{ rotate: '0deg' }],
   width: 0,
   height: 0,
   borderLeftWidth: 12,

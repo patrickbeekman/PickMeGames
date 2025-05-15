@@ -6,6 +6,7 @@ export default function HomeScreen() {
     { title: 'Multifinger Tap', route: '/finger-tap' },
     { title: 'Spinner', route: '/spinner' },
     { title: 'Numbered Spinner', route: '/numbered-spinner' },
+    { title: 'Random Number', route: '/random-number' },
   ];
 
   return (
