@@ -1,5 +1,5 @@
 import { Link } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { Image, Pressable, SafeAreaView, StatusBar, Text, View } from 'react-native';
 
 export default function HomeScreen() {
   const options = [
@@ -7,28 +7,45 @@ export default function HomeScreen() {
     { title: 'Spinner', route: '/spinner' },
     { title: 'Numbered Spinner', route: '/numbered-spinner' },
     { title: 'Random Number', route: '/random-number' },
+    { title: 'Prompted', route: '/prompted' },
   ];
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#F3E889' }}>
-      <Text style={{ fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 40 }}>
-        Select a Method to Pick Player 1
-      </Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#CCCB85' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#CCCB85" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
+        {/* Logo or App Icon */}
+        <Image
+          source={require('../assets/images/pickmelogo.png')} // Add your logo to assets
+          style={{ width: 200, height: 200, marginBottom: 24 }}
+          resizeMode="contain"
+        />
+        <Text style={{ fontSize: 28, color: '#555', fontWeight: "bold", textAlign: 'center', marginBottom: 32 }}>
+          Select a method to pick Player 1
+        </Text>
       {options.map((opt) => (
         <Link href={opt.route as any} asChild key={opt.route}>
           <Pressable
             style={{
-              padding: 20,
+              paddingVertical: 18,
+              paddingHorizontal: 32,
               borderRadius: 12,
+              width: 280,
               backgroundColor: '#4CAF50',
               marginBottom: 20,
               alignItems: 'center',
+              shadowColor: '#000123',
+              shadowOpacity: 0.12,
+              shadowOffset: { width: 0, height: 10 },
+              shadowRadius: 8,
+              elevation: 3,
             }}
           >
             <Text style={{ color: 'white', fontSize: 18 }}>{opt.title}</Text>
           </Pressable>
         </Link>
       ))}
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }

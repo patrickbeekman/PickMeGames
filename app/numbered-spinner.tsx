@@ -153,7 +153,7 @@ arrow: {
     position: 'absolute',
     bottom: 80,
     alignSelf: 'center',
-    backgroundColor: '#F57C00',
+    backgroundColor: '#4CAF50',
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 999,
