@@ -5,6 +5,7 @@ export default function HomeScreen() {
   const options = [
     { title: 'Multifinger Tap', route: '/finger-tap' },
     { title: 'Spinner', route: '/spinner' },
+    { title: 'Numbered Spinner', route: '/numbered-spinner' },
   ];
 
   return (
