@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
+import { usePostHog } from 'posthog-react-native';
+import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import prompts from '../assets/prompts.json';
 
 export default function PromptSelector() {
+    const posthog = usePostHog();
   const [currentIndex, setCurrentIndex] = useState(() =>
     Math.floor(Math.random() * prompts.length)
   );
+
+
+    useEffect(() => {
+            posthog.capture('prompt_selected');
+        }, []);
 
   const nextPrompt = () => {
     let next;
@@ -13,6 +20,7 @@ export default function PromptSelector() {
         next = Math.floor(Math.random() * prompts.length);
     } while (prompts.length > 1 && next === currentIndex);
     setCurrentIndex(next);
+
   };
 
   const currentPrompt = prompts[currentIndex];

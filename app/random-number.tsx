@@ -1,14 +1,23 @@
+import { usePostHog } from 'posthog-react-native';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function NumberGuesser() {
+    const posthog = usePostHog();
   const [randomNumber, setRandomNumber] = useState<number | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
   const [animatedNumber, setAnimatedNumber] = useState('?');
 
+    useEffect(() => {
+        posthog.capture('entered_number_guesser');
+    }, []);
+
   const revealNumber = () => {
     if (isRevealing) return;
     setIsRevealing(true);
+    posthog.capture('number_revealed', {
+      randomNumber,
+    });
   };
 
   useEffect(() => {

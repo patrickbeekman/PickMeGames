@@ -1,21 +1,24 @@
+import { usePostHog } from 'posthog-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    Dimensions,
-    Easing,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  Animated,
+  Dimensions,
+  Easing,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
+
 
 const COUNTDOWN_SECONDS = 4;
 const PARTICLE_COUNT = 24;
 const { width, height } = Dimensions.get('window');
 
 export default function FingerTapScreen() {
+  const posthog = usePostHog()
   const [touches, setTouches] = useState<{ identifier: number; x: number; y: number }[]>([]);
   const [winner, setWinner] = useState<{ x: number; y: number } | null>(null);
   const [particles, setParticles] = useState<Animated.ValueXY[]>([]);
@@ -23,6 +26,10 @@ export default function FingerTapScreen() {
   const [phase, setPhase] = useState<'waiting' | 'countdown' | 'flickering' | 'winner'>('waiting');
 
   const backgroundColor = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    posthog.capture('entered_finger_tap');
+  }, []);
 
   useEffect(() => {
     if (countdown !== null && countdown > 0) {
@@ -101,6 +108,12 @@ export default function FingerTapScreen() {
     setWinner({ x: chosen.x, y: chosen.y });
     triggerParticles(chosen.x, chosen.y);
     setPhase('winner');
+    // Track winner picked
+    posthog.capture('finger_tap_winner_picked', {
+      winner_x: chosen.x,
+      winner_y: chosen.y,
+      total_touches: touches.length,
+    });
   };
 
   const triggerParticles = (x: number, y: number) => {

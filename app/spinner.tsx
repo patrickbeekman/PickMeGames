@@ -1,3 +1,4 @@
+import { usePostHog } from 'posthog-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
@@ -15,11 +16,16 @@ const SPINS_PER_TURN = 5; // Number of full spins before stopping
 const ARROW_LENGTH = SPINNER_SIZE / 2 - 10;
 
 const TwisterSpinner = () => {
+  const posthog = usePostHog();
   const rotation = useRef(new Animated.Value(0)).current;
   const [spinning, setSpinning] = useState(false);
   const [currentRotation, setCurrentRotation] = useState(0);
   const [baseRotation, setBaseRotation] = useState(0);
   const isMounted = useRef(true);
+
+  useEffect(() => {
+    posthog.capture('entered_spinner');
+  }, []);
 
   useEffect(() => {
     isMounted.current = true;
@@ -46,6 +52,11 @@ const TwisterSpinner = () => {
       if (!isMounted.current) return;
       setSpinning(false);
       setBaseRotation(targetRotation); // accumulate total rotation
+    });
+    // capture the spin event
+    posthog.capture('spun_spinner', {
+      finalAngle: randomOffset,
+      totalRotation: targetRotation,
     });
   };
   

@@ -1,14 +1,20 @@
 import Slider from '@react-native-community/slider';
-import React, { useRef, useState } from 'react';
+import { usePostHog } from 'posthog-react-native';
+import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
 
 const SPINNER_SIZE = 300;
 
 export default function SpinnerSelector() {
+  const posthog = usePostHog();
   const [playerCount, setPlayerCount] = useState(6);
   const [spinning, setSpinning] = useState(false);
   const rotation = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        posthog.capture('entered_spinner');
+    }, []);
 
   const spin = () => {
     if (spinning) return;
@@ -27,6 +33,10 @@ export default function SpinnerSelector() {
       useNativeDriver: true,
     }).start(() => {
         setSpinning(false);
+    });
+    posthog.capture('spun_spinner', {
+      playerCount,
+      finalAngle: randomOffset,
     });
   };
 

@@ -1,7 +1,11 @@
 import { Link } from 'expo-router';
+import { usePostHog } from 'posthog-react-native';
+import { useEffect } from 'react';
 import { Image, Pressable, SafeAreaView, StatusBar, Text, View } from 'react-native';
 
+
 export default function HomeScreen() {
+  const posthog = usePostHog();
   const options = [
     { title: 'Multifinger Tap', route: '/finger-tap' },
     { title: 'Spinner', route: '/spinner' },
@@ -9,6 +13,10 @@ export default function HomeScreen() {
     { title: 'Random Number', route: '/random-number' },
     { title: 'Prompted', route: '/prompted' },
   ];
+
+  useEffect(() => {
+      posthog.capture('entered_finger_tap');
+    }, []);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#CCCB85' }}>
