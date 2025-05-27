@@ -34,7 +34,7 @@ export default function SpinnerSelector() {
     }).start(() => {
         setSpinning(false);
     });
-    posthog.capture('spun_spinner', {
+    posthog.capture('spun_numbered_spinner', {
       playerCount,
       finalAngle: randomOffset,
     });

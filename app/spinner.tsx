@@ -54,7 +54,7 @@ const TwisterSpinner = () => {
       setBaseRotation(targetRotation); // accumulate total rotation
     });
     // capture the spin event
-    posthog.capture('spun_spinner', {
+    posthog.capture('spun_empty_spinner', {
       finalAngle: randomOffset,
       totalRotation: targetRotation,
     });
