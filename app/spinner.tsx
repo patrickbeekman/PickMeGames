@@ -12,16 +12,17 @@ import {
 
 const { width } = Dimensions.get('window');
 const SPINNER_SIZE = width * 0.8;
-const SPINS_PER_TURN = 5; // Number of full spins before stopping
+const SPINS_PER_TURN = 4; // Number of full spins before stopping
 const ARROW_LENGTH = SPINNER_SIZE / 2 - 10;
 
 const TwisterSpinner = () => {
   const posthog = usePostHog();
   const rotation = useRef(new Animated.Value(0)).current;
   const [spinning, setSpinning] = useState(false);
-  const [currentRotation, setCurrentRotation] = useState(0);
   const [baseRotation, setBaseRotation] = useState(0);
   const isMounted = useRef(true);
+  const animationRef = useRef<Animated.CompositeAnimation | null>(null);
+
 
   useEffect(() => {
     posthog.capture('entered_spinner');
@@ -31,6 +32,10 @@ const TwisterSpinner = () => {
     isMounted.current = true;
     return () => {
       isMounted.current = false;
+      // Stop any running animation on unmount
+      if (animationRef.current) {
+        animationRef.current.stop();
+      }
     };
   }, []);
 
@@ -43,16 +48,21 @@ const TwisterSpinner = () => {
   
     setSpinning(true);
   
-    Animated.timing(rotation, {
+    // Save animation ref so we can stop it on unmount
+    animationRef.current = Animated.timing(rotation, {
       toValue: targetRotation,
       duration: 3500,
-      easing: Easing.out(Easing.cubic), // nice deceleration feel
+      easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
-    }).start(() => {
-      if (!isMounted.current) return;
-      setSpinning(false);
-      setBaseRotation(targetRotation); // accumulate total rotation
     });
+
+    animationRef.current.start(() => {
+      if (isMounted.current) {
+        setSpinning(false);
+        setBaseRotation(targetRotation);
+      }
+    });
+
     // capture the spin event
     posthog.capture('spun_empty_spinner', {
       finalAngle: randomOffset,

@@ -8,7 +8,7 @@ const SPINNER_SIZE = 300;
 
 export default function SpinnerSelector() {
   const posthog = usePostHog();
-  const [playerCount, setPlayerCount] = useState(6);
+  const [playerCount, setPlayerCount] = useState(4);
   const [spinning, setSpinning] = useState(false);
   const rotation = useRef(new Animated.Value(0)).current;
 
@@ -19,7 +19,7 @@ export default function SpinnerSelector() {
   const spin = () => {
     if (spinning) return;
 
-    const fullRotation = 5 * 360;
+    const fullRotation = 4 * 360;
     const randomOffset = Math.floor(Math.random() * 360);
     const targetRotation = fullRotation + randomOffset;
 

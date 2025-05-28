@@ -1,9 +1,11 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import Constants from 'expo-constants';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { PostHogProvider } from 'posthog-react-native';
 import 'react-native-reanimated';
+
 
 
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -13,6 +15,8 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+  const { POSTHOG_API_KEY, POSTHOG_HOST } = Constants.expoConfig?.extra || {};
+
 
   if (!loaded) {
     // Async font loading only occurs in development.
@@ -20,12 +24,24 @@ export default function RootLayout() {
   }
 
   return (
-    <PostHogProvider apiKey="phc_cxFWSv2rWvr1Gs2rHNPmPxH8y9Ctd2hDL0XCnVXgCL5" options={{
-        host: "https://us.i.posthog.com",
-        
-    }}>
+    <PostHogProvider 
+      apiKey={POSTHOG_API_KEY}
+      options={{ host: POSTHOG_HOST }}
+    >
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
+        <Stack
+              screenOptions={{
+                headerStyle: {
+                  backgroundColor: '#CCCB85',
+                },
+                headerTintColor: '#333', // icon and text color
+                headerTitleStyle: {
+                  fontWeight: 'bold',
+                },
+                contentStyle: {
+                  backgroundColor: '#CCCB85', // match background
+                },
+              }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
         </Stack>

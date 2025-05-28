@@ -1,10 +1,24 @@
-import { Link } from 'expo-router';
+import { Link, useNavigation } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 import { Image, Pressable, SafeAreaView, StatusBar, Text, View } from 'react-native';
 
 
 export default function HomeScreen() {
+  const navigation = useNavigation();
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <Link href="/about" asChild>
+          <Pressable style={{ marginRight: 12 }}>
+            <Text style={{ fontSize: 20 }}>?</Text>
+          </Pressable>
+        </Link>
+      ),
+    });
+  }, [navigation]);
+
   const posthog = usePostHog();
   const options = [
     { title: 'Multifinger Tap', route: '/finger-tap' },
@@ -19,12 +33,12 @@ export default function HomeScreen() {
     }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#CCCB85' }}>
-      <StatusBar barStyle="dark-content" backgroundColor="#CCCB85" />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F3E889' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F3E889" />
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
         {/* Logo or App Icon */}
         <Image
-          source={require('../assets/images/pickmelogo.png')} // Add your logo to assets
+          source={require('../assets/images/pickmelogo_transparent.png')} // Add your logo to assets
           style={{ width: 200, height: 200, marginBottom: 24 }}
           resizeMode="contain"
         />
