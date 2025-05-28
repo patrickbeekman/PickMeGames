@@ -1,18 +1,32 @@
+import { useNavigation } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import prompts from '../assets/prompts.json';
 
 export default function PromptSelector() {
-    const posthog = usePostHog();
+  const navigation = useNavigation();
+  const posthog = usePostHog();
   const [currentIndex, setCurrentIndex] = useState(() =>
     Math.floor(Math.random() * prompts.length)
   );
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'Prompt Selector',
+      headerStyle: {
+        backgroundColor: '#F3E889',
+      },
+      headerTintColor: '#333',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    });
+  }, [navigation]);
 
-    useEffect(() => {
-            posthog.capture('prompt_selected');
-        }, []);
+  useEffect(() => {
+          posthog.capture('prompt_selected');
+      }, []);
 
   const nextPrompt = () => {
     let next;

@@ -9,13 +9,7 @@ export default function HomeScreen() {
 
   useLayoutEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <Link href="/about" asChild>
-          <Pressable style={{ marginRight: 12 }}>
-            <Text style={{ fontSize: 20 }}>?</Text>
-          </Pressable>
-        </Link>
-      ),
+      title: '',
     });
   }, [navigation]);
 
@@ -67,6 +61,40 @@ export default function HomeScreen() {
           </Pressable>
         </Link>
       ))}
+      </View>
+      <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 12 }}>
+        <Link href="/donate" asChild>
+          <Pressable
+            style={{
+              flex: 1,
+              backgroundColor: '#FFD700',
+              paddingVertical: 16,
+              borderRadius: 12,
+              alignItems: 'center',
+              marginRight: 5,
+              marginLeft: 20,
+              width: 90,
+            }}
+          >
+            <Text style={{ color: '#333', fontWeight: 'bold', fontSize: 16 }}>Donations</Text>
+          </Pressable>
+        </Link>
+        <Link href="/about" asChild>
+          <Pressable
+            style={{
+              flex: 1,
+              backgroundColor: '#4CAF50',
+              paddingVertical: 16,
+              borderRadius: 12,
+              alignItems: 'center',
+              marginLeft: 5,
+              marginRight: 20,
+              width: 90,
+            }}
+          >
+            <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>About</Text>
+          </Pressable>
+        </Link>
       </View>
     </SafeAreaView>
   );

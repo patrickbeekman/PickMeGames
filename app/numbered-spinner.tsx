@@ -1,16 +1,31 @@
 import Slider from '@react-native-community/slider';
+import { useNavigation } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
 
 const SPINNER_SIZE = 300;
 
 export default function SpinnerSelector() {
+  const navigation = useNavigation();
   const posthog = usePostHog();
-  const [playerCount, setPlayerCount] = useState(4);
+  const [playerCount, setPlayerCount] = useState(6);
   const [spinning, setSpinning] = useState(false);
   const rotation = useRef(new Animated.Value(0)).current;
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'Numbered Spinner',
+      headerStyle: {
+        backgroundColor: '#F3E889',
+      },
+      headerTintColor: '#333',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    });
+  }, [navigation]);
 
     useEffect(() => {
         posthog.capture('entered_spinner');

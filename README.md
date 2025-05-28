@@ -1,54 +1,89 @@
-# Welcome to your Expo app 👋
+# 🎲 Ready Player One – The Ultimate Player Picker App!
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Welcome to **Ready Player One**, the fun, fast, and fair way to pick who goes first! Whether you’re starting a board game, party game, or just need to settle who’s up, Ready Player One makes the process exciting and interactive for everyone.
 
-## Get started
+---
 
-1. Install dependencies
+## 🚀 Why Ready Player One?
+
+- **No more arguments:** Let the app decide who goes first—randomly and transparently.
+- **Multiple minigames:** Choose from finger tap, spinners, random numbers, and more!
+- **Party-friendly:** Designed for groups, families, and game nights.
+- **Beautiful & simple:** Clean, playful design that works on both iOS and Android.
+- **Open source:** Fork, contribute, or use as inspiration for your own projects!
+
+---
+
+## 🕹️ Features
+
+- **Multifinger Tap:** Everyone taps, one is crowned the winner!
+- **Classic Spinner:** Spin the wheel and let fate decide.
+- **Numbered Spinner:** Customizable for any group size.
+- **Random Number:** Quick and fair number picker.
+- **Prompted:** Fun prompts to break the ice or add a twist.
+- **About & Donate:** Learn more or support the project.
+
+---
+
+## 🛠️ Getting Started
+
+1. **Install dependencies**
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. **Start the app**
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+3. **Open on your device or simulator**
+   - Scan the QR code with Expo Go, or launch on an emulator/simulator.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## 🗂️ Project Structure
 
-## Get a fresh project
+- All app screens and logic are in the **app/** directory.
+- Uses [Expo Router](https://docs.expo.dev/router/introduction) for file-based navigation.
+- Analytics powered by [PostHog](https://posthog.com/).
 
-When you're ready, run:
+---
 
-```bash
-npm run reset-project
-```
+## 💡 Customization
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+- Add your own minigames or tweak the look by editing files in the **app/** directory.
+- Update branding by replacing the logo in `assets/images/pickmelogo_transparent.png`.
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## 🤝 Contributing
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Pull requests and issues are welcome! If you have a fun new way to pick a player, let us know or submit a PR.
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## 📚 Learn More
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Expo documentation](https://docs.expo.dev/)
+- [Expo Router](https://docs.expo.dev/router/introduction/)
+- [PostHog for analytics](https://posthog.com/)
 
+---
+
+## 💬 Join the Community
+
+- [Expo on GitHub](https://github.com/expo/expo)
+- [Expo Discord](https://chat.expo.dev)
+
+---
+
+Ready to make game night even better?  
+**Download, tap, spin, and let the games begin!**
+
+---
 
 import { usePostHog } from 'posthog-react-native'
 

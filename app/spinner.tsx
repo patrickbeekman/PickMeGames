@@ -1,3 +1,4 @@
+import { useNavigation } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -16,6 +17,7 @@ const SPINS_PER_TURN = 4; // Number of full spins before stopping
 const ARROW_LENGTH = SPINNER_SIZE / 2 - 10;
 
 const TwisterSpinner = () => {
+  const navigation = useNavigation();
   const posthog = usePostHog();
   const rotation = useRef(new Animated.Value(0)).current;
   const [spinning, setSpinning] = useState(false);
@@ -23,6 +25,18 @@ const TwisterSpinner = () => {
   const isMounted = useRef(true);
   const animationRef = useRef<Animated.CompositeAnimation | null>(null);
 
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'Spinner',
+      headerStyle: {
+        backgroundColor: '#F3E889',
+      },
+      headerTintColor: '#333',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    });
+  }, [navigation]);
 
   useEffect(() => {
     posthog.capture('entered_spinner');

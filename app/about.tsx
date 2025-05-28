@@ -7,7 +7,8 @@ export default function AboutScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>About This App</Text>
       <Text style={styles.text}>Version: {Constants.expoConfig?.version ?? '1.0.0'}</Text>
-      <Text style={styles.text}>Created by Patrick Beekman for fun and learning 🎲</Text>
+      <Text style={styles.text}>Created by Patrick Beekman</Text>
+      <Text style={styles.text}>For fun and learning 🎲</Text>
       <Text style={styles.text}>No ads. Just games.</Text>
     </View>
   );

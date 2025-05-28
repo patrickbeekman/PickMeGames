@@ -1,3 +1,4 @@
+import { useNavigation } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -18,6 +19,7 @@ const PARTICLE_COUNT = 24;
 const { width, height } = Dimensions.get('window');
 
 export default function FingerTapScreen() {
+  const navigation = useNavigation();
   const posthog = usePostHog()
   const [touches, setTouches] = useState<{ identifier: number; x: number; y: number }[]>([]);
   const [winner, setWinner] = useState<{ x: number; y: number } | null>(null);
@@ -26,6 +28,19 @@ export default function FingerTapScreen() {
   const [phase, setPhase] = useState<'waiting' | 'countdown' | 'flickering' | 'winner'>('waiting');
 
   const backgroundColor = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'Finger Tap',
+      headerStyle: {
+        backgroundColor: '#F3E889',
+      },
+      headerTintColor: '#333',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    });
+  }, [navigation]);
 
   useEffect(() => {
     posthog.capture('entered_finger_tap');

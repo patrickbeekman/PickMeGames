@@ -1,16 +1,31 @@
+import { useNavigation } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function NumberGuesser() {
-    const posthog = usePostHog();
+  const navigation = useNavigation();
+  const posthog = usePostHog();
   const [randomNumber, setRandomNumber] = useState<number | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
   const [animatedNumber, setAnimatedNumber] = useState('?');
 
-    useEffect(() => {
-        posthog.capture('entered_number_guesser');
-    }, []);
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'Number Guesser',
+      headerStyle: {
+        backgroundColor: '#F3E889',
+      },
+      headerTintColor: '#333',
+      headerTitleStyle: {
+        fontWeight: 'bold',
+      },
+    });
+  }, [navigation]);
+
+  useEffect(() => {
+      posthog.capture('entered_number_guesser');
+  }, []);
 
   const revealNumber = () => {
     if (isRevealing) return;
