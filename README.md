@@ -1,10 +1,10 @@
-# 🎲 Ready Player One – The Ultimate Player Picker App!
+# 🎲 Pick Me – The Ultimate Player Picker App!
 
-Welcome to **Ready Player One**, the fun, fast, and fair way to pick who goes first! Whether you’re starting a board game, party game, or just need to settle who’s up, Ready Player One makes the process exciting and interactive for everyone.
+Welcome to **Pick Me**, the fun, fast, and fair way to pick who goes first! Whether you’re starting a board game, party game, or just need to settle who’s up, Pick Me makes the process exciting and interactive for everyone.
 
 ---
 
-## 🚀 Why Ready Player One?
+## 🚀 Why Pick Me?
 
 - **No more arguments:** Let the app decide who goes first—randomly and transparently.
 - **Multiple minigames:** Choose from finger tap, spinners, random numbers, and more!
