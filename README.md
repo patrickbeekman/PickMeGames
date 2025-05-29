@@ -25,6 +25,18 @@ Welcome to **Pick Me**, the fun, fast, and fair way to pick who goes first! Whet
 
 ---
 
+## Screenshots
+
+<div align="center">
+
+  <img src="https://github.com/user-attachments/assets/5061e6d2-49b7-42a3-9b18-d30d57cc78b1" alt="home page" width="220"/>
+  <img src="https://github.com/user-attachments/assets/99be12cf-eca1-40e8-8100-08ce8ec4f46a" alt="multifinger tap" width="220"/>
+  <img src="https://github.com/user-attachments/assets/e7953353-8659-4cc5-9619-dda6de939350" alt="random number" width="220"/>
+  <img src="https://github.com/user-attachments/assets/2fa4771d-6e47-43bf-a538-56db80b665ba" alt="numbered spinner" width="220"/>
+  <img src="https://github.com/user-attachments/assets/73cb5c7d-471b-4e23-8196-ff005cd31bd4" alt="prompter" width="220"/>
+
+</div>
+
 ## 🛠️ Getting Started
 
 1. **Install dependencies**
