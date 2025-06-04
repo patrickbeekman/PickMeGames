@@ -1,7 +1,7 @@
 import { Link, useNavigation } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 import { useEffect, useLayoutEffect } from 'react';
-import { Image, Pressable, SafeAreaView, StatusBar, Text, View } from 'react-native';
+import { Image, Linking, Pressable, SafeAreaView, StatusBar, Text, View } from 'react-native';
 
 
 export default function HomeScreen() {
@@ -63,8 +63,8 @@ export default function HomeScreen() {
       ))}
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 12 }}>
-        <Link href="/donate" asChild>
           <Pressable
+            onPress={() => Linking.openURL('https://www.buymeacoffee.com/pickmegames')}
             style={{
               flex: 1,
               backgroundColor: '#FFD700',
@@ -76,9 +76,8 @@ export default function HomeScreen() {
               width: 90,
             }}
           >
-            <Text style={{ color: '#333', fontWeight: 'bold', fontSize: 16 }}>Donations</Text>
-          </Pressable>
-        </Link>
+            <Text style={{ color: '#333', fontWeight: 'bold', fontSize: 16 }}>Buy me a coffee</Text>
+        </Pressable>
         <Link href="/about" asChild>
           <Pressable
             style={{

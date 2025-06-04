@@ -168,6 +168,28 @@ export default function FingerTapScreen() {
       onTouchEnd={onTouchEnd}
     >
 
+    {/* Instructions for waiting phase */}
+    {phase === 'waiting' && (
+      <View style={styles.instructionsContainer}>
+        <Text style={styles.instructionsText}>
+          Every player touch and hold one finger to the screen
+        </Text>
+      </View>
+    )}
+
+    {touches.map((touch, index) => (
+        <Ripple
+            key={touch.identifier}
+            x={touch.x}
+            y={touch.y}
+            speed={
+                phase === 'countdown' && countdown !== null
+                  ? Math.max(1000, countdown * 150) // slower ripple ramp-up
+                  : 1500 // idle or post-winner
+              }
+        />
+    ))}
+
     {touches.map((touch, index) => (
         <Ripple
             key={touch.identifier}
@@ -250,6 +272,23 @@ export default function FingerTapScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  instructionsContainer: {
+    position: 'absolute',
+    top: height * 0.3,
+    left: 20,
+    right: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+  },
+  instructionsText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
+    lineHeight: 24,
   },
   centerCountdown: {
     position: 'absolute',
