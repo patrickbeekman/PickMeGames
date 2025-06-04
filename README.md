@@ -23,6 +23,8 @@ Welcome to **Pick Me**, the fun, fast, and fair way to pick who goes first! Whet
 - **Prompted:** Fun prompts to break the ice or add a twist.
 - **About & Donate:** Learn more or support the project.
 
+
+<a href="https://www.buymeacoffee.com/pickmegames" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
 ---
 
 ## Screenshots
