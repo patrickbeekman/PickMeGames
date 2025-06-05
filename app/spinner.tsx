@@ -1,3 +1,6 @@
+import { Button } from '@tamagui/button';
+import { Text, View } from '@tamagui/core';
+import { YStack } from '@tamagui/stacks';
 import { useNavigation } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 import React, { useEffect, useRef, useState } from 'react';
@@ -6,9 +9,6 @@ import {
   Dimensions,
   Easing,
   StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
 } from 'react-native';
 
 const { width } = Dimensions.get('window');
@@ -92,7 +92,7 @@ const TwisterSpinner = () => {
 
 
   return (
-    <View style={styles.container}>
+    <YStack flex={1} backgroundColor="#F3E889" alignItems="center" justifyContent="center">
       {/* Static base circle */}
       <View style={styles.circle} />
 
@@ -101,20 +101,29 @@ const TwisterSpinner = () => {
         <View style={styles.arrow} />
       </Animated.View>
 
-      <TouchableOpacity style={styles.button} onPress={spin} disabled={spinning}>
-        <Text style={styles.buttonText}>{spinning ? 'Spinning...' : 'Spin'}</Text>
-      </TouchableOpacity>
-    </View>
+      <Button
+        position="absolute"
+        bottom={80}
+        alignSelf="center"
+        backgroundColor="#4CAF50"
+        borderRadius={999}
+        pressStyle={{ scale: 0.95, backgroundColor: "#45a049" }}
+        shadowColor="#000"
+        shadowOpacity={0.2}
+        shadowOffset={{ width: 0, height: 2 }}
+        shadowRadius={4}
+        onPress={spin}
+        disabled={spinning}
+      >
+        <Text color="white" fontWeight="bold" fontSize={18}>
+          {spinning ? 'Spinning...' : 'Spin'}
+        </Text>
+      </Button>
+    </YStack>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F3E889',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   circle: {
     width: SPINNER_SIZE,
     height: SPINNER_SIZE,
@@ -140,24 +149,6 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderBottomColor: '#8BBB19',
-  },
-  button: {
-    position: 'absolute',
-    bottom: 80, // Adjust as needed
-    alignSelf: 'center',
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 999,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-  },
-  buttonText: {
-    color: '#FFF',
-    fontWeight: 'bold',
-    fontSize: 18,
   },
 });
 

@@ -1,8 +1,11 @@
 import Slider from '@react-native-community/slider';
+import { Button } from '@tamagui/button';
+import { Text } from '@tamagui/core';
+import { YStack } from '@tamagui/stacks';
 import { useNavigation } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, StyleSheet } from 'react-native';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
 
 const SPINNER_SIZE = 300;
@@ -110,10 +113,10 @@ export default function SpinnerSelector() {
   });
 
   return (
-    <View style={styles.container}>
+    <YStack flex={1} backgroundColor="#F3E889" alignItems="center" justifyContent="center">
 
       {/* Arrow Pointer */}
-      <View style={styles.arrow} />
+      <YStack style={styles.arrow} />
 
       {/* Spinner */}
       <Animated.View style={{ transform: [{ rotate }] }}>
@@ -123,8 +126,10 @@ export default function SpinnerSelector() {
       </Animated.View>
 
       {/* Player Count Slider */}
-      <View style={styles.sliderContainer}>
-        <Text style={styles.sliderLabel}>Players: {playerCount}</Text>
+      <YStack marginTop={20} alignItems="center">
+        <Text fontSize={16} fontWeight="500" marginBottom={8}>
+          Players: {playerCount}
+        </Text>
         <Slider
           minimumValue={2}
           maximumValue={15}
@@ -134,62 +139,44 @@ export default function SpinnerSelector() {
           disabled={spinning}
           style={{ width: 250 }}
         />
-      </View>
+      </YStack>
 
       {/* Spin Button */}
-      <Pressable style={styles.button} onPress={spin} disabled={spinning}>
-        <Text style={styles.buttonText}>{spinning ? 'Spinning...' : 'Spin!'}</Text>
-      </Pressable>
-    </View>
+      <Button
+        position="absolute"
+        bottom={80}
+        alignSelf="center"
+        backgroundColor="#4CAF50"
+        borderRadius={999}
+        pressStyle={{ scale: 0.95, backgroundColor: "#45a049" }}
+        shadowColor="#000"
+        shadowOpacity={0.2}
+        shadowOffset={{ width: 0, height: 2 }}
+        shadowRadius={4}
+        onPress={spin}
+        disabled={spinning}
+      >
+        <Text fontSize={18} color="white" fontWeight="bold">
+          {spinning ? 'Spinning...' : 'Spin!'}
+        </Text>
+      </Button>
+    </YStack>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F3E889',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-arrow: {
-  position: 'absolute',
-  top: '20%',
-  transform: [{ rotate: '0deg' }],
-  width: 0,
-  height: 0,
-  borderLeftWidth: 12,
-  borderRightWidth: 12,
-  borderTopWidth: 30,
-  borderLeftColor: 'transparent',
-  borderRightColor: 'transparent',
-  borderTopColor: '#D32F2F',
-  zIndex: 10,
-},
-  sliderContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  sliderLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 8,
-  },
-  button: {
+  arrow: {
     position: 'absolute',
-    bottom: 80,
-    alignSelf: 'center',
-    backgroundColor: '#4CAF50',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 999,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-  },
-  buttonText: {
-    fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
+    top: '20%',
+    transform: [{ rotate: '0deg' }],
+    width: 0,
+    height: 0,
+    borderLeftWidth: 12,
+    borderRightWidth: 12,
+    borderTopWidth: 30,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+    borderTopColor: '#D32F2F',
+    zIndex: 10,
   },
 });
