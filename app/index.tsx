@@ -40,14 +40,15 @@ export default function HomeScreen() {
         />
         <StatusBar barStyle="dark-content" backgroundColor="#F3E889" />
         
-        <YStack flex={1} justifyContent="center" alignItems="center" padding={20}>
+        <YStack flex={1} justifyContent="center" alignItems="center" padding={5} marginTop={-75}>
           {/* Logo */}
           <Image
             source={require('../assets/images/pickmelogo_transparent.png')}
-            width={200}
-            height={200}
-            marginBottom={24}
-            resizeMode="contain"
+            width={250}
+            height={250}
+            marginBottom={5}
+            objectFit='contain'
+            alt='PickMe Games Logo'
           />
           
           {/* Title */}
@@ -102,7 +103,7 @@ export default function HomeScreen() {
             <XStack alignItems="center" justifyContent="center" space={6}>
               <Text fontSize={16}>☕</Text>
               <Text color="#333" fontWeight="bold" fontSize={14}>
-                Buy Coffee
+                Buy Me A Coffee
               </Text>
             </XStack>
           </Button>
@@ -116,7 +117,7 @@ export default function HomeScreen() {
               pressStyle={{ scale: 0.95, backgroundColor: "#45a049" }}
             >
               <XStack alignItems="center" justifyContent="center" space={6}>
-                <Text fontSize={16}>ℹ️</Text>
+                <Text fontSize={16}>👨🏻‍🌾</Text>
                 <Text color="white" fontWeight="bold" fontSize={14}>
                   About
                 </Text>
