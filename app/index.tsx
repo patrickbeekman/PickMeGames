@@ -1,21 +1,13 @@
 import { Button } from '@tamagui/button';
-import { styled, Text } from '@tamagui/core';
+import { Text } from '@tamagui/core';
 import { Image } from '@tamagui/image';
-import { YStack as TamaguiYStack } from '@tamagui/stacks';
+import { XStack, YStack } from '@tamagui/stacks';
+import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useNavigation } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 import { useEffect, useLayoutEffect } from 'react';
 import { Linking, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-
-const YStack = styled(TamaguiYStack, {
-  flexDirection: 'column',
-});
-
-const XStack = styled(TamaguiYStack, {
-  flexDirection: 'row',
-});
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -28,22 +20,28 @@ export default function HomeScreen() {
 
   const posthog = usePostHog();
   const options = [
-    { title: 'Multifinger Tap', route: '/finger-tap' },
-    { title: 'Spinner', route: '/spinner' },
-    { title: 'Numbered Spinner', route: '/numbered-spinner' },
-    { title: 'Random Number', route: '/random-number' },
-    { title: 'Prompted', route: '/prompted' },
+    { title: 'Multifinger Tap', route: '/finger-tap', emoji: '👆' },
+    { title: 'Spinner', route: '/spinner', emoji: '🎯' },
+    { title: 'Numbered Spinner', route: '/numbered-spinner', emoji: '🔢' },
+    { title: 'Random Number', route: '/random-number', emoji: '🎲' },
+    { title: 'Prompted', route: '/prompted', emoji: '💭' },
   ];
 
   useEffect(() => {
-      posthog.capture('entered_finger_tap');
-    }, []);
+    posthog.capture('entered_finger_tap');
+  }, []);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <YStack flex={1} backgroundColor="#F3E889">
+        <LinearGradient
+          colors={['#F3E889', '#FFE082', '#FFF9C4']}
+          style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: -40 }}
+        />
         <StatusBar barStyle="dark-content" backgroundColor="#F3E889" />
+        
         <YStack flex={1} justifyContent="center" alignItems="center" padding={20}>
+          {/* Logo */}
           <Image
             source={require('../assets/images/pickmelogo_transparent.png')}
             width={200}
@@ -51,6 +49,8 @@ export default function HomeScreen() {
             marginBottom={24}
             resizeMode="contain"
           />
+          
+          {/* Title */}
           <Text 
             fontSize={28} 
             color="#555" 
@@ -58,53 +58,73 @@ export default function HomeScreen() {
             textAlign="center" 
             marginBottom={32}
           >
-            Select a method to pick Player 1
+            Choose your picker and let fate decide!
           </Text>
-      {options.map((opt) => (
-        <Link href={opt.route as any} asChild key={opt.route}>
-          <Button
-            size="$5"
-            theme="green"
-            backgroundColor="#4CAF50"
-            borderRadius={12}
-            width={280}
-            marginBottom={20}
-            pressStyle={{ scale: 0.95, backgroundColor: "#45a049" }}
-            shadowColor="#000123"
-            shadowOpacity={0.12}
-            shadowOffset={{ width: 0, height: 10 }}
-            shadowRadius={8}
-            elevation={3}
-          >
-            <Text color="white" fontSize={18}>{opt.title}</Text>
-          </Button>
-        </Link>
-      ))}
-      </YStack>
-      <XStack justifyContent="center" marginTop={25} paddingHorizontal={20} gap={10}>
+
+          {/* Game Options */}
+          {options.map((opt) => (
+            <Link href={opt.route as any} asChild key={opt.route}>
+              <Button
+                backgroundColor="#4CAF50"
+                borderRadius={12}
+                width={320}
+                marginBottom={16}
+                pressStyle={{ scale: 0.95, backgroundColor: "#45a049" }}
+                shadowColor="#000123"
+                shadowOpacity={0.12}
+                shadowOffset={{ width: 0, height: 4 }}
+                shadowRadius={8}
+                elevation={3}
+                padding={5}
+              >
+                <XStack alignItems="center" space={12} width="100%">
+                  <Text fontSize={24}>{opt.emoji}</Text>
+                  <Text color="white" fontSize={18} fontWeight="600" flex={1} textAlign="left">
+                    {opt.title}
+                  </Text>
+                  <Text color="white" fontSize={16}>→</Text>
+                </XStack>
+              </Button>
+            </Link>
+          ))}
+        </YStack>
+        
+        {/* Bottom Buttons */}
+        <XStack justifyContent="center" marginTop={12} paddingHorizontal={20} gap={10} paddingBottom={20}>
           <Button
             flex={1}
             backgroundColor="#FFD700"
             borderRadius={12}
+            padding={5}
             pressStyle={{ scale: 0.95, backgroundColor: "#e6c200" }}
             onPress={() => Linking.openURL('https://www.buymeacoffee.com/pickmegames')}
           >
-            <Text color="#333" fontWeight="bold" fontSize={16}>Buy me a coffee</Text>
+            <XStack alignItems="center" justifyContent="center" space={6}>
+              <Text fontSize={16}>☕</Text>
+              <Text color="#333" fontWeight="bold" fontSize={14}>
+                Buy Coffee
+              </Text>
+            </XStack>
           </Button>
           
           <Link href="/about" asChild>
             <Button
               flex={1}
-              theme="green"
               backgroundColor="#4CAF50"
               borderRadius={12}
+              padding={5}
               pressStyle={{ scale: 0.95, backgroundColor: "#45a049" }}
             >
-              <Text color="white" fontWeight="bold" fontSize={16}>About</Text>
+              <XStack alignItems="center" justifyContent="center" space={6}>
+                <Text fontSize={16}>ℹ️</Text>
+                <Text color="white" fontWeight="bold" fontSize={14}>
+                  About
+                </Text>
+              </XStack>
             </Button>
           </Link>
         </XStack>
-    </YStack>
+      </YStack>
     </SafeAreaView>
   );
 }
