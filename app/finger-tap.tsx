@@ -1,3 +1,7 @@
+import { Button } from '@tamagui/button';
+import { Text } from '@tamagui/core';
+import { YStack } from '@tamagui/stacks';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
 import { usePostHog } from 'posthog-react-native';
 import React, { useEffect, useRef, useState } from 'react';
@@ -5,10 +9,7 @@ import {
   Animated,
   Dimensions,
   Easing,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+  StyleSheet
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
@@ -100,6 +101,18 @@ export default function FingerTapScreen() {
     }
   };
 
+  const onTouchMove = (e: any) => {
+    if (phase === 'winner' || phase === 'flickering') return;
+
+    // Update touch positions when fingers move
+    const updatedTouches = e.nativeEvent.touches.map((t: any) => ({
+      identifier: t.identifier,
+      x: t.locationX,
+      y: t.locationY,
+    }));
+    setTouches(updatedTouches);
+  };
+
   const onTouchEnd = (e: any) => {
     const remainingTouches = e.nativeEvent.touches.map((t: any) => ({
       identifier: t.identifier,
@@ -162,109 +175,215 @@ export default function FingerTapScreen() {
 
   return (
     <Animated.View style={[styles.container, { backgroundColor: bgColor }]}>
-    <Animated.View
-      style={[styles.container, { backgroundColor: bgColor || '#F3E889' }]}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-    >
+      <LinearGradient
+        colors={['#F3E889', '#FFE082', '#FFF9C4']}
+        style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+      />
+      
+      <Animated.View
+        style={[styles.container, { backgroundColor: 'transparent' }]}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
 
-    {/* Instructions for waiting phase */}
-    {phase === 'waiting' && (
-      <View style={styles.instructionsContainer}>
-        <Text style={styles.instructionsText}>
-          Every player touch and hold one finger to the screen
-        </Text>
-      </View>
-    )}
-
-    {touches.map((touch, index) => (
-        <Ripple
-            key={touch.identifier}
-            x={touch.x}
-            y={touch.y}
-            speed={
-                phase === 'countdown' && countdown !== null
-                  ? Math.max(1000, countdown * 150) // slower ripple ramp-up
-                  : 1500 // idle or post-winner
-              }
-        />
-    ))}
-
-    {touches.map((touch, index) => (
-        <Ripple
-            key={touch.identifier}
-            x={touch.x}
-            y={touch.y}
-            speed={
-                phase === 'countdown' && countdown !== null
-                  ? Math.max(1000, countdown * 150) // slower ripple ramp-up
-                  : 1500 // idle or post-winner
-              }
-        />
-    ))}
-
-      {countdown !== null && (
-        <View style={styles.centerCountdown}>
-          <Text style={styles.countdownText}>{countdown}</Text>
-        </View>
-      )}
-
-      {winner && (
-        <View
-          style={{
-            position: 'absolute',
-            left: winner.x - 50,
-            top: winner.y - 50,
-            width: 100,
-            height: 100,
-            borderRadius: 50,
-            backgroundColor: 'rgba(255, 215, 0, 0.9)',
-            justifyContent: 'center',
-            alignItems: 'center',
-            borderWidth: 3,
-            borderColor: 'white',
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 4,
-          }}
-        >
-          <Text style={{ fontSize: 30 }}>👑</Text>
-        </View>
-      )}
-
-      {particles.map((p, i) => (
-        <Animated.View
-          key={i}
-          style={{
-            position: 'absolute',
-            width: 10,
-            height: 10,
-            borderRadius: 5,
-            backgroundColor: '#FFEB3B',
-            transform: [
-              { translateX: p.x },
-              { translateY: p.y },
-            ],
-          }}
-        />
-      ))}
-
-        {phase === 'winner' && (
-        <ConfettiCannon
-            count={100}
-            origin={{ x: width / 2, y: 0 }}
-            fadeOut={true}
-            explosionSpeed={300}
-            fallSpeed={3000}
-        />
+        {/* Enhanced Instructions for waiting phase */}
+        {phase === 'waiting' && (
+          <YStack
+            position="absolute"
+            top={height * 0.25}
+            left={20}
+            right={20}
+            alignItems="center"
+            zIndex={10}
+          >
+            <Text fontSize={40} marginBottom={16}>👆✨</Text>
+            <Text fontSize={20} fontWeight="700" color="#333" textAlign="center" marginBottom={8}>
+              Multifinger Challenge!
+            </Text>
+            <YStack
+              backgroundColor="rgba(255, 255, 255, 0.95)"
+              borderRadius={16}
+              padding={20}
+              alignItems="center"
+              shadowColor="#000"
+              shadowOpacity={0.1}
+              shadowOffset={{ width: 0, height: 4 }}
+              shadowRadius={8}
+            >
+              <Text
+                fontSize={16}
+                fontWeight="600"
+                color="#333"
+                textAlign="center"
+                lineHeight={22}
+              >
+                Every player touch and hold one finger to the screen. 
+                You can move your finger around!
+              </Text>
+            </YStack>
+          </YStack>
         )}
 
+        {/* Enhanced Ripples */}
+        {touches.map((touch) => (
+          <Ripple
+            key={touch.identifier}
+            x={touch.x}
+            y={touch.y}
+            speed={
+              phase === 'countdown' && countdown !== null
+                ? Math.max(1000, countdown * 150)
+                : 1500
+            }
+          />
+        ))}
 
-      <TouchableOpacity style={styles.resetButton} onPress={reset}>
-        <Text style={styles.resetText}>Reset</Text>
-      </TouchableOpacity>
-    </Animated.View>
+        {/* Enhanced Countdown */}
+        {countdown !== null && (
+          <YStack
+            position="absolute"
+            top={height * 0.15}
+            left={width / 2 - 80}
+            width={160}
+            height={160}
+            borderRadius={80}
+            justifyContent="center"
+            alignItems="center"
+            shadowColor="#000"
+            shadowOpacity={0.2}
+            shadowOffset={{ width: 0, height: 8 }}
+            shadowRadius={12}
+            zIndex={5}
+          >
+            <LinearGradient
+              colors={['#4CAF50', '#66BB6A', '#81C784']}
+              style={{
+                width: 160,
+                height: 160,
+                borderRadius: 80,
+                position: 'absolute',
+              }}
+            />
+            <Text fontSize={56} fontWeight="bold" color="white">
+              {countdown}
+            </Text>
+            <Text fontSize={14} color="white" fontWeight="600" marginTop={4}>
+              GET READY!
+            </Text>
+          </YStack>
+        )}
+
+        {/* Enhanced Winner Display */}
+        {winner && (
+          <YStack
+            position="absolute"
+            left={winner.x - 55}
+            top={winner.y - 55}
+            width={120}
+            height={120}
+            borderRadius={60}
+            justifyContent="center"
+            alignItems="center"
+            borderWidth={4}
+            borderColor="white"
+            shadowColor="#000"
+            shadowOffset={{ width: 0, height: 8 }}
+            shadowOpacity={0.3}
+            shadowRadius={12}
+            zIndex={10}
+          >
+            <LinearGradient
+              colors={['#FFD700', '#FFC107', '#FF8F00']}
+              style={{
+                width: 120,
+                height: 120,
+                borderRadius: 60,
+                position: 'absolute',
+              }}
+            />
+            <Text fontSize={40}>👑</Text>
+            <Text fontSize={12} color="white" fontWeight="bold" marginTop={4}>
+              WINNER!
+            </Text>
+          </YStack>
+        )}
+
+        {/* Enhanced Particles */}
+        {particles.map((p, i) => (
+          <Animated.View
+            key={i}
+            style={{
+              position: 'absolute',
+              width: 12,
+              height: 12,
+              borderRadius: 6,
+              backgroundColor: '#FFD700',
+              shadowColor: '#FFD700',
+              shadowOpacity: 0.8,
+              shadowRadius: 4,
+              transform: [
+                { translateX: p.x },
+                { translateY: p.y },
+              ],
+            }}
+          />
+        ))}
+
+        {/* Enhanced Confetti */}
+        {phase === 'winner' && (
+          <ConfettiCannon
+            count={120}
+            origin={{ x: width / 2, y: 0 }}
+            fadeOut={true}
+            explosionSpeed={350}
+            fallSpeed={2800}
+            colors={['#FFD700', '#4CAF50', '#FF6B6B', '#4ECDC4', '#9B59B6']}
+          />
+        )}
+
+        {/* Enhanced Reset Button */}
+        <Button
+          position="absolute"
+          bottom={80}
+          alignSelf="center"
+          backgroundColor="#FF5722"
+          borderRadius={50}
+          paddingHorizontal={32}
+          paddingVertical={5}
+          pressStyle={{ scale: 0.95, backgroundColor: "#E64A19" }}
+          shadowColor="#000"
+          shadowOpacity={0.2}
+          shadowOffset={{ width: 0, height: 6 }}
+          shadowRadius={10}
+          elevation={8}
+          onPress={reset}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+        >
+          <Text color="white" fontSize={18} fontWeight="bold">
+            🔄 Reset Game
+          </Text>
+        </Button>
+
+        {/* Players indicator */}
+        {phase === 'countdown' && touches.length > 0 && (
+          <YStack
+            position="absolute"
+            bottom={160}
+            alignSelf="center"
+            backgroundColor="rgba(76, 175, 80, 0.9)"
+            borderRadius={20}
+            paddingVertical={8}
+            paddingHorizontal={16}
+          >
+            <Text color="white" fontSize={14} fontWeight="600">
+              👥 {touches.length} Player{touches.length !== 1 ? 's' : ''} Ready!
+            </Text>
+          </YStack>
+        )}
+      </Animated.View>
     </Animated.View>
   );
 }
@@ -272,51 +391,5 @@ export default function FingerTapScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  instructionsContainer: {
-    position: 'absolute',
-    top: height * 0.3,
-    left: 20,
-    right: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 12,
-    padding: 20,
-    alignItems: 'center',
-  },
-  instructionsText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  centerCountdown: {
-    position: 'absolute',
-    top: height * 0.2,
-    left: width / 2 - 60,
-    width: 120,
-    height: 120,
-    backgroundColor: 'rgba(70, 187, 24, 0.6)',
-    borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  countdownText: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '3adc3e',
-  },
-  resetButton: {
-    position: 'absolute',
-    bottom: 60,
-    alignSelf: 'center',
-    backgroundColor: '#f44336',
-    padding: 16,
-    borderRadius: 10,
-  },
-  resetText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });
