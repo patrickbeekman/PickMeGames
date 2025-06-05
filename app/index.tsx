@@ -21,8 +21,8 @@ export default function HomeScreen() {
   const posthog = usePostHog();
   const options = [
     { title: 'Multifinger Tap', route: '/finger-tap', emoji: '👆' },
-    { title: 'Spinner', route: '/spinner', emoji: '🎯' },
-    { title: 'Numbered Spinner', route: '/numbered-spinner', emoji: '🔢' },
+    { title: 'Spinner', route: '/spinner', emoji: '🌀' },
+    { title: 'Numbered Spinner', route: '/numbered-spinner', emoji: '🍭' },
     { title: 'Random Number', route: '/random-number', emoji: '🎲' },
     { title: 'Prompted', route: '/prompted', emoji: '💭' },
   ];
