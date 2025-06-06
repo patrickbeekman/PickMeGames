@@ -4,8 +4,8 @@ import { Input } from '@tamagui/input';
 import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Alert, FlatList, StyleSheet } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Alert, FlatList, Keyboard, StyleSheet, TouchableWithoutFeedback, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { usePrompts } from '../hooks/usePrompts';
@@ -23,6 +23,47 @@ export default function PromptSettings() {
     defaultPromptsCount 
   } = usePrompts();
   const [newPrompt, setNewPrompt] = useState('');
+  const [showCustom, setShowCustom] = useState(false);
+  const inputRef = useRef<any>(null);
+
+  // Choose which prompts to show
+  const visiblePrompts = showCustom ? getCustomPrompts() : prompts.slice(0, defaultPromptsCount);
+
+  const renderPromptItem = ({ item, index }: { item: string; index: number }) => {
+    // Adjust index for custom prompts view
+    const realIndex = showCustom ? index + defaultPromptsCount : index;
+    const isDefault = !showCustom;
+
+    return (
+      <YStack
+        backgroundColor={isDefault ? "#E8F5E9" : "#FFF3E0"}
+        borderRadius={12}
+        padding={16}
+        marginVertical={4}
+        marginHorizontal={16}
+        borderWidth={0}
+      >
+        <XStack alignItems="center" justifyContent="space-between">
+          <YStack flex={1} marginRight={12}>
+            <Text fontSize={16} color="#333" lineHeight={22}>
+              {item}
+            </Text>
+          </YStack>
+          <Button
+            size="$2"
+            backgroundColor={isDefault ? "#4CAF50" : "#FF9800"}
+            borderRadius={20}
+            pressStyle={{ scale: 0.95, backgroundColor: isDefault ? "#388E3C" : "#F57C00" }}
+            onPress={() => handleRemovePrompt(realIndex, item)}
+          >
+            <Text color="white" fontSize={12} fontWeight="bold">
+              🗑️ Remove
+            </Text>
+          </Button>
+        </XStack>
+      </YStack>
+    );
+  };
 
   useEffect(() => {
     navigation.setOptions({
@@ -46,7 +87,6 @@ export default function PromptSettings() {
 
   const handleAddPrompt = async () => {
     if (!newPrompt.trim()) return;
-    
     const success = await addPrompt(newPrompt);
     if (success) {
       setNewPrompt('');
@@ -61,7 +101,6 @@ export default function PromptSettings() {
       Alert.alert('Cannot Delete', 'Default prompts cannot be removed.');
       return;
     }
-
     Alert.alert(
       'Remove Prompt',
       `Are you sure you want to remove this prompt?\n\n"${prompt}"`,
@@ -91,47 +130,6 @@ export default function PromptSettings() {
     );
   };
 
-  const renderPromptItem = ({ item, index }: { item: string; index: number }) => {
-    const isDefault = index < defaultPromptsCount;
-    
-    return (
-      <YStack
-        backgroundColor={isDefault ? "rgba(255,255,255,0.7)" : "rgba(255,255,255,0.95)"}
-        borderRadius={12}
-        padding={16}
-        marginVertical={4}
-        marginHorizontal={16}
-        borderWidth={isDefault ? 1 : 2}
-        borderColor={isDefault ? "#E0E0E0" : "#4CAF50"}
-      >
-        <XStack alignItems="center" justifyContent="space-between">
-          <YStack flex={1} marginRight={12}>
-            <Text fontSize={16} color="#333" lineHeight={22}>
-              {item}
-            </Text>
-            <Text fontSize={12} color="#666" marginTop={4}>
-              {isDefault ? '📱 Default prompt' : '✨ Custom prompt'}
-            </Text>
-          </YStack>
-          
-          {!isDefault && (
-            <Button
-              size="$2"
-              backgroundColor="#FF5722"
-              borderRadius={20}
-              pressStyle={{ scale: 0.95, backgroundColor: "#E64A19" }}
-              onPress={() => handleRemovePrompt(index, item)}
-            >
-              <Text color="white" fontSize={12} fontWeight="bold">
-                🗑️ Remove
-              </Text>
-            </Button>
-          )}
-        </XStack>
-      </YStack>
-    );
-  };
-
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
@@ -153,10 +151,10 @@ export default function PromptSettings() {
         {/* Header */}
         <YStack padding={1} alignItems="center">
           <Text fontSize={32} marginBottom={8}>⚙️💭⚙️</Text>
-          <Text fontSize={20} fontWeight="700" color="#333" textAlign="center" marginBottom={8}>
+          <Text fontSize={20} fontWeight="700" color="#333" textAlign="center" marginBottom={2}>
             Manage Your Prompts
           </Text>
-          <Text fontSize={14} color="#666" textAlign="center" maxWidth={300}>
+          <Text fontSize={14} color="#666" textAlign="center" maxWidth={300} marginBottom={8}>
             Add custom prompts or remove ones you don't like!
           </Text>
         </YStack>
@@ -177,6 +175,7 @@ export default function PromptSettings() {
           </Text>
           
           <Input
+            ref={inputRef}
             placeholder="Enter your custom prompt..."
             value={newPrompt}
             onChangeText={setNewPrompt}
@@ -186,6 +185,9 @@ export default function PromptSettings() {
             borderColor="#E0E0E0"
             padding={12}
             marginBottom={12}
+            returnKeyType="done"
+            blurOnSubmit={true}
+            onSubmitEditing={Keyboard.dismiss}
           />
           
           <Button
@@ -202,40 +204,53 @@ export default function PromptSettings() {
           </Button>
         </YStack>
 
-        {/* Stats */}
-        <XStack justifyContent="center" marginHorizontal={16} marginBottom={16}>
-          <YStack
-            backgroundColor="rgba(76, 175, 80, 0.1)"
-            borderRadius={12}
-            padding={12}
-            alignItems="center"
+        {/* Stats as Toggle Buttons */}
+        <XStack justifyContent="center" marginHorizontal={16} marginBottom={16} gap={12}>
+          <Button
             flex={1}
-            marginRight={8}
-          >
-            <Text fontSize={18} fontWeight="bold" color="#4CAF50">
-              {prompts.length}
-            </Text>
-            <Text fontSize={12} color="#666">Total Prompts</Text>
-          </YStack>
-          
-          <YStack
-            backgroundColor="rgba(255, 193, 7, 0.1)"
+            backgroundColor={showCustom ? "rgba(76, 175, 80, 0.08)" : "#E8F5E9"}
+            borderColor="#4CAF50"
+            borderWidth={showCustom ? 1 : 2}
             borderRadius={12}
-            padding={12}
-            alignItems="center"
-            flex={1}
-            marginLeft={8}
+            padding={0}
+            onPress={() => {
+              setShowCustom(false);
+              Keyboard.dismiss();
+            }}
+            pressStyle={{ scale: 0.97, backgroundColor: "#C8E6C9" }}
           >
-            <Text fontSize={18} fontWeight="bold" color="#FF9800">
-              {getCustomPrompts().length}
-            </Text>
-            <Text fontSize={12} color="#666">Custom Prompts</Text>
-          </YStack>
+            <YStack alignItems="center" paddingVertical={8} paddingHorizontal={4}>
+              <Text fontSize={12} color="#666" marginBottom={2}>Default Prompts</Text>
+              <Text fontSize={20} fontWeight="bold" color="#4CAF50">
+                {defaultPromptsCount}
+              </Text>
+            </YStack>
+          </Button>
+          <Button
+            flex={1}
+            backgroundColor={showCustom ? "#FFF3E0" : "rgba(255, 193, 7, 0.08)"}
+            borderColor="#FF9800"
+            borderWidth={showCustom ? 2 : 1}
+            borderRadius={12}
+            padding={0}
+            onPress={() => {
+              setShowCustom(true);
+              Keyboard.dismiss();
+            }}
+            pressStyle={{ scale: 0.97, backgroundColor: "#FFE0B2" }}
+          >
+            <YStack alignItems="center" paddingVertical={8} paddingHorizontal={4}>
+              <Text fontSize={12} color="#666" marginBottom={2}>Custom Prompts</Text>
+              <Text fontSize={20} fontWeight="bold" color="#FF9800">
+                {getCustomPrompts().length}
+              </Text>
+            </YStack>
+          </Button>
         </XStack>
 
         {/* Prompts List */}
         <FlatList
-          data={prompts}
+          data={visiblePrompts}
           renderItem={renderPromptItem}
           keyExtractor={(item, index) => `${index}-${item}`}
           showsVerticalScrollIndicator={false}
