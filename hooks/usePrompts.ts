@@ -92,6 +92,25 @@ export const usePrompts = () => {
     return prompts.slice(defaultPrompts.length);
   }, [prompts]);
 
+  // Helper function to get filtered prompts (for external use)
+  const getFilteredPrompts = useCallback(async () => {
+    try {
+      const storedHidden = await AsyncStorage.getItem('hidden_default_prompts');
+      const hiddenDefaults = storedHidden ? JSON.parse(storedHidden) : [];
+      
+      // Get the actual custom prompts from storage
+      const storedCustom = await AsyncStorage.getItem(PROMPTS_STORAGE_KEY);
+      const customPrompts = storedCustom ? JSON.parse(storedCustom) : [];
+      
+      // Filter out hidden defaults but keep all custom prompts
+      const filteredDefaults = defaultPrompts.filter((_, index) => !hiddenDefaults.includes(index));
+      
+      return [...filteredDefaults, ...customPrompts];
+    } catch {
+      return prompts;
+    }
+  }, [prompts]);
+
   return {
     prompts,
     loading,
@@ -99,6 +118,7 @@ export const usePrompts = () => {
     removePrompt,
     resetToDefaults,
     getCustomPrompts,
+    getFilteredPrompts,
     defaultPromptsCount: defaultPrompts.length,
   };
 };

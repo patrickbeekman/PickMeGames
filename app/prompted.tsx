@@ -11,19 +11,30 @@ import { usePrompts } from '../hooks/usePrompts';
 export default function PromptSelector() {
   const navigation = useNavigation();
   const { capture } = useAnalytics();
-  const { prompts, loading } = usePrompts();
+  const { getFilteredPrompts, loading } = usePrompts();
+  const [filteredPrompts, setFilteredPrompts] = useState<string[]>([]);
   const [usedPrompts, setUsedPrompts] = useState<Set<number>>(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  // Reset usedPrompts and currentIndex if prompts change (e.g. after hiding defaults)
+  // Load filtered prompts when component mounts or when returning from settings
   useEffect(() => {
-    setUsedPrompts(new Set());
-    if (prompts.length > 0) {
-      setCurrentIndex(Math.floor(Math.random() * prompts.length));
-    }
-  }, [prompts]);
+    const loadFilteredPrompts = async () => {
+      const filtered = await getFilteredPrompts();
+      setFilteredPrompts(filtered);
+      setUsedPrompts(new Set());
+      if (filtered.length > 0) {
+        setCurrentIndex(Math.floor(Math.random() * filtered.length));
+      }
+    };
+    
+    loadFilteredPrompts();
+    
+    // Listen for focus events to reload when returning from settings
+    const unsubscribe = navigation.addListener('focus', loadFilteredPrompts);
+    return unsubscribe;
+  }, [getFilteredPrompts, navigation]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -43,7 +54,7 @@ export default function PromptSelector() {
   }, [capture]);
 
   const nextPrompt = () => {
-    if (prompts.length === 0) return;
+    if (filteredPrompts.length === 0) return;
     // Animate out
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -62,7 +73,7 @@ export default function PromptSelector() {
       newUsedPrompts.add(currentIndex);
 
       // If all prompts have been used, reset the used prompts list
-      if (newUsedPrompts.size >= prompts.length) {
+      if (newUsedPrompts.size >= filteredPrompts.length) {
         newUsedPrompts.clear();
         newUsedPrompts.add(currentIndex);
       }
@@ -70,7 +81,7 @@ export default function PromptSelector() {
       setUsedPrompts(newUsedPrompts);
 
       // Find available prompts (not yet used)
-      const availablePrompts = prompts
+      const availablePrompts = filteredPrompts
         .map((_, index) => index)
         .filter(index => !newUsedPrompts.has(index));
 
@@ -98,11 +109,11 @@ export default function PromptSelector() {
     capture('prompt_changed', {
       fromIndex: currentIndex,
       totalUsedPrompts: usedPrompts.size + 1,
-      totalAvailablePrompts: prompts.length,
+      totalAvailablePrompts: filteredPrompts.length,
     });
   };
 
-  const currentPrompt = prompts.length > 0 ? prompts[currentIndex] : "No prompts available. Add some in settings!";
+  const currentPrompt = filteredPrompts.length > 0 ? filteredPrompts[currentIndex] : "No prompts available. Add some in settings!";
 
   if (loading) {
     return (
@@ -217,9 +228,9 @@ export default function PromptSelector() {
         padding={16}
       >
         <Text fontSize={14} color="#666" textAlign="center" fontWeight="500">
-          💡 Prompt {usedPrompts.size + 1} of {prompts.length}
+          💡 Prompt {usedPrompts.size + 1} of {filteredPrompts.length}
         </Text>
-        {usedPrompts.size >= prompts.length - 1 && (
+        {usedPrompts.size >= filteredPrompts.length - 1 && (
           <Text fontSize={12} color="#999" textAlign="center" marginTop={4}>
             Next prompt will reset the cycle
           </Text>
