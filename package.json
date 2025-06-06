@@ -21,6 +21,7 @@
     "@tamagui/config": "^1.126.14",
     "@tamagui/core": "^1.126.14",
     "@tamagui/image": "^1.126.14",
+    "@tamagui/input": "^1.126.14",
     "@tamagui/lucide-icons": "^1.126.14",
     "@tamagui/stacks": "^1.126.14",
     "@tamagui/text": "^1.126.14",

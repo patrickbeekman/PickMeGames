@@ -2,15 +2,16 @@ import { Button } from '@tamagui/button';
 import { Text } from '@tamagui/core';
 import { YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from 'expo-router';
+import { Link, useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing } from 'react-native';
-import prompts from '../assets/prompts.json';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { usePrompts } from '../hooks/usePrompts';
 
 export default function PromptSelector() {
   const navigation = useNavigation();
   const { capture } = useAnalytics();
+  const { prompts, loading } = usePrompts();
   const [currentIndex, setCurrentIndex] = useState(() =>
     Math.floor(Math.random() * prompts.length)
   );
@@ -23,6 +24,9 @@ export default function PromptSelector() {
       headerTitle: 'Prompt Selector',
       headerStyle: {
         backgroundColor: '#F3E889',
+        borderBottomWidth: 0,
+        shadowOpacity: 0,
+        elevation: 0,
       },
       headerTintColor: '#333',
       headerTitleStyle: {
@@ -30,6 +34,13 @@ export default function PromptSelector() {
       },
     });
   }, [navigation]);
+
+  // Update currentIndex when prompts change
+  useEffect(() => {
+    if (prompts.length > 0 && currentIndex >= prompts.length) {
+      setCurrentIndex(0);
+    }
+  }, [prompts, currentIndex]);
 
   useEffect(() => {
     capture('prompt_selected');
@@ -96,12 +107,48 @@ export default function PromptSelector() {
 
   const currentPrompt = prompts[currentIndex];
 
+  if (loading) {
+    return (
+      <YStack flex={1} backgroundColor="#F3E889" alignItems="center" justifyContent="center">
+        <LinearGradient
+          colors={['#F3E889', '#FFE082', '#FFF9C4']}
+          style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+        />
+        <Text fontSize={18} color="#333">Loading prompts...</Text>
+      </YStack>
+    );
+  }
+
   return (
     <YStack flex={1} backgroundColor="#F3E889" alignItems="center" justifyContent="center" padding={20}>
       <LinearGradient
         colors={['#F3E889', '#FFE082', '#FFF9C4']}
         style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
       />
+
+      {/* Settings Button - positioned in top right */}
+      <Link href="/prompt-settings" asChild>
+        <Button
+          position="absolute"
+          top={60}
+          right={20}
+          backgroundColor="rgba(255,255,255,0.9)"
+          borderRadius={25}
+          width={50}
+          height={50}
+          pressStyle={{ scale: 0.95, backgroundColor: "rgba(255,255,255,1)" }}
+          shadowColor="#000"
+          shadowOpacity={0.15}
+          shadowOffset={{ width: 0, height: 4 }}
+          shadowRadius={8}
+          elevation={4}
+          borderWidth={2}
+          borderColor="#4CAF50"
+          zIndex={20}
+        >
+          <Text fontSize={20}>⚙️</Text>
+        </Button>
+      </Link>
 
       {/* Header with emojis */}
       <YStack alignItems="center" marginBottom={40}>
