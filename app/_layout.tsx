@@ -25,7 +25,13 @@ export default function RootLayout() {
   return (
     <PostHogProvider 
       apiKey={POSTHOG_API_KEY}
-      options={{ host: POSTHOG_HOST }}
+      options={{ 
+        host: POSTHOG_HOST,
+        // Reduce error noise when offline
+        captureMode: 'form',
+        flushAt: 20, // Send in batches instead of individually
+        flushInterval: 30000, // Every 30 seconds instead of constantly
+      }}
     >
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <TamaguiProvider config={config}>
@@ -46,7 +52,7 @@ export default function RootLayout() {
             <Stack.Screen name="+not-found" />
           </Stack>
         </TamaguiProvider>
-        <StatusBar style="auto" />
+        <StatusBar backgroundColor="#F3E889" translucent={true} style='dark' />
       </ThemeProvider>
     </PostHogProvider>
   );

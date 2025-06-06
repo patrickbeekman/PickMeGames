@@ -3,17 +3,18 @@ import { Text } from '@tamagui/core';
 import { YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
-import { usePostHog } from 'posthog-react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing } from 'react-native';
 import prompts from '../assets/prompts.json';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 export default function PromptSelector() {
   const navigation = useNavigation();
-  const posthog = usePostHog();
+  const { capture } = useAnalytics();
   const [currentIndex, setCurrentIndex] = useState(() =>
     Math.floor(Math.random() * prompts.length)
   );
+  const [usedPrompts, setUsedPrompts] = useState<Set<number>>(new Set());
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -31,8 +32,8 @@ export default function PromptSelector() {
   }, [navigation]);
 
   useEffect(() => {
-    posthog.capture('prompt_selected');
-  }, []);
+    capture('prompt_selected');
+  }, [capture]);
 
   const nextPrompt = () => {
     // Animate out
@@ -48,11 +49,25 @@ export default function PromptSelector() {
         useNativeDriver: true,
       }),
     ]).start(() => {
-      // Change prompt
-      let next;
-      do {
-        next = Math.floor(Math.random() * prompts.length);
-      } while (prompts.length > 1 && next === currentIndex);
+      // Mark current prompt as used
+      const newUsedPrompts = new Set(usedPrompts);
+      newUsedPrompts.add(currentIndex);
+      
+      // If all prompts have been used, reset the used prompts list
+      if (newUsedPrompts.size >= prompts.length) {
+        newUsedPrompts.clear();
+        newUsedPrompts.add(currentIndex);
+      }
+      
+      setUsedPrompts(newUsedPrompts);
+      
+      // Find available prompts (not yet used)
+      const availablePrompts = prompts
+        .map((_, index) => index)
+        .filter(index => !newUsedPrompts.has(index));
+      
+      // Select random prompt from available ones
+      const next = availablePrompts[Math.floor(Math.random() * availablePrompts.length)];
       setCurrentIndex(next);
 
       // Animate in
@@ -72,9 +87,10 @@ export default function PromptSelector() {
       ]).start();
     });
 
-    posthog.capture('prompt_changed', {
+    capture('prompt_changed', {
       fromIndex: currentIndex,
-      toIndex: currentIndex,
+      totalUsedPrompts: usedPrompts.size + 1,
+      totalAvailablePrompts: prompts.length,
     });
   };
 
@@ -147,6 +163,24 @@ export default function PromptSelector() {
           🎲 New Prompt
         </Text>
       </Button>
+
+      {/* Prompt counter */}
+      <YStack 
+        alignItems="center" 
+        marginTop={20}
+        backgroundColor="rgba(76, 175, 80, 0.1)"
+        borderRadius={16}
+        padding={16}
+      >
+        <Text fontSize={14} color="#666" textAlign="center" fontWeight="500">
+          💡 Prompt {usedPrompts.size + 1} of {prompts.length}
+        </Text>
+        {usedPrompts.size >= prompts.length - 1 && (
+          <Text fontSize={12} color="#999" textAlign="center" marginTop={4}>
+            Next prompt will reset the cycle
+          </Text>
+        )}
+      </YStack>
 
     </YStack>
   );

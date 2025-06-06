@@ -3,8 +3,7 @@ import { Text } from '@tamagui/core';
 import { YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
-import { usePostHog } from 'posthog-react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -13,6 +12,7 @@ import {
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 
 const COUNTDOWN_SECONDS = 4;
@@ -21,7 +21,7 @@ const { width, height } = Dimensions.get('window');
 
 export default function FingerTapScreen() {
   const navigation = useNavigation();
-  const posthog = usePostHog()
+  const { capture } = useAnalytics();
   const [touches, setTouches] = useState<{ identifier: number; x: number; y: number }[]>([]);
   const [winner, setWinner] = useState<{ x: number; y: number } | null>(null);
   const [particles, setParticles] = useState<Animated.ValueXY[]>([]);
@@ -44,8 +44,8 @@ export default function FingerTapScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    posthog.capture('entered_finger_tap');
-  }, []);
+    capture('entered_finger_tap');
+  }, [capture]);
 
   useEffect(() => {
     if (countdown !== null && countdown > 0) {
@@ -136,8 +136,8 @@ export default function FingerTapScreen() {
     setWinner({ x: chosen.x, y: chosen.y });
     triggerParticles(chosen.x, chosen.y);
     setPhase('winner');
-    // Track winner picked
-    posthog.capture('finger_tap_winner_picked', {
+    
+    capture('finger_tap_winner_picked', {
       winner_x: chosen.x,
       winner_y: chosen.y,
       total_touches: touches.length,
@@ -197,7 +197,7 @@ export default function FingerTapScreen() {
             alignItems="center"
             zIndex={10}
           >
-            <Text fontSize={40} marginBottom={16}>👆✨</Text>
+            <Text fontSize={40} marginBottom={16}>✨👆✨</Text>
             <Text fontSize={20} fontWeight="700" color="#333" textAlign="center" marginBottom={8}>
               Multifinger Challenge!
             </Text>

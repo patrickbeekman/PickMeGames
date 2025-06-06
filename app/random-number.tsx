@@ -3,14 +3,14 @@ import { Text } from '@tamagui/core';
 import { YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
-import { usePostHog } from 'posthog-react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 export default function NumberGuesser() {
   const navigation = useNavigation();
-  const posthog = usePostHog();
+  const { capture } = useAnalytics();
   const [randomNumber, setRandomNumber] = useState<number | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
   const [animatedNumber, setAnimatedNumber] = useState('?');
@@ -36,8 +36,8 @@ export default function NumberGuesser() {
   }, [navigation]);
 
   useEffect(() => {
-      posthog.capture('entered_number_guesser');
-  }, []);
+      capture('entered_number_guesser');
+  }, [capture]);
 
   const revealNumber = () => {
     if (isRevealing) return;
@@ -67,7 +67,7 @@ export default function NumberGuesser() {
       }),
     ]).start();
 
-    posthog.capture('number_revealed', {
+    capture('number_revealed', {
       randomNumber,
     });
   };

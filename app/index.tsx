@@ -4,10 +4,10 @@ import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useNavigation } from 'expo-router';
-import { usePostHog } from 'posthog-react-native';
 import { useEffect, useLayoutEffect } from 'react';
 import { Linking, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -18,7 +18,7 @@ export default function HomeScreen() {
     });
   }, [navigation]);
 
-  const posthog = usePostHog();
+  const { capture } = useAnalytics();
   const options = [
     { title: 'Multifinger Tap', route: '/finger-tap', emoji: '👆' },
     { title: 'Spinner', route: '/spinner', emoji: '🌀' },
@@ -28,8 +28,8 @@ export default function HomeScreen() {
   ];
 
   useEffect(() => {
-    posthog.capture('entered_finger_tap');
-  }, []);
+    capture('entered_home_screen');
+  }, [capture]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

@@ -3,8 +3,7 @@ import { Text, View } from '@tamagui/core';
 import { YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
-import { usePostHog } from 'posthog-react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -12,6 +11,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 const { width, height } = Dimensions.get('window');
 const SPINNER_SIZE = width * 0.8;
@@ -20,7 +20,7 @@ const ARROW_LENGTH = SPINNER_SIZE / 2 - 10;
 
 const TwisterSpinner = () => {
   const navigation = useNavigation();
-  const posthog = usePostHog();
+  const { capture } = useAnalytics();
   const rotation = useRef(new Animated.Value(0)).current;
   const [spinning, setSpinning] = useState(false);
   const [baseRotation, setBaseRotation] = useState(0);
@@ -42,8 +42,8 @@ const TwisterSpinner = () => {
   }, [navigation]);
 
   useEffect(() => {
-    posthog.capture('entered_spinner');
-  }, []);
+    capture('entered_spinner');
+  }, [capture]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -86,7 +86,7 @@ const TwisterSpinner = () => {
     });
 
     // capture the spin event
-    posthog.capture('spun_empty_spinner', {
+    capture('spun_empty_spinner', {
       finalAngle: randomOffset,
       totalRotation: targetRotation,
     });

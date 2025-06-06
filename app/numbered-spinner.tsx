@@ -4,18 +4,18 @@ import { Text } from '@tamagui/core';
 import { YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
-import { usePostHog } from 'posthog-react-native';
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, Easing, StyleSheet } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 const SPINNER_SIZE = 300;
 const { width, height } = Dimensions.get('window');
 
 export default function SpinnerSelector() {
   const navigation = useNavigation();
-  const posthog = usePostHog();
+  const { capture } = useAnalytics();
   const [playerCount, setPlayerCount] = useState(6);
   const [spinning, setSpinning] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -36,8 +36,8 @@ export default function SpinnerSelector() {
   }, [navigation]);
 
   useEffect(() => {
-    posthog.capture('entered_spinner');
-  }, []);
+    capture('entered_numbered_spinner');
+  }, [capture]);
 
   const spin = () => {
     if (spinning) return;
@@ -82,7 +82,7 @@ export default function SpinnerSelector() {
       setTimeout(() => setShowConfetti(false), 3000);
     });
 
-    posthog.capture('spun_numbered_spinner', {
+    capture('spun_numbered_spinner', {
       playerCount,
       finalAngle: randomOffset,
     });
