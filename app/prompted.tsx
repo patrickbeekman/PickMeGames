@@ -12,21 +12,24 @@ export default function PromptSelector() {
   const navigation = useNavigation();
   const { capture } = useAnalytics();
   const { prompts, loading } = usePrompts();
-  const [currentIndex, setCurrentIndex] = useState(() =>
-    Math.floor(Math.random() * prompts.length)
-  );
   const [usedPrompts, setUsedPrompts] = useState<Set<number>>(new Set());
+  const [currentIndex, setCurrentIndex] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  // Reset usedPrompts and currentIndex if prompts change (e.g. after hiding defaults)
+  useEffect(() => {
+    setUsedPrompts(new Set());
+    if (prompts.length > 0) {
+      setCurrentIndex(Math.floor(Math.random() * prompts.length));
+    }
+  }, [prompts]);
 
   useEffect(() => {
     navigation.setOptions({
       headerTitle: 'Prompt Selector',
       headerStyle: {
         backgroundColor: '#F3E889',
-        borderBottomWidth: 0,
-        shadowOpacity: 0,
-        elevation: 0,
       },
       headerTintColor: '#333',
       headerTitleStyle: {
@@ -35,18 +38,12 @@ export default function PromptSelector() {
     });
   }, [navigation]);
 
-  // Update currentIndex when prompts change
-  useEffect(() => {
-    if (prompts.length > 0 && currentIndex >= prompts.length) {
-      setCurrentIndex(0);
-    }
-  }, [prompts, currentIndex]);
-
   useEffect(() => {
     capture('prompt_selected');
   }, [capture]);
 
   const nextPrompt = () => {
+    if (prompts.length === 0) return;
     // Animate out
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -63,20 +60,20 @@ export default function PromptSelector() {
       // Mark current prompt as used
       const newUsedPrompts = new Set(usedPrompts);
       newUsedPrompts.add(currentIndex);
-      
+
       // If all prompts have been used, reset the used prompts list
       if (newUsedPrompts.size >= prompts.length) {
         newUsedPrompts.clear();
         newUsedPrompts.add(currentIndex);
       }
-      
+
       setUsedPrompts(newUsedPrompts);
-      
+
       // Find available prompts (not yet used)
       const availablePrompts = prompts
         .map((_, index) => index)
         .filter(index => !newUsedPrompts.has(index));
-      
+
       // Select random prompt from available ones
       const next = availablePrompts[Math.floor(Math.random() * availablePrompts.length)];
       setCurrentIndex(next);
@@ -105,7 +102,7 @@ export default function PromptSelector() {
     });
   };
 
-  const currentPrompt = prompts[currentIndex];
+  const currentPrompt = prompts.length > 0 ? prompts[currentIndex] : "No prompts available. Add some in settings!";
 
   if (loading) {
     return (
@@ -130,12 +127,12 @@ export default function PromptSelector() {
       <Link href="/prompt-settings" asChild>
         <Button
           position="absolute"
-          top={60}
+          top={10}
           right={20}
           backgroundColor="rgba(255,255,255,0.9)"
-          borderRadius={25}
-          width={50}
-          height={50}
+          borderRadius={15}
+          width={60}
+          height={60}
           pressStyle={{ scale: 0.95, backgroundColor: "rgba(255,255,255,1)" }}
           shadowColor="#000"
           shadowOpacity={0.15}

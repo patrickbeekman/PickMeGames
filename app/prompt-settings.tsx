@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Button } from '@tamagui/button';
 import { Text } from '@tamagui/core';
 import { Input } from '@tamagui/input';
@@ -26,8 +27,36 @@ export default function PromptSettings() {
   const [showCustom, setShowCustom] = useState(false);
   const inputRef = useRef<any>(null);
 
-  // Choose which prompts to show
-  const visiblePrompts = showCustom ? getCustomPrompts() : prompts.slice(0, defaultPromptsCount);
+  // Track deleted default prompts locally so they don't show up again
+  const [hiddenDefaults, setHiddenDefaults] = useState<number[]>([]);
+
+  // Load hidden defaults from AsyncStorage on mount
+  useEffect(() => {
+    AsyncStorage.getItem('hidden_default_prompts')
+      .then(stored => {
+        if (stored) setHiddenDefaults(JSON.parse(stored));
+      })
+      .catch(() => {});
+  }, []);
+
+  // Save hidden defaults to AsyncStorage
+  useEffect(() => {
+    AsyncStorage.setItem('hidden_default_prompts', JSON.stringify(hiddenDefaults)).catch(() => {});
+  }, [hiddenDefaults]);
+
+  // Helper to hide all default prompts
+  const hideAllDefaults = () => {
+    setHiddenDefaults(Array.from({ length: defaultPromptsCount }, (_, i) => i));
+  };
+
+  // Helper to restore all default prompts
+  const restoreAllDefaults = () => {
+    setHiddenDefaults([]);
+  };
+
+  // Filtered default prompts for display and count
+  const filteredDefaultPrompts = prompts.slice(0, defaultPromptsCount).filter((_, i) => !hiddenDefaults.includes(i));
+  const visiblePrompts = showCustom ? getCustomPrompts() : filteredDefaultPrompts;
 
   const renderPromptItem = ({ item, index }: { item: string; index: number }) => {
     // Adjust index for custom prompts view
@@ -54,7 +83,7 @@ export default function PromptSettings() {
             backgroundColor={isDefault ? "#4CAF50" : "#FF9800"}
             borderRadius={20}
             pressStyle={{ scale: 0.95, backgroundColor: isDefault ? "#388E3C" : "#F57C00" }}
-            onPress={() => handleRemovePrompt(realIndex, item)}
+            onPress={() => handleRemovePrompt(realIndex, item, isDefault)}
           >
             <Text color="white" fontSize={12} fontWeight="bold">
               🗑️ Remove
@@ -87,6 +116,7 @@ export default function PromptSettings() {
 
   const handleAddPrompt = async () => {
     if (!newPrompt.trim()) return;
+    capture('prompt_typed', { prompt: newPrompt });
     const success = await addPrompt(newPrompt);
     if (success) {
       setNewPrompt('');
@@ -96,9 +126,10 @@ export default function PromptSettings() {
     }
   };
 
-  const handleRemovePrompt = (index: number, prompt: string) => {
-    if (index < defaultPromptsCount) {
-      Alert.alert('Cannot Delete', 'Default prompts cannot be removed.');
+  // Allow hiding default prompts instead of blocking deletion
+  const handleRemovePrompt = (index: number, prompt: string, isDefault: boolean) => {
+    if (isDefault) {
+      setHiddenDefaults((prev) => [...prev, index]);
       return;
     }
     Alert.alert(
@@ -222,7 +253,7 @@ export default function PromptSettings() {
             <YStack alignItems="center" paddingVertical={8} paddingHorizontal={4}>
               <Text fontSize={12} color="#666" marginBottom={2}>Default Prompts</Text>
               <Text fontSize={20} fontWeight="bold" color="#4CAF50">
-                {defaultPromptsCount}
+                {filteredDefaultPrompts.length}
               </Text>
             </YStack>
           </Button>
@@ -258,21 +289,36 @@ export default function PromptSettings() {
           contentContainerStyle={{ paddingBottom: 100 }}
         />
 
-        {/* Reset Button */}
-        {getCustomPrompts().length > 0 && (
-          <YStack margin={16}>
+        {/* Reset/Delete Buttons */}
+        <XStack margin={16} gap={12} justifyContent="center">
+          <Button
+            backgroundColor="#FF9800"
+            borderRadius={12}
+            pressStyle={{ scale: 0.95, backgroundColor: "#F57C00" }}
+            onPress={hideAllDefaults}
+            flex={1}
+          >
+            <Text color="white" fontWeight="bold">
+              🗑️ Delete All Default Prompts
+            </Text>
+          </Button>
+          {getCustomPrompts().length > 0 || hiddenDefaults.length > 0 ? (
             <Button
-              backgroundColor="#FF5722"
+              backgroundColor="#4CAF50"
               borderRadius={12}
-              pressStyle={{ scale: 0.95, backgroundColor: "#E64A19" }}
-              onPress={handleResetToDefaults}
+              pressStyle={{ scale: 0.95, backgroundColor: "#388E3C" }}
+              onPress={() => {
+                handleResetToDefaults();
+                restoreAllDefaults();
+              }}
+              flex={1}
             >
               <Text color="white" fontWeight="bold">
                 🔄 Reset to Default Prompts
               </Text>
             </Button>
-          </YStack>
-        )}
+          ) : null}
+        </XStack>
       </YStack>
     </SafeAreaView>
   );
