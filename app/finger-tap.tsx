@@ -21,7 +21,7 @@ const { width, height } = Dimensions.get('window');
 
 export default function FingerTapScreen() {
   const navigation = useNavigation();
-  const { capture } = useAnalytics();
+  const { capture, isReady } = useAnalytics();
   const [touches, setTouches] = useState<{ identifier: number; x: number; y: number }[]>([]);
   const [winner, setWinner] = useState<{ x: number; y: number } | null>(null);
   const [particles, setParticles] = useState<Animated.ValueXY[]>([]);
@@ -44,8 +44,10 @@ export default function FingerTapScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    capture('entered_finger_tap');
-  }, [capture]);
+    if (isReady) {
+      capture('entered_finger_tap');
+    }
+  }, [capture, isReady]);
 
   useEffect(() => {
     if (countdown !== null && countdown > 0) {

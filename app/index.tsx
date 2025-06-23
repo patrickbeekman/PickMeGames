@@ -18,7 +18,7 @@ export default function HomeScreen() {
     });
   }, [navigation]);
 
-  const { capture } = useAnalytics();
+  const { capture, isReady } = useAnalytics();
   const options = [
     { title: 'Multifinger Tap', route: '/finger-tap', emoji: '👆' },
     { title: 'Spinner', route: '/spinner', emoji: '🌀' },
@@ -28,8 +28,10 @@ export default function HomeScreen() {
   ];
 
   useEffect(() => {
-    capture('entered_home_screen');
-  }, [capture]);
+    if (isReady) {
+      capture('entered_home_screen');
+    }
+  }, [capture, isReady]);
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

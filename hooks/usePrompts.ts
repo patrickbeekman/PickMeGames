@@ -1,19 +1,20 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useState } from 'react';
-import defaultPrompts from '../assets/prompts.json';
+import * as defaultPromptsData from '../assets/prompts.json';
 import { useAnalytics } from './useAnalytics';
+const defaultPrompts: string[] = (defaultPromptsData as any).default || defaultPromptsData;
 
 const PROMPTS_STORAGE_KEY = 'custom_prompts';
 
 export const usePrompts = () => {
-  const [prompts, setPrompts] = useState<string[]>(defaultPrompts);
+  const [prompts, setPrompts] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const { capture } = useAnalytics();
 
-  // Load prompts from storage on mount
+  // Load prompts from storage on mount - FIX: Remove prompts from useEffect deps
   useEffect(() => {
     loadPrompts();
-  }, []);
+  }, []); // Remove defaultPrompts dependency to prevent loops
 
   const loadPrompts = async () => {
     try {
@@ -21,9 +22,19 @@ export const usePrompts = () => {
       if (stored) {
         const customPrompts = JSON.parse(stored);
         setPrompts([...defaultPrompts, ...customPrompts]);
+      } else {
+        // Only set if different to prevent unnecessary re-renders
+        setPrompts(prev => {
+          if (prev.length === 0) {
+            return defaultPrompts;
+          }
+          return prev;
+        });
       }
     } catch (error) {
       console.log('Error loading prompts:', error);
+      // Fallback to defaults on error
+      setPrompts(defaultPrompts);
     } finally {
       setLoading(false);
     }
@@ -39,16 +50,17 @@ export const usePrompts = () => {
 
   const addPrompt = useCallback(async (newPrompt: string) => {
     const trimmed = newPrompt.trim();
-    if (!trimmed || prompts.includes(trimmed)) return false;
+    if (!trimmed) return false;
+    
+    // Check against current prompts to prevent duplicates
+    if (prompts.includes(trimmed)) return false;
 
     const updatedPrompts = [...prompts, trimmed];
     setPrompts(updatedPrompts);
     
-    // Save only custom prompts (exclude defaults)
     const customPrompts = updatedPrompts.slice(defaultPrompts.length);
     await saveCustomPrompts(customPrompts);
     
-    // Log to analytics
     capture('prompt_added', {
       prompt: trimmed,
       totalPrompts: updatedPrompts.length,
@@ -59,17 +71,15 @@ export const usePrompts = () => {
   }, [prompts, capture]);
 
   const removePrompt = useCallback(async (index: number) => {
-    if (index < defaultPrompts.length) return false; // Can't remove default prompts
+    if (index < defaultPrompts.length) return false;
     
     const promptToRemove = prompts[index];
     const updatedPrompts = prompts.filter((_, i) => i !== index);
     setPrompts(updatedPrompts);
     
-    // Save only custom prompts
     const customPrompts = updatedPrompts.slice(defaultPrompts.length);
     await saveCustomPrompts(customPrompts);
     
-    // Log to analytics
     capture('prompt_removed', {
       prompt: promptToRemove,
       totalPrompts: updatedPrompts.length,
@@ -86,7 +96,7 @@ export const usePrompts = () => {
     capture('prompts_reset_to_defaults', {
       totalPrompts: defaultPrompts.length,
     });
-  }, [capture]);
+  }, [capture]); // Remove defaultPrompts dependency
 
   const getCustomPrompts = useCallback(() => {
     return prompts.slice(defaultPrompts.length);

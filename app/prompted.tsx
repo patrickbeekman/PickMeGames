@@ -10,7 +10,7 @@ import { usePrompts } from '../hooks/usePrompts';
 
 export default function PromptSelector() {
   const navigation = useNavigation();
-  const { capture } = useAnalytics();
+  const { capture, isReady } = useAnalytics();
   const { getFilteredPrompts, loading } = usePrompts();
   const [filteredPrompts, setFilteredPrompts] = useState<string[]>([]);
   const [usedPrompts, setUsedPrompts] = useState<Set<number>>(new Set());
@@ -18,23 +18,40 @@ export default function PromptSelector() {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  // Load filtered prompts when component mounts or when returning from settings
+  // Load filtered prompts when component mounts or when returning from settings - FIX: Add loading guard
   useEffect(() => {
+    let isMounted = true;
+
     const loadFilteredPrompts = async () => {
-      const filtered = await getFilteredPrompts();
-      setFilteredPrompts(filtered);
-      setUsedPrompts(new Set());
-      if (filtered.length > 0) {
-        setCurrentIndex(Math.floor(Math.random() * filtered.length));
+      if (loading) return; // Don't load if still loading
+      
+      try {
+        const filtered = await getFilteredPrompts();
+        if (!isMounted) return;
+        
+        setFilteredPrompts(filtered);
+        setUsedPrompts(new Set());
+        if (filtered.length > 0) {
+          setCurrentIndex(Math.floor(Math.random() * filtered.length));
+        }
+      } catch (error) {
+        console.log('Error loading filtered prompts:', error);
       }
     };
     
     loadFilteredPrompts();
     
-    // Listen for focus events to reload when returning from settings
-    const unsubscribe = navigation.addListener('focus', loadFilteredPrompts);
-    return unsubscribe;
-  }, [getFilteredPrompts, navigation]);
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (!loading) {
+        loadFilteredPrompts();
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [getFilteredPrompts, navigation, loading]); // Add loading dependency
 
   useEffect(() => {
     navigation.setOptions({
@@ -50,8 +67,11 @@ export default function PromptSelector() {
   }, [navigation]);
 
   useEffect(() => {
-    capture('prompt_selected');
-  }, [capture]);
+    // Only capture once when component mounts and prompts are loaded
+    if (isReady && !loading && filteredPrompts.length > 0) {
+      capture('enter_prompt_selector');
+    }
+  }, [capture, isReady, loading, filteredPrompts.length]);
 
   const nextPrompt = () => {
     if (filteredPrompts.length === 0) return;

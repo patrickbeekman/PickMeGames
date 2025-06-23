@@ -20,7 +20,7 @@ const ARROW_LENGTH = SPINNER_SIZE / 2 - 10;
 
 const TwisterSpinner = () => {
   const navigation = useNavigation();
-  const { capture } = useAnalytics();
+  const { capture, isReady } = useAnalytics();
   const rotation = useRef(new Animated.Value(0)).current;
   const [spinning, setSpinning] = useState(false);
   const [baseRotation, setBaseRotation] = useState(0);
@@ -42,8 +42,10 @@ const TwisterSpinner = () => {
   }, [navigation]);
 
   useEffect(() => {
-    capture('entered_spinner');
-  }, [capture]);
+    if (isReady) {
+      capture('entered_spinner');
+    }
+  }, [capture, isReady]);
 
   useEffect(() => {
     isMounted.current = true;
