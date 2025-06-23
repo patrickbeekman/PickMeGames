@@ -34,9 +34,7 @@ export const useAnalytics = () => {
     };
 
     // Only start checking if not already ready
-    if (!isReady) {
-      timeoutId = setTimeout(checkReady, 500);
-    }
+    timeoutId = setTimeout(checkReady, 500);
 
     return () => {
       isMounted = false;

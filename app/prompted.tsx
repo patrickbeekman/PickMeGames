@@ -21,14 +21,11 @@ export default function PromptSelector() {
   // Load filtered prompts when component mounts or when returning from settings - FIX: Add loading guard
   useEffect(() => {
     let isMounted = true;
-
     const loadFilteredPrompts = async () => {
-      if (loading) return; // Don't load if still loading
-      
+      if (loading) return;
       try {
         const filtered = await getFilteredPrompts();
         if (!isMounted) return;
-        
         setFilteredPrompts(filtered);
         setUsedPrompts(new Set());
         if (filtered.length > 0) {
@@ -38,20 +35,17 @@ export default function PromptSelector() {
         console.log('Error loading filtered prompts:', error);
       }
     };
-    
     loadFilteredPrompts();
-    
     const unsubscribe = navigation.addListener('focus', () => {
       if (!loading) {
         loadFilteredPrompts();
       }
     });
-
     return () => {
       isMounted = false;
       unsubscribe();
     };
-  }, [getFilteredPrompts, navigation, loading]); // Add loading dependency
+  }, [navigation, loading]); // getFilteredPrompts is stable, so not needed in deps
 
   useEffect(() => {
     navigation.setOptions({

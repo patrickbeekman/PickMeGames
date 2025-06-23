@@ -18,34 +18,39 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
   const [postHogReady, setPostHogReady] = useState(false);
-  
+
   const { POSTHOG_API_KEY, POSTHOG_HOST } = Constants.expoConfig?.extra || {};
-  
+
   // Stricter validation for PostHog - ensure both values exist and are valid strings
-  const hasValidPostHog = 
-    Platform.OS !== 'web' && 
-    POSTHOG_API_KEY && 
-    POSTHOG_HOST && 
-    typeof POSTHOG_API_KEY === 'string' && 
+  const hasValidPostHog =
+    Platform.OS !== 'web' &&
+    POSTHOG_API_KEY &&
+    POSTHOG_HOST &&
+    typeof POSTHOG_API_KEY === 'string' &&
     typeof POSTHOG_HOST === 'string' &&
-    POSTHOG_API_KEY.trim().length > 0 && 
+    POSTHOG_API_KEY.trim().length > 0 &&
     POSTHOG_HOST.trim().length > 0;
 
-  // Give PostHog time to initialize
+  // Give PostHog time to initialize (safe, only runs on mount or when hasValidPostHog changes)
   useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined;
     if (hasValidPostHog) {
-      const timer = setTimeout(() => setPostHogReady(true), 1000);
-      return () => clearTimeout(timer);
+      timer = setTimeout(() => setPostHogReady(true), 1000);
     } else {
       setPostHogReady(true);
     }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [hasValidPostHog]);
 
   if (!loaded || (hasValidPostHog && !postHogReady)) {
     return null;
   }
 
-  const AppContent = () => (
+  // All hooks above this line, no hooks in conditionals below
+
+  const AppContent = (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <TamaguiProvider config={config}>
         <Stack
@@ -78,27 +83,21 @@ export default function RootLayout() {
 
   // Only use PostHogProvider if we have valid credentials
   if (hasValidPostHog) {
-    try {
-      return (
-        <PostHogProvider 
-          apiKey={POSTHOG_API_KEY}
-          options={{ 
-            host: POSTHOG_HOST,
-            captureMode: 'form',
-            flushAt: 20,
-            flushInterval: 30000,
-          }}
-        >
-          <AppContent />
-        </PostHogProvider>
-      );
-    } catch (error) {
-      // If PostHog fails to initialize, just render the app without analytics
-      console.log('PostHog failed to initialize, continuing without analytics:', error);
-      return <AppContent />;
-    }
+    return (
+      <PostHogProvider 
+        apiKey={POSTHOG_API_KEY}
+        options={{ 
+          host: POSTHOG_HOST,
+          captureMode: 'form',
+          flushAt: 20,
+          flushInterval: 30000,
+        }}
+      >
+        {AppContent}
+      </PostHogProvider>
+    );
   }
 
   // Render app without PostHog if credentials are missing/invalid
-  return <AppContent />;
+  return AppContent;
 }

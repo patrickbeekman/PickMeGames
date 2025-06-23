@@ -24,7 +24,8 @@ export default {
           resizeMode: "contain",
           backgroundColor: "#F3E889"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     splash: {
       image: "./assets/images/pickmelogo.png",
@@ -36,6 +37,13 @@ export default {
       adaptiveIcon: {
         foregroundImage: "./assets/images/pickmelogo.png",
         backgroundColor: "#F3E889"
+      }
+    },
+    ios: {
+      bundleIdentifier: "com.pattar.readyplayerone",
+      supportsTablet: true,
+      infoPlist: {
+        ITSAppUsesNonExemptEncryption: false
       }
     },
     web: {
