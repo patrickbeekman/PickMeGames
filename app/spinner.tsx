@@ -118,12 +118,12 @@ const TwisterSpinner = () => {
           alignItems="center"
           zIndex={10}
         >
-          <Text fontSize={32} marginBottom={8}>🎯📱</Text>
+          <Text fontSize={32} marginBottom={8}>🎯</Text>
           <Text fontSize={18} fontWeight="600" color="#333" textAlign="center" marginBottom={8}>
-            Classic Spinner Challenge!
+            Classic Spinner!
           </Text>
           <Text fontSize={14} color="#666" textAlign="center" maxWidth={280} lineHeight={20}>
-            Place your phone in the center of your group so everyone is equally distant from the spinner! 🎯
+            Place your phone in the center of your group so everyone is equidistant from the spinner!
           </Text>
         </YStack>
       }

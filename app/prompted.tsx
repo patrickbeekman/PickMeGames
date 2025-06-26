@@ -148,30 +148,6 @@ export default function PromptSelector() {
         style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
       />
 
-      {/* Settings Button - positioned in top right */}
-      <Link href="/prompt-settings" asChild>
-        <Button
-          position="absolute"
-          top={10}
-          right={20}
-          backgroundColor="rgba(255,255,255,0.9)"
-          borderRadius={15}
-          width={60}
-          height={60}
-          pressStyle={{ scale: 0.95, backgroundColor: "rgba(255,255,255,1)" }}
-          shadowColor="#000"
-          shadowOpacity={0.15}
-          shadowOffset={{ width: 0, height: 4 }}
-          shadowRadius={8}
-          elevation={4}
-          borderWidth={2}
-          borderColor="#4CAF50"
-          zIndex={20}
-        >
-          <Text fontSize={20}>⚙️</Text>
-        </Button>
-      </Link>
-
       {/* Header with emojis */}
       <YStack alignItems="center" marginBottom={40}>
         <Text fontSize={40} marginBottom={16}>✨💭✨</Text>
@@ -179,7 +155,8 @@ export default function PromptSelector() {
           Decision Prompt Challenge!
         </Text>
         <Text fontSize={14} color="#666" textAlign="center" maxWidth={300}>
-          Get a random prompt to help make your decision!
+          Get a random prompt to help make your decision! 
+          Tap "New Prompt" for another idea.
         </Text>
       </YStack>
 
@@ -213,6 +190,35 @@ export default function PromptSelector() {
         </YStack>
       </Animated.View>
 
+      {/* Call to action for custom prompts */}
+      <YStack alignItems="center" marginTop={12} marginBottom={12}>
+        <Link href="/prompt-settings" asChild>
+          <Button
+            backgroundColor="#FFF3E0"
+            borderRadius={28}
+            paddingHorizontal={32}
+            paddingVertical={12}
+            marginTop={8}
+            borderWidth={2}
+            borderColor="#FF9800"
+            pressStyle={{ scale: 0.97, backgroundColor: "#FFE0B2" }}
+            size="$4"
+            elevation={4}
+            shadowColor="#FF9800"
+            shadowOpacity={0.15}
+            shadowOffset={{ width: 0, height: 4 }}
+            shadowRadius={10}
+          >
+            <Text fontSize={15} color="#FF9800" fontWeight="bold">
+              ➕ Add Custom Prompts
+            </Text>
+          </Button>
+        </Link>
+        <Text fontSize={12} color="#888" marginTop={6} textAlign="center" maxWidth={260}>
+          Manage your prompts anytime from this page.
+        </Text>
+      </YStack>
+
       {/* Enhanced Button */}
       <Button
         backgroundColor="#4CAF50"
@@ -227,6 +233,7 @@ export default function PromptSelector() {
         elevation={8}
         onPress={nextPrompt}
         marginTop={20}
+        accessibilityLabel="Get a new random prompt"
       >
         <Text fontSize={20} color="white" fontWeight="bold">
           🎲 New Prompt

@@ -230,7 +230,7 @@ export default function SpinnerSelector() {
       </Animated.View>
         <Slider
           minimumValue={2}
-          maximumValue={15}
+          maximumValue={20}
           step={1}
           value={playerCount}
           onValueChange={setPlayerCount}

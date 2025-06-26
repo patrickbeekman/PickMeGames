@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { useAnalytics } from '../hooks/useAnalytics';
+import Slider from '@react-native-community/slider';
 
 export default function NumberGuesser() {
   const navigation = useNavigation();
@@ -21,6 +22,10 @@ export default function NumberGuesser() {
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const bounceAnim = useRef(new Animated.Value(0)).current;
+
+  const RANGE_OPTIONS = [10, 100, 1000, 10000, 100000, 1000000];
+  const [rangeIndex, setRangeIndex] = useState(1); // default to 100
+  const maxNumber = RANGE_OPTIONS[rangeIndex];
 
   useEffect(() => {
     navigation.setOptions({
@@ -71,6 +76,7 @@ export default function NumberGuesser() {
 
     capture('number_revealed', {
       randomNumber,
+      maxNumber,
     });
   };
 
@@ -94,15 +100,15 @@ export default function NumberGuesser() {
       pulseAnimation.start();
 
       const interval = setInterval(() => {
-        setAnimatedNumber(String(Math.floor(Math.random() * 100) + 1));
+        setAnimatedNumber(String(Math.floor(Math.random() * maxNumber) + 1));
       }, 50);
 
       const timeout = setTimeout(() => {
         clearInterval(interval);
         pulseAnimation.stop();
         pulseAnim.setValue(1);
-        
-        const final = Math.floor(Math.random() * 100) + 1;
+
+        const final = Math.floor(Math.random() * maxNumber) + 1;
         setRandomNumber(final);
         setAnimatedNumber(String(final));
         setIsRevealing(false);
@@ -136,7 +142,7 @@ export default function NumberGuesser() {
         pulseAnimation.stop();
       };
     }
-  }, [isRevealing]);
+  }, [isRevealing, maxNumber]);
 
   const spin = rotateAnim.interpolate({
     inputRange: [0, 1],
@@ -155,6 +161,58 @@ export default function NumberGuesser() {
         style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
       />
       
+      {/* Range slider */}
+      <YStack
+        alignItems="center"
+        backgroundColor="rgba(255,255,255,0.95)"
+        borderRadius={16}
+        padding={18}
+        marginBottom={24}
+        shadowColor="#000"
+        shadowOpacity={0.08}
+        shadowOffset={{ width: 0, height: 2 }}
+        shadowRadius={6}
+        width="100%"
+        maxWidth={340}
+      >
+        <Text fontSize={16} fontWeight="600" color="#333" marginBottom={8}>
+          Max Number: <Text fontWeight="bold" color="#4CAF50">{maxNumber.toLocaleString()}</Text>
+        </Text>
+        <Slider
+          minimumValue={0}
+          maximumValue={RANGE_OPTIONS.length - 1}
+          step={1}
+          value={rangeIndex}
+          onValueChange={val => setRangeIndex(Math.round(val))}
+          disabled={isRevealing}
+          style={{ width: 220, height: 40 }}
+          minimumTrackTintColor="#4CAF50"
+          maximumTrackTintColor="#E0E0E0"
+          thumbTintColor="#4CAF50"
+        />
+        <YStack flexDirection="row" justifyContent="space-between" width={220} marginTop={4}>
+          {RANGE_OPTIONS.map((val, idx) => (
+            <Text
+              key={val}
+              fontSize={10}
+              color={idx === rangeIndex ? "#4CAF50" : "#999"}
+              fontWeight={idx === rangeIndex ? "bold" : "normal"}
+              style={{ width: 36, textAlign: 'center' }}
+            >
+              {val === 1000000
+                ? '1M'
+                : val === 100000
+                  ? '100k'
+                  : val === 10000
+                    ? '10k'
+                    : val === 1000
+                      ? '1k'
+                      : val}
+            </Text>
+          ))}
+        </YStack>
+      </YStack>
+
       {/* Fun header with emoji */}
       <YStack alignItems="center" marginBottom={40}>
         <Text fontSize={40} marginBottom={16}>✨🎲✨</Text>
@@ -162,7 +220,7 @@ export default function NumberGuesser() {
           Lucky Number Challenge!
         </Text>
         <Text fontSize={16} fontWeight="500" color="#666" textAlign="center" maxWidth={300}>
-          Everyone pick a number from 1 to 100.
+          Everyone pick a number from 1 to {maxNumber.toLocaleString()}.
           Closest guess without going over wins!
         </Text>
       </YStack>
@@ -193,11 +251,34 @@ export default function NumberGuesser() {
           borderWidth={4}
           borderColor={randomNumber !== null ? "#4CAF50" : "#FFD700"}
         >
+          {/*
+            Dynamically scale font size based on number length.
+            - 7+ digits: 32
+            - 6 digits: 40
+            - 5 digits: 48
+            - 4 digits: 56
+            - else: 72/56
+          */}
           <Text 
-            fontSize={randomNumber !== null ? 56 : 72} 
+            fontSize={
+              (() => {
+                const numStr = isRevealing
+                  ? animatedNumber
+                  : randomNumber !== null
+                    ? String(randomNumber)
+                    : '?';
+                if (numStr.length >= 7) return 32;
+                if (numStr.length === 6) return 40;
+                if (numStr.length === 5) return 48;
+                if (numStr.length === 4) return 56;
+                return randomNumber !== null ? 56 : 72;
+              })()
+            }
             fontWeight="bold" 
             color={randomNumber !== null ? "#4CAF50" : "#333"} 
             textAlign="center"
+            numberOfLines={1}
+            adjustsFontSizeToFit
           >
             {isRevealing ? animatedNumber : randomNumber !== null ? randomNumber : '?'}
           </Text>

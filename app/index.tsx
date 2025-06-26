@@ -59,9 +59,18 @@ export default function HomeScreen() {
             color="#555" 
             fontWeight="bold" 
             textAlign="center" 
-            marginBottom={32}
+            marginBottom={12}
           >
-            Choose your picker and let fate decide!
+            Welcome to Pick Me!
+          </Text>
+          <Text
+            fontSize={16}
+            color="#666"
+            textAlign="center"
+            marginBottom={20}
+            maxWidth={320}
+          >
+            Pick a mode below and follow the instructions to let fate decide who goes first.
           </Text>
 
           {/* Game Options */}
