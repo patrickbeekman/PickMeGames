@@ -1,3 +1,4 @@
+import Slider from '@react-native-community/slider';
 import { Button } from '@tamagui/button';
 import { Text } from '@tamagui/core';
 import { YStack } from '@tamagui/stacks';
@@ -7,7 +8,6 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { useAnalytics } from '../hooks/useAnalytics';
-import Slider from '@react-native-community/slider';
 
 export default function NumberGuesser() {
   const navigation = useNavigation();
@@ -32,6 +32,9 @@ export default function NumberGuesser() {
       headerTitle: 'Number Guesser',
       headerStyle: {
         backgroundColor: '#F3E889',
+        borderBottomWidth: 0,
+        shadowOpacity: 0,
+        elevation: 0,
       },
       headerTintColor: '#333',
       headerTitleStyle: {

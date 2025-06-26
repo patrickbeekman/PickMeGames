@@ -33,6 +33,9 @@ const TwisterSpinner = () => {
       headerTitle: 'Spinner',
       headerStyle: {
         backgroundColor: '#F3E889',
+        borderBottomWidth: 0,
+        shadowOpacity: 0,
+        elevation: 0,
       },
       headerTintColor: '#333',
       headerTitleStyle: {

@@ -65,6 +65,7 @@ export default function RootLayout() {
             contentStyle: {
               backgroundColor: '#F3E889',
             },
+            headerShadowVisible: false, // <-- Add this line to remove the bottom border/shadow
           }}>
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="prompted" />

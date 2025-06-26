@@ -35,6 +35,9 @@ export default function FingerTapScreen() {
       headerTitle: 'Finger Tap',
       headerStyle: {
         backgroundColor: '#F3E889',
+        borderBottomWidth: 0,
+        shadowOpacity: 0,
+        elevation: 0,
       },
       headerTintColor: '#333',
       headerTitleStyle: {
