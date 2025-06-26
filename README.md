@@ -1,7 +1,8 @@
-# 🎲 Pick Me – The Ultimate Player Picker App!
+# 🎲 Pick Me – The Fun Way to Choose Who Goes First!
 
-Welcome to **Pick Me**, the fun, fast, and fair way to pick who goes first! Whether you’re starting a board game, party game, or just need to settle who’s up, Pick Me makes the process exciting and interactive for everyone.
+Make game nights, parties, and group decisions fun and fair with Pick Me! Whether you need to choose who goes first on board game night or settle any group activity, Pick Me takes the pressure off and lets fate decide. No more arguments, just tap, spin, or prompt and let the app do the work!
 
+Need help deciding who starts? Let Pick Me choose for you!
 ---
 
 ## 🚀 Why Pick Me?
