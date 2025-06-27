@@ -102,8 +102,7 @@ export default function HomeScreen() {
         </YStack>
         
         {/* Bottom Buttons */}
-        <XStack justifyContent="center" marginTop={12} paddingHorizontal={20} gap={10} paddingBottom={20}>
-          {/* Buy Me A Coffee button removed to comply with App Store guidelines */}
+        <XStack justifyContent="center" marginTop={12} paddingHorizontal={100} gap={10} paddingBottom={20}>
           <Link href="/about" asChild>
             <Button
               flex={1}

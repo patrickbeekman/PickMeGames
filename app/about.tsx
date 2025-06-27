@@ -16,6 +16,11 @@ export default function AboutScreen() {
     Linking.openURL('https://airtable.com/appPI2noUjKkmeNWM/pagrjCubfIJqODIOQ/form');
   };
 
+  const openCoffee = () => {
+    // Always open in Safari/external browser
+    Linking.openURL('https://www.buymeacoffee.com/pickmegames');
+  };
+
   return (
     <YStack flex={1} backgroundColor="#F3E889" padding={24}>
       <LinearGradient
@@ -151,7 +156,23 @@ export default function AboutScreen() {
               <Text color="white" fontSize={16}>→</Text>
             </XStack>
           </Button>
-          {/* Buy Me A Coffee button removed to comply with App Store guidelines */}
+
+          <Button
+            backgroundColor="#FFD700"
+            borderRadius={8}
+            pressStyle={{ scale: 0.95, backgroundColor: "#e6c200" }}
+            onPress={openCoffee}
+            accessibilityLabel="Support the developer (opens in Safari)"
+          >
+            <XStack alignItems="center" space={8}>
+              <Text fontSize={18}>☕</Text>
+              <Text color="#333" fontWeight="600" fontSize={16}>Buy me a coffee</Text>
+              <Text color="#888" fontSize={11} marginTop={-2} textAlign="center">
+                  (voluntary)
+                </Text>
+              <Text color="#333" fontSize={16}>→</Text>
+            </XStack>
+          </Button>
         </YStack>
 
         {/* Footer */}
