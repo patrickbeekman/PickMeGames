@@ -5,7 +5,7 @@ import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useNavigation } from 'expo-router';
 import { useEffect, useLayoutEffect } from 'react';
-import { Linking, StatusBar } from 'react-native';
+import { StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAnalytics } from '../hooks/useAnalytics';
 
@@ -103,22 +103,7 @@ export default function HomeScreen() {
         
         {/* Bottom Buttons */}
         <XStack justifyContent="center" marginTop={12} paddingHorizontal={20} gap={10} paddingBottom={20}>
-          <Button
-            flex={1}
-            backgroundColor="#FFD700"
-            borderRadius={12}
-            padding={5}
-            pressStyle={{ scale: 0.95, backgroundColor: "#e6c200" }}
-            onPress={() => Linking.openURL('https://www.buymeacoffee.com/pickmegames')}
-          >
-            <XStack alignItems="center" justifyContent="center" space={6}>
-              <Text fontSize={16}>☕</Text>
-              <Text color="#333" fontWeight="bold" fontSize={14}>
-                Buy Me A Coffee
-              </Text>
-            </XStack>
-          </Button>
-          
+          {/* Buy Me A Coffee button removed to comply with App Store guidelines */}
           <Link href="/about" asChild>
             <Button
               flex={1}
