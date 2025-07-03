@@ -61,7 +61,7 @@ export default function HomeScreen() {
             textAlign="center" 
             marginBottom={12}
           >
-            Welcome to Pick Me!
+            Who goes first?
           </Text>
           <Text
             fontSize={16}
