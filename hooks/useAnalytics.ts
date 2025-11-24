@@ -63,6 +63,8 @@ export const useAnalytics = () => {
 
       posthog.capture(event, properties);
     } catch (error) {
+      // Analytics errors are non-critical and should not interrupt user experience
+      // Log for debugging but fail silently to maintain smooth UX
       console.log('Analytics capture failed:', error);
     }
   }, [posthog, isReady]);
@@ -86,6 +88,8 @@ export const useAnalytics = () => {
 
       posthog.identify(userId, properties);
     } catch (error) {
+      // Analytics errors are non-critical and should not interrupt user experience
+      // Log for debugging but fail silently to maintain smooth UX
       console.log('Analytics identify failed:', error);
     }
   }, [posthog, isReady]);

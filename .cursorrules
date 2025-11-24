@@ -1,0 +1,116 @@
+# Cursor Rules for ReadyPlayerOne (PickMe Games)
+
+## Project Overview
+This is a React Native/Expo app built to help friends decide who goes first on board game night. The app features multiple "game modes" for random selection.
+
+## Tech Stack
+- **Framework**: React Native with Expo (SDK 53)
+- **Navigation**: Expo Router (file-based routing)
+- **UI Library**: Tamagui
+- **Analytics**: PostHog
+- **State Management**: React hooks + AsyncStorage
+- **Styling**: Tamagui components + StyleSheet for complex layouts
+
+## Code Style Guidelines
+
+### General
+- Use TypeScript for all new files
+- Prefer functional components with hooks
+- Use Tamagui components (YStack, XStack, Text, Button) for UI when possible
+- Use StyleSheet for complex positioning (especially for arrows, animations)
+- Follow existing patterns in the codebase
+
+### File Structure
+- App screens: `app/*.tsx` (file-based routing)
+- Components: `components/*.tsx`
+- Hooks: `hooks/*.ts`
+- Constants: `constants/*.ts`
+- Assets: `assets/`
+
+### Naming Conventions
+- Components: PascalCase (e.g., `FingerTapScreen`)
+- Hooks: camelCase starting with "use" (e.g., `useAnalytics`)
+- Files: kebab-case for routes, PascalCase for components
+
+### Styling
+- Primary color: `#4CAF50` (green)
+- Background gradient: `['#F3E889', '#FFE082', '#FFF9C4']` (yellow gradient)
+- Use Tamagui props for simple styling (padding, margin, backgroundColor)
+- Use StyleSheet for:
+  - Complex positioning (absolute positioning, transforms)
+  - Platform-specific styles (especially Android)
+  - Animation-related styles
+
+### Platform Considerations
+- **Android**: Pay special attention to:
+  - Arrow alignment (use `alignItems: 'center'` and proper positioning)
+  - Elevation vs shadow (use both for cross-platform)
+  - Border rendering (may differ from iOS)
+- **iOS**: Generally handles shadows and borders well
+- Test on both platforms when making UI changes
+
+### Analytics
+- Use `useAnalytics` hook for all events
+- Capture meaningful user actions (screen views, button presses, game completions)
+- Include relevant context in event properties
+
+### Animation
+- Use `Animated` API from React Native
+- Prefer `useNativeDriver: true` when possible
+- Clean up animations on unmount
+- Use `useRef` for animation values
+
+### Error Handling
+- Use try-catch for async operations
+- Log errors with `console.log` (not console.error in production)
+- Provide user-friendly error messages via Alert when appropriate
+
+### Performance
+- Memoize callbacks with `useCallback` when passed as props
+- Use `useMemo` for expensive computations
+- Avoid unnecessary re-renders
+- Clean up timers, listeners, and animations on unmount
+
+## Common Patterns
+
+### Screen Setup
+```typescript
+export default function MyScreen() {
+  const navigation = useNavigation();
+  const { capture, isReady } = useAnalytics();
+  
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: 'My Screen',
+      headerStyle: { backgroundColor: '#F3E889' },
+      // ...
+    });
+  }, [navigation]);
+  
+  useEffect(() => {
+    if (isReady) {
+      capture('entered_my_screen');
+    }
+  }, [capture, isReady]);
+  
+  // Component logic...
+}
+```
+
+### Arrow Positioning (for spinners)
+- Use absolute positioning with proper centering
+- For Android alignment, ensure `alignItems: 'center'` on container
+- Position arrow relative to spinner center, not top-left
+- Use border triangles for arrow shape (CSS trick)
+
+## Known Issues & Fixes
+- Android arrow alignment: Use centered positioning with proper transform origin
+- Animation cleanup: Always stop animations on unmount
+- PostHog initialization: Check for valid credentials before using
+
+## Testing
+- Test on both iOS and Android
+- Verify animations work smoothly
+- Check that analytics events fire correctly
+- Ensure proper cleanup on navigation
+

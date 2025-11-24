@@ -10,6 +10,7 @@ web-build/
 expo-env.d.ts
 ios/
 android/
+.idea/
 
 # Native
 .kotlin/
@@ -20,6 +21,9 @@ android/
 *.key
 *.mobileprovision
 *.ipa
+*.aab
+*.apk
+
 
 # Metro
 .metro-health-check*

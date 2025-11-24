@@ -70,21 +70,44 @@ export default function PromptSelector() {
     }
   }, [capture, isReady, loading, filteredPrompts.length]);
 
+  // Store animation refs for cleanup
+  const animationRefs = useRef<Animated.CompositeAnimation[]>([]);
+
+  // Cleanup animations on unmount
+  useEffect(() => {
+    return () => {
+      animationRefs.current.forEach((anim) => {
+        anim.stop();
+      });
+      animationRefs.current = [];
+    };
+  }, []);
+
   const nextPrompt = () => {
     if (filteredPrompts.length === 0) return;
+    
+    // Stop any running animations
+    animationRefs.current.forEach((anim) => {
+      anim.stop();
+    });
+    animationRefs.current = [];
+    
     // Animate out
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 0.8,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
+    const fadeOutAnim = Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 200,
+      useNativeDriver: true,
+    });
+    const scaleOutAnim = Animated.timing(scaleAnim, {
+      toValue: 0.8,
+      duration: 200,
+      useNativeDriver: true,
+    });
+    
+    const outAnimation = Animated.parallel([fadeOutAnim, scaleOutAnim]);
+    animationRefs.current.push(outAnimation);
+    
+    outAnimation.start(() => {
       // Mark current prompt as used
       const newUsedPrompts = new Set(usedPrompts);
       newUsedPrompts.add(currentIndex);
@@ -107,20 +130,25 @@ export default function PromptSelector() {
       setCurrentIndex(next);
 
       // Animate in
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 300,
-          easing: Easing.bounce,
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 1,
-          duration: 300,
-          easing: Easing.bounce,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      const fadeInAnim = Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        easing: Easing.bounce,
+        useNativeDriver: true,
+      });
+      const scaleInAnim = Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 300,
+        easing: Easing.bounce,
+        useNativeDriver: true,
+      });
+      
+      const inAnimation = Animated.parallel([fadeInAnim, scaleInAnim]);
+      animationRefs.current.push(inAnimation);
+      inAnimation.start(() => {
+        // Remove completed animations from refs
+        animationRefs.current = animationRefs.current.filter(anim => anim !== inAnimation);
+      });
     });
 
     capture('prompt_changed', {

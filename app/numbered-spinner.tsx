@@ -165,12 +165,6 @@ export default function SpinnerSelector() {
         </Text>
       </YStack>
 
-      {/* Enhanced Arrow Pointer */}
-      <YStack style={styles.arrowContainer}>
-        <YStack style={styles.arrowShadow} />
-        <YStack style={styles.arrow} />
-      </YStack>
-
       {/* Enhanced Spinner Container */}
       <YStack
         alignItems="center"
@@ -182,7 +176,13 @@ export default function SpinnerSelector() {
         shadowOpacity={0.15}
         shadowOffset={{ width: 0, height: 8 }}
         shadowRadius={16}
+        position="relative"
       >
+        {/* Enhanced Arrow Pointer - positioned above spinner */}
+        <YStack style={styles.arrowContainer}>
+          <YStack style={styles.arrowShadow} />
+          <YStack style={styles.arrow} />
+        </YStack>
         <Animated.View style={{ transform: [{ rotate }] }}>
           <Svg width={SPINNER_SIZE} height={SPINNER_SIZE}>
             {renderWheel()}
@@ -268,9 +268,11 @@ export default function SpinnerSelector() {
 const styles = StyleSheet.create({
   arrowContainer: {
     position: 'absolute',
-    top: '17%',
+    top: -30,
+    left: SPINNER_SIZE / 2 - 12, // Center horizontally: half spinner width minus half arrow width (24/2 = 12)
     zIndex: 10,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   arrowShadow: {
     position: 'absolute',

@@ -17,6 +17,8 @@ const { width, height } = Dimensions.get('window');
 const SPINNER_SIZE = width * 0.8;
 const SPINS_PER_TURN = 4; // Number of full spins before stopping
 const ARROW_LENGTH = SPINNER_SIZE / 2 - 10;
+const SPINNER_CENTER_X = width / 2;
+const SPINNER_CENTER_Y = height / 2;
 
 const TwisterSpinner = () => {
   const navigation = useNavigation();
@@ -195,6 +197,8 @@ const styles = StyleSheet.create({
     width: SPINNER_SIZE,
     height: SPINNER_SIZE,
     position: 'absolute',
+    top: SPINNER_CENTER_Y - SPINNER_SIZE / 2,
+    left: SPINNER_CENTER_X - SPINNER_SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -230,8 +234,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: SPINNER_SIZE,
     height: SPINNER_SIZE,
+    top: SPINNER_CENTER_Y - SPINNER_SIZE / 2,
+    left: SPINNER_CENTER_X - SPINNER_SIZE / 2,
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
   },
   arrowShadow: {
     width: 0,
@@ -243,7 +249,8 @@ const styles = StyleSheet.create({
     borderRightColor: 'transparent',
     borderBottomColor: 'rgba(0,0,0,0.2)',
     position: 'absolute',
-    top: 2,
+    top: SPINNER_SIZE / 2 - ARROW_LENGTH - 2,
+    left: SPINNER_SIZE / 2 - 12,
   },
   arrow: {
     width: 0,
@@ -254,6 +261,9 @@ const styles = StyleSheet.create({
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
     borderBottomColor: '#4CAF50',
+    position: 'absolute',
+    top: SPINNER_SIZE / 2 - ARROW_LENGTH,
+    left: SPINNER_SIZE / 2 - 10,
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowOffset: { width: 0, height: 2 },

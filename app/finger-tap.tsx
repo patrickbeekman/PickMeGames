@@ -8,12 +8,26 @@ import {
   Animated,
   Dimensions,
   Easing,
-  StyleSheet
+  StyleSheet,
+  NativeTouchEvent,
+  GestureResponderEvent,
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
 import { useAnalytics } from '../hooks/useAnalytics';
 
+// TypeScript interfaces for touch events
+interface TouchData {
+  identifier: number;
+  locationX: number;
+  locationY: number;
+}
+
+interface TouchEventData {
+  nativeEvent: {
+    touches: NativeTouchEvent[];
+  };
+}
 
 const COUNTDOWN_SECONDS = 4;
 const PARTICLE_COUNT = 24;
@@ -82,18 +96,24 @@ export default function FingerTapScreen() {
         break;
     }
   
-    Animated.timing(backgroundColor, {
+    const animation = Animated.timing(backgroundColor, {
       toValue,
       duration: 750,
       easing: Easing.inOut(Easing.ease),
       useNativeDriver: false,
-    }).start();
+    });
+    
+    animation.start();
+    
+    return () => {
+      animation.stop();
+    };
   }, [phase]);
 
-  const onTouchStart = (e: any) => {
+  const onTouchStart = (e: GestureResponderEvent) => {
     if (phase === 'winner' || phase === 'flickering') return;
 
-    const newTouches = e.nativeEvent.touches.map((t: any) => ({
+    const newTouches: TouchData[] = e.nativeEvent.touches.map((t: NativeTouchEvent) => ({
       identifier: t.identifier,
       x: t.locationX,
       y: t.locationY,
@@ -106,11 +126,11 @@ export default function FingerTapScreen() {
     }
   };
 
-  const onTouchMove = (e: any) => {
+  const onTouchMove = (e: GestureResponderEvent) => {
     if (phase === 'winner' || phase === 'flickering') return;
 
     // Update touch positions when fingers move
-    const updatedTouches = e.nativeEvent.touches.map((t: any) => ({
+    const updatedTouches: TouchData[] = e.nativeEvent.touches.map((t: NativeTouchEvent) => ({
       identifier: t.identifier,
       x: t.locationX,
       y: t.locationY,
@@ -118,8 +138,8 @@ export default function FingerTapScreen() {
     setTouches(updatedTouches);
   };
 
-  const onTouchEnd = (e: any) => {
-    const remainingTouches = e.nativeEvent.touches.map((t: any) => ({
+  const onTouchEnd = (e: GestureResponderEvent) => {
+    const remainingTouches: TouchData[] = e.nativeEvent.touches.map((t: NativeTouchEvent) => ({
       identifier: t.identifier,
       x: t.locationX,
       y: t.locationY,
@@ -155,15 +175,30 @@ export default function FingerTapScreen() {
       const dx = Math.cos(angle) * 100;
       const dy = Math.sin(angle) * 100;
       const animated = new Animated.ValueXY({ x, y });
-      Animated.timing(animated, {
+      const particleAnimation = Animated.timing(animated, {
         toValue: { x: x + dx, y: y + dy },
         duration: 600,
         useNativeDriver: false,
-      }).start();
+      });
+      particleAnimation.start();
       return animated;
     });
     setParticles(newParticles);
   };
+
+  // Cleanup particles and animations on unmount
+  useEffect(() => {
+    return () => {
+      // Stop all particle animations
+      if (particles.length > 0) {
+        particles.forEach((particle) => {
+          particle.stopAnimation();
+        });
+      }
+      // Stop background color animation
+      backgroundColor.stopAnimation();
+    };
+  }, [particles]);
 
   const reset = () => {
     setTouches([]);
