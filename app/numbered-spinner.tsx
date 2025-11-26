@@ -1,17 +1,49 @@
 import Slider from '@react-native-community/slider';
-import { Button } from '@tamagui/button';
 import { Text } from '@tamagui/core';
-import { YStack } from '@tamagui/stacks';
+import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Easing, StyleSheet } from 'react-native';
+import { Animated, Dimensions, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
-import { useAnalytics } from '../hooks/useAnalytics';
 import { Design } from '../constants/Design';
+import { useAnalytics } from '../hooks/useAnalytics';
 
-const SPINNER_SIZE = 300;
+// Modern color palette with gradients
+const SEGMENT_COLORS = [
+  ['#FF6B6B', '#FF8E8E'], // Red
+  ['#4ECDC4', '#6EDDD6'], // Teal
+  ['#45B7D1', '#6BC5D8'], // Blue
+  ['#FFA07A', '#FFB896'], // Peach
+  ['#98D8C8', '#B4E4D4'], // Mint
+  ['#F7DC6F', '#F9E79F'], // Yellow
+  ['#BB8FCE', '#D4A5E0'], // Purple
+  ['#85C1E2', '#A8D4F0'], // Sky Blue
+  ['#F1948A', '#F5B7B1'], // Pink
+  ['#82E0AA', '#A9DFBF'], // Green
+  ['#F8C471', '#FAD7A0'], // Orange
+  ['#85C1E9', '#AED6F1'], // Light Blue
+  ['#EC7063', '#F1948A'], // Coral
+  ['#52BE80', '#7DCEA0'], // Emerald
+  ['#F39C12', '#F7DC6F'], // Gold
+  ['#AF7AC5', '#C39BD3'], // Lavender
+  ['#5DADE2', '#85C1E9'], // Light Blue
+  ['#E67E22', '#F39C12'], // Dark Orange
+  ['#1ABC9C', '#52BE80'], // Turquoise
+  ['#E74C3C', '#EC7063'], // Red Orange
+];
+
+// Calculate responsive spinner size
+const getSpinnerSize = () => {
+  const { width, height } = Dimensions.get('window');
+  return Math.min(
+    width * 0.7,
+    height * 0.35,
+    320 // Max size
+  );
+};
+
 const { width, height } = Dimensions.get('window');
 
 export default function SpinnerSelector() {
@@ -22,6 +54,7 @@ export default function SpinnerSelector() {
   const [showConfetti, setShowConfetti] = useState(false);
   const rotation = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const [spinnerSize, setSpinnerSize] = useState(getSpinnerSize());
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -45,6 +78,14 @@ export default function SpinnerSelector() {
       capture('entered_numbered_spinner');
     }
   }, [capture, isReady]);
+
+  // Update spinner size on dimension changes
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener('change', () => {
+      setSpinnerSize(getSpinnerSize());
+    });
+    return () => subscription?.remove();
+  }, []);
 
   const spin = () => {
     if (spinning) return;
@@ -97,7 +138,7 @@ export default function SpinnerSelector() {
 
   const renderWheel = () => {
     const angleStep = 360 / playerCount;
-    const radius = SPINNER_SIZE / 2;
+    const radius = spinnerSize / 2;
     const paths = [];
 
     for (let i = 0; i < playerCount; i++) {
@@ -122,13 +163,17 @@ export default function SpinnerSelector() {
       const labelX = radius + (radius * 0.6) * Math.cos(midAngle);
       const labelY = radius + (radius * 0.6) * Math.sin(midAngle);
 
+      // Use modern color palette
+      const colorIndex = i % SEGMENT_COLORS.length;
+      const colors = SEGMENT_COLORS[colorIndex];
+
       paths.push(
         <G key={i}>
-          <Path d={pathData} fill={`hsl(${(i * 360) / playerCount}, 80%, 60%)`} />
+          <Path d={pathData} fill={colors[0]} />
           <SvgText
             x={labelX}
             y={labelY}
-            fontSize="16"
+            fontSize={spinnerSize > 250 ? 18 : 14}
             fontWeight="bold"
             fill="#fff"
             textAnchor="middle"
@@ -150,107 +195,172 @@ export default function SpinnerSelector() {
   });
 
   return (
-    <YStack flex={1} backgroundColor="#F3E889" alignItems="center" justifyContent="center">
+    <YStack flex={1} backgroundColor={Design.colors.background.light}>
       <LinearGradient
-        colors={['#F3E889', '#FFE082', '#FFF9C4']}
-        style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+        colors={[Design.colors.background.light, Design.colors.background.medium, Design.colors.background.lightest]}
+        locations={[0, 0.5, 1]}
+        style={StyleSheet.absoluteFillObject}
       />
 
-      {/* Header with emojis */}
-      <YStack alignItems="center" marginBottom={30} marginTop={-50}>
-        <Text fontSize={32} marginBottom={8}>🎭🎪</Text>
-        <Text fontSize={18} fontWeight="600" color="#333" textAlign="center">
-          Numbered Spinner Challenge!
-        </Text>
-        <Text fontSize={14} color="#666" textAlign="center" maxWidth={280}>
-          Each player gets a number - let the spinner decide!
-        </Text>
-      </YStack>
-
-      {/* Enhanced Spinner Container */}
-      <YStack
-        alignItems="center"
-        justifyContent="center"
-        backgroundColor="rgba(255,255,255,0.1)"
-        borderRadius={SPINNER_SIZE / 2 + 20}
-        padding={20}
-        shadowColor="#000"
-        shadowOpacity={0.15}
-        shadowOffset={{ width: 0, height: 8 }}
-        shadowRadius={16}
-        position="relative"
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: Design.spacing.lg,
+          paddingTop: Design.spacing.lg,
+          paddingBottom: Design.spacing.xl,
+          alignItems: 'center',
+        }}
+        showsVerticalScrollIndicator={false}
       >
-        {/* Enhanced Arrow Pointer - positioned above spinner */}
-        <YStack style={styles.arrowContainer}>
-          <YStack style={styles.arrowShadow} />
-          <YStack style={styles.arrow} />
-        </YStack>
-        <Animated.View style={{ transform: [{ rotate }] }}>
-          <Svg width={SPINNER_SIZE} height={SPINNER_SIZE}>
-            {renderWheel()}
-          </Svg>
-        </Animated.View>
-      </YStack>
-
-      {/* Enhanced Player Count Slider */}
-      <YStack
-        marginTop={30}
-        alignItems="center"
-        backgroundColor="rgba(255,255,255,0.9)"
-        borderRadius={16}
-        padding={20}
-        width="90%"
-        maxWidth={320}
-        shadowColor="#000"
-        shadowOpacity={0.1}
-        shadowOffset={{ width: 0, height: 4 }}
-        shadowRadius={8}
-      >
-        <Text fontSize={18} fontWeight="600" marginBottom={12} color="#333">
-          👥 Players: {playerCount}
-        </Text>
-              {/* Enhanced Spin Button */}
-      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-        <Button
-          // position="absolute"
-          // bottom={80}
-          alignSelf="center"
-          backgroundColor={spinning ? "#FF9800" : "#4CAF50"}
-          borderRadius={50}
-          paddingHorizontal={40}
-          paddingVertical={5}
-          pressStyle={{ scale: 0.95, backgroundColor: spinning ? "#F57C00" : "#45a049" }}
-          shadowColor="#000"
-          shadowOpacity={0.25}
-          shadowOffset={{ width: 0, height: 8 }}
-          shadowRadius={12}
-          elevation={8}
-          onPress={spin}
-          disabled={spinning}
-        >
-          <Text fontSize={20} color="white" fontWeight="bold">
-            {spinning ? '🌀 Spinning...' : '🎯 SPIN!'}
+        {/* Header Section */}
+        <YStack alignItems="center" marginBottom={Design.spacing.lg}>
+          <Text fontSize={Design.typography.sizes.xxl} marginBottom={Design.spacing.sm}>🎭🎪</Text>
+          <Text 
+            fontSize={Design.typography.sizes.lg} 
+            fontWeight={Design.typography.weights.bold} 
+            color={Design.colors.text.primary} 
+            textAlign="center"
+            marginBottom={Design.spacing.xs}
+          >
+            Numbered Spinner Challenge!
           </Text>
-        </Button>
-      </Animated.View>
-        <Slider
-          minimumValue={2}
-          maximumValue={20}
-          step={1}
-          value={playerCount}
-          onValueChange={setPlayerCount}
-          disabled={spinning}
-          style={{ width: 250, height: 40 }}
-          minimumTrackTintColor="#4CAF50"
-          maximumTrackTintColor="#E0E0E0"
-          // thumbStyle={{ backgroundColor: '#4CAF50', width: 20, height: 20 }}
-        />
-        <Text fontSize={12} color="#666" textAlign="center" marginTop={8}>
-          Slide to adjust the number of players
-        </Text>
-      </YStack>
+          <Text 
+            fontSize={Design.typography.sizes.sm} 
+            color={Design.colors.text.secondary} 
+            textAlign="center" 
+            maxWidth={300}
+          >
+            Each player gets a number - let the spinner decide!
+          </Text>
+        </YStack>
 
+        {/* Spinner Container with Responsive Arrow */}
+        <YStack
+          alignItems="center"
+          justifyContent="center"
+          backgroundColor="rgba(255,255,255,0.15)"
+          borderRadius={(spinnerSize / 2) + Design.spacing.lg}
+          padding={Design.spacing.lg}
+          marginBottom={Design.spacing.xl}
+          {...Design.shadows.lg}
+          style={{ position: 'relative' }}
+        >
+          {/* Responsive Arrow Pointer - centered above spinner */}
+          <View
+            style={[
+              styles.arrowContainer,
+              {
+                top: -28,
+                left: '50%',
+                marginLeft: -12, // Half arrow width (24/2)
+              },
+            ]}
+          >
+            <View style={styles.arrowShadow} />
+            <View style={styles.arrow} />
+          </View>
+          
+          <Animated.View style={{ transform: [{ rotate }] }}>
+            <Svg width={spinnerSize} height={spinnerSize}>
+              {renderWheel()}
+            </Svg>
+          </Animated.View>
+        </YStack>
 
+        {/* Controls Card */}
+        <View
+          style={{
+            width: '100%',
+            maxWidth: 360,
+            backgroundColor: '#FFFFFF',
+            borderRadius: Design.borderRadius.xl,
+            padding: Design.spacing.lg,
+            ...Design.shadows.lg,
+          }}
+        >
+          {/* Player Count Display */}
+          <XStack alignItems="center" justifyContent="center" marginBottom={Design.spacing.md}>
+            <Text fontSize={Design.typography.sizes.lg} marginRight={Design.spacing.xs}>👥</Text>
+            <Text 
+              fontSize={Design.typography.sizes.lg} 
+              fontWeight={Design.typography.weights.bold} 
+              color={Design.colors.text.primary}
+            >
+              Players: {playerCount}
+            </Text>
+          </XStack>
+
+          {/* Modern Gradient Spin Button */}
+          <Animated.View 
+            style={{ 
+              transform: [{ scale: scaleAnim }],
+              marginBottom: Design.spacing.lg,
+            }}
+          >
+            <Pressable
+              onPress={spin}
+              disabled={spinning}
+              style={({ pressed }) => [
+                {
+                  borderRadius: Design.borderRadius.lg,
+                  overflow: 'hidden',
+                  backgroundColor: '#FFFFFF',
+                  ...Design.shadows.md,
+                  transform: [{ scale: pressed ? 0.95 : 1 }],
+                  opacity: spinning ? 0.7 : 1,
+                },
+              ]}
+            >
+              <LinearGradient
+                colors={spinning ? ['#FF9800', '#F57C00'] : [Design.colors.primary, Design.colors.primaryDark]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={{
+                  paddingVertical: Design.spacing.md + 2,
+                  paddingHorizontal: Design.spacing.xl,
+                  borderRadius: Design.borderRadius.lg,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <XStack alignItems="center" gap={Design.spacing.sm}>
+                  <Text fontSize={Design.typography.sizes.lg}>
+                    {spinning ? '🌀' : '🎯'}
+                  </Text>
+                  <Text 
+                    fontSize={Design.typography.sizes.lg} 
+                    color={Design.colors.text.white} 
+                    fontWeight={Design.typography.weights.bold}
+                  >
+                    {spinning ? 'Spinning...' : 'SPIN!'}
+                  </Text>
+                </XStack>
+              </LinearGradient>
+            </Pressable>
+          </Animated.View>
+
+          {/* Slider */}
+          <Slider
+            minimumValue={2}
+            maximumValue={20}
+            step={1}
+            value={playerCount}
+            onValueChange={setPlayerCount}
+            disabled={spinning}
+            style={{ width: '100%', height: 40 }}
+            minimumTrackTintColor={Design.colors.primary}
+            maximumTrackTintColor="#E0E0E0"
+            thumbTintColor={Design.colors.primary}
+          />
+          <Text 
+            fontSize={Design.typography.sizes.xs} 
+            color={Design.colors.text.secondary} 
+            textAlign="center" 
+            marginTop={Design.spacing.sm}
+          >
+            Slide to adjust the number of players
+          </Text>
+        </View>
+      </ScrollView>
 
       {/* Confetti celebration */}
       {showConfetti && (
@@ -270,8 +380,6 @@ export default function SpinnerSelector() {
 const styles = StyleSheet.create({
   arrowContainer: {
     position: 'absolute',
-    top: -30,
-    left: SPINNER_SIZE / 2 - 12, // Center horizontally: half spinner width minus half arrow width (24/2 = 12)
     zIndex: 10,
     alignItems: 'center',
     justifyContent: 'center',
@@ -296,7 +404,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 30,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderTopColor: '#D32F2F',
+    borderTopColor: '#E74C3C',
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowOffset: { width: 0, height: 2 },
