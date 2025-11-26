@@ -56,6 +56,8 @@ export default function SpinnerSelector() {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
+  const headerFadeAnim = useRef(new Animated.Value(0)).current;
+  const headerSlideAnim = useRef(new Animated.Value(20)).current;
   const [spinnerSize, setSpinnerSize] = useState(getSpinnerSize());
 
   useLayoutEffect(() => {
@@ -87,6 +89,23 @@ export default function SpinnerSelector() {
       setSpinnerSize(getSpinnerSize());
     });
     return () => subscription?.remove();
+  }, []);
+
+  // Header entrance animation
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(headerFadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(headerSlideAnim, {
+        toValue: 0,
+        duration: 500,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, []);
 
   const spin = () => {
@@ -227,14 +246,20 @@ export default function SpinnerSelector() {
 
       paths.push(
         <G key={i}>
-          <Path d={pathData} fill={colors[0]} />
+          {/* Segment with subtle border */}
+          <Path 
+            d={pathData} 
+            fill={colors[0]}
+            stroke="rgba(255,255,255,0.2)"
+            strokeWidth={1}
+          />
           {/* Text shadow effect using duplicate text */}
           <SvgText
             x={labelX}
-            y={labelY + 1}
-            fontSize={spinnerSize > 250 ? 20 : 16}
+            y={labelY + 1.5}
+            fontSize={spinnerSize > 250 ? 22 : 18}
             fontWeight="bold"
-            fill="rgba(0,0,0,0.3)"
+            fill="rgba(0,0,0,0.4)"
             textAnchor="middle"
             alignmentBaseline="middle"
           >
@@ -243,7 +268,7 @@ export default function SpinnerSelector() {
           <SvgText
             x={labelX}
             y={labelY}
-            fontSize={spinnerSize > 250 ? 20 : 16}
+            fontSize={spinnerSize > 250 ? 22 : 18}
             fontWeight="bold"
             fill="#fff"
             textAnchor="middle"
@@ -281,27 +306,43 @@ export default function SpinnerSelector() {
         }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header Section */}
-        <YStack alignItems="center" marginBottom={Design.spacing.lg}>
-          <Text fontSize={Design.typography.sizes.xxl} marginBottom={Design.spacing.sm}>🎭🎪</Text>
-          <Text 
-            fontSize={Design.typography.sizes.lg} 
-            fontWeight={Design.typography.weights.bold} 
-            color={Design.colors.text.primary} 
-            textAlign="center"
-            marginBottom={Design.spacing.xs}
-          >
-            Numbered Spinner Challenge!
-          </Text>
-          <Text 
-            fontSize={Design.typography.sizes.sm} 
-            color={Design.colors.text.secondary} 
-            textAlign="center" 
-            maxWidth={300}
-          >
-            Each player gets a number - let the spinner decide!
-          </Text>
-        </YStack>
+        {/* Header Section with Animation */}
+        <Animated.View
+          style={{
+            opacity: headerFadeAnim,
+            transform: [{ translateY: headerSlideAnim }],
+            width: '100%',
+            alignItems: 'center',
+          }}
+        >
+          <YStack alignItems="center" marginBottom={Design.spacing.lg}>
+            <Text 
+              fontSize={Design.typography.sizes.xxl + 4} 
+              marginBottom={Design.spacing.sm}
+            >
+              🎭🎪
+            </Text>
+            <Text 
+              fontSize={Design.typography.sizes.xl} 
+              fontWeight={Design.typography.weights.bold} 
+              color={Design.colors.text.primary} 
+              textAlign="center"
+              marginBottom={Design.spacing.xs}
+              letterSpacing={Design.typography.letterSpacing.tight}
+            >
+              Numbered Spinner Challenge!
+            </Text>
+            <Text 
+              fontSize={Design.typography.sizes.sm} 
+              color={Design.colors.text.secondary} 
+              textAlign="center" 
+              maxWidth={300}
+              lineHeight={Design.typography.sizes.sm * 1.4}
+            >
+              Each player gets a number - let the spinner decide!
+            </Text>
+          </YStack>
+        </Animated.View>
 
         {/* Arrow positioned completely outside spinner area */}
         <View
@@ -331,9 +372,11 @@ export default function SpinnerSelector() {
             <YStack
               alignItems="center"
               justifyContent="center"
-              backgroundColor="rgba(255,255,255,0.15)"
+              backgroundColor="rgba(255,255,255,0.2)"
               borderRadius={(spinnerSize / 2) + Design.spacing.lg}
               padding={Design.spacing.lg}
+              borderWidth={1}
+              borderColor="rgba(255,255,255,0.3)"
               {...Design.shadows.lg}
             >
               <Animated.View style={{ transform: [{ rotate }] }}>
@@ -346,7 +389,7 @@ export default function SpinnerSelector() {
         </View>
 
         {/* Controls Card */}
-        <View
+        <Animated.View
           style={{
             width: '100%',
             maxWidth: 360,
@@ -356,10 +399,20 @@ export default function SpinnerSelector() {
             paddingBottom: Design.spacing.sm,
             ...Design.shadows.md,
             marginBottom: Design.spacing.md,
+            opacity: headerFadeAnim,
+            transform: [{ translateY: headerSlideAnim }],
           }}
         >
           {/* Player Count Display */}
-          <XStack alignItems="center" justifyContent="center" marginBottom={Design.spacing.sm}>
+          <XStack 
+            alignItems="center" 
+            justifyContent="center" 
+            marginBottom={Design.spacing.sm}
+            backgroundColor="rgba(76, 175, 80, 0.1)"
+            borderRadius={Design.borderRadius.md}
+            paddingVertical={Design.spacing.xs}
+            paddingHorizontal={Design.spacing.md}
+          >
             <Text fontSize={Design.typography.sizes.md} marginRight={Design.spacing.xs}>👥</Text>
             <Text 
               fontSize={Design.typography.sizes.md} 
@@ -420,18 +473,20 @@ export default function SpinnerSelector() {
           </Animated.View>
 
           {/* Slider */}
-          <Slider
-            minimumValue={2}
-            maximumValue={20}
-            step={1}
-            value={playerCount}
-            onValueChange={setPlayerCount}
-            disabled={spinning}
-            style={{ width: '100%', height: 32 }}
-            minimumTrackTintColor={Design.colors.primary}
-            maximumTrackTintColor="#E0E0E0"
-            thumbTintColor={Design.colors.primary}
-          />
+          <View style={{ width: '100%', paddingHorizontal: Design.spacing.xs }}>
+            <Slider
+              minimumValue={2}
+              maximumValue={20}
+              step={1}
+              value={playerCount}
+              onValueChange={setPlayerCount}
+              disabled={spinning}
+              style={{ width: '100%', height: 32 }}
+              minimumTrackTintColor={Design.colors.primary}
+              maximumTrackTintColor="#E0E0E0"
+              thumbTintColor={Design.colors.primary}
+            />
+          </View>
           <Text 
             fontSize={Design.typography.sizes.xs} 
             color={Design.colors.text.secondary} 
@@ -441,7 +496,7 @@ export default function SpinnerSelector() {
           >
             Slide to adjust players
           </Text>
-        </View>
+        </Animated.View>
       </ScrollView>
 
       {/* Confetti celebration */}
@@ -476,7 +531,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 32,
     borderLeftColor: 'transparent',
     borderRightColor: 'transparent',
-    borderTopColor: 'rgba(0,0,0,0.2)',
+    borderTopColor: 'rgba(0,0,0,0.25)',
   },
   arrow: {
     width: 0,
@@ -488,9 +543,9 @@ const styles = StyleSheet.create({
     borderRightColor: 'transparent',
     borderTopColor: '#E74C3C',
     shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 6,
+    elevation: 6,
   },
 });
