@@ -257,3 +257,4 @@ export default function MyScreen() {
 - Follow existing patterns for consistency
 - Check for animation cleanup on component unmount
 - Use `useAnalytics` hook for all user actions
+

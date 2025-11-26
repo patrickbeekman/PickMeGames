@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing } from 'react-native';
+import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { usePrompts } from '../hooks/usePrompts';
 
@@ -49,16 +50,17 @@ export default function PromptSelector() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: 'Prompt Selector',
+      headerTitle: 'Prompted',
       headerStyle: {
-        backgroundColor: '#F3E889',
+        backgroundColor: Design.colors.background.light,
         borderBottomWidth: 0,
         shadowOpacity: 0,
         elevation: 0,
       },
-      headerTintColor: '#333',
+      headerTintColor: Design.colors.text.primary,
       headerTitleStyle: {
-        fontWeight: 'bold',
+        fontWeight: Design.typography.weights.bold,
+        fontSize: Design.typography.sizes.xl,
       },
     });
   }, [navigation]);

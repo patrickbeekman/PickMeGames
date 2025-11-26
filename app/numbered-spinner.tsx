@@ -9,6 +9,7 @@ import { Animated, Dimensions, Easing, StyleSheet } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { Design } from '../constants/Design';
 
 const SPINNER_SIZE = 300;
 const { width, height } = Dimensions.get('window');
@@ -26,14 +27,15 @@ export default function SpinnerSelector() {
     navigation.setOptions({
       headerTitle: 'Numbered Spinner',
       headerStyle: {
-        backgroundColor: '#F3E889',
+        backgroundColor: Design.colors.background.light,
         borderBottomWidth: 0,
         shadowOpacity: 0,
         elevation: 0,
       },
-      headerTintColor: '#333',
+      headerTintColor: Design.colors.text.primary,
       headerTitleStyle: {
-        fontWeight: 'bold',
+        fontWeight: Design.typography.weights.bold,
+        fontSize: Design.typography.sizes.xl,
       },
     });
   }, [navigation]);

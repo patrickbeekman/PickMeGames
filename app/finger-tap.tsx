@@ -15,6 +15,7 @@ import {
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { Design } from '../constants/Design';
 
 // TypeScript interfaces for touch events
 interface TouchData {
@@ -46,16 +47,17 @@ export default function FingerTapScreen() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: 'Finger Tap',
+      headerTitle: 'Multifinger Tap',
       headerStyle: {
-        backgroundColor: '#F3E889',
+        backgroundColor: Design.colors.background.light,
         borderBottomWidth: 0,
         shadowOpacity: 0,
         elevation: 0,
       },
-      headerTintColor: '#333',
+      headerTintColor: Design.colors.text.primary,
       headerTitleStyle: {
-        fontWeight: 'bold',
+        fontWeight: Design.typography.weights.bold,
+        fontSize: Design.typography.sizes.xl,
       },
     });
   }, [navigation]);

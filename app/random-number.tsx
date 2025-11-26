@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { Design } from '../constants/Design';
 
 export default function NumberGuesser() {
   const navigation = useNavigation();
@@ -29,16 +30,17 @@ export default function NumberGuesser() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: 'Number Guesser',
+      headerTitle: 'Random Number',
       headerStyle: {
-        backgroundColor: '#F3E889',
+        backgroundColor: Design.colors.background.light,
         borderBottomWidth: 0,
         shadowOpacity: 0,
         elevation: 0,
       },
-      headerTintColor: '#333',
+      headerTintColor: Design.colors.text.primary,
       headerTitleStyle: {
-        fontWeight: 'bold',
+        fontWeight: Design.typography.weights.bold,
+        fontSize: Design.typography.sizes.xl,
       },
     });
   }, [navigation]);

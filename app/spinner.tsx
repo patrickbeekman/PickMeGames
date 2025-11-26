@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { Design } from '../constants/Design';
 
 const { width, height } = Dimensions.get('window');
 const SPINNER_SIZE = width * 0.8;
@@ -34,14 +35,15 @@ const TwisterSpinner = () => {
     navigation.setOptions({
       headerTitle: 'Spinner',
       headerStyle: {
-        backgroundColor: '#F3E889',
+        backgroundColor: Design.colors.background.light,
         borderBottomWidth: 0,
         shadowOpacity: 0,
         elevation: 0,
       },
-      headerTintColor: '#333',
+      headerTintColor: Design.colors.text.primary,
       headerTitleStyle: {
-        fontWeight: 'bold',
+        fontWeight: Design.typography.weights.bold,
+        fontSize: Design.typography.sizes.xl,
       },
     });
   }, [navigation]);
