@@ -1,21 +1,23 @@
-import { Button } from '@tamagui/button';
 import { Text } from '@tamagui/core';
-import { YStack } from '@tamagui/stacks';
+import { XStack, YStack } from '@tamagui/stacks';
+import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
-  Animated,
-  Dimensions,
-  Easing,
-  StyleSheet,
-  NativeTouchEvent,
-  GestureResponderEvent,
+    Animated,
+    Dimensions,
+    Easing,
+    GestureResponderEvent,
+    NativeTouchEvent,
+    Pressable,
+    ScrollView,
+    StyleSheet,
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
-import { useAnalytics } from '../hooks/useAnalytics';
 import { Design } from '../constants/Design';
+import { useAnalytics } from '../hooks/useAnalytics';
 
 // TypeScript interfaces for touch events
 interface TouchData {
@@ -44,6 +46,10 @@ export default function FingerTapScreen() {
   const [phase, setPhase] = useState<'waiting' | 'countdown' | 'flickering' | 'winner'>('waiting');
 
   const backgroundColor = useRef(new Animated.Value(0)).current;
+  const headerFadeAnim = useRef(new Animated.Value(0)).current;
+  const headerSlideAnim = useRef(new Animated.Value(20)).current;
+  const buttonFadeAnim = useRef(new Animated.Value(0)).current;
+  const buttonSlideAnim = useRef(new Animated.Value(30)).current;
 
   useEffect(() => {
     navigation.setOptions({
@@ -67,6 +73,36 @@ export default function FingerTapScreen() {
       capture('entered_finger_tap');
     }
   }, [capture, isReady]);
+
+  // Entrance animations
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(headerFadeAnim, {
+        toValue: 1,
+        duration: Design.animation.normal,
+        useNativeDriver: true,
+      }),
+      Animated.timing(headerSlideAnim, {
+        toValue: 0,
+        duration: Design.animation.normal,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonFadeAnim, {
+        toValue: 1,
+        duration: Design.animation.normal,
+        delay: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(buttonSlideAnim, {
+        toValue: 0,
+        duration: Design.animation.normal,
+        delay: 200,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
 
   useEffect(() => {
     if (countdown !== null && countdown > 0) {
@@ -115,14 +151,16 @@ export default function FingerTapScreen() {
   const onTouchStart = (e: GestureResponderEvent) => {
     if (phase === 'winner' || phase === 'flickering') return;
 
-    const newTouches: TouchData[] = e.nativeEvent.touches.map((t: NativeTouchEvent) => ({
-      identifier: t.identifier,
+    const newTouches = e.nativeEvent.touches.map((t: NativeTouchEvent) => ({
+      identifier: Number(t.identifier),
       x: t.locationX,
       y: t.locationY,
     }));
     setTouches(newTouches);
 
     if (phase === 'waiting' && newTouches.length > 0) {
+      // Haptic feedback when game starts
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setPhase('countdown');
       setCountdown(COUNTDOWN_SECONDS);
     }
@@ -132,8 +170,8 @@ export default function FingerTapScreen() {
     if (phase === 'winner' || phase === 'flickering') return;
 
     // Update touch positions when fingers move
-    const updatedTouches: TouchData[] = e.nativeEvent.touches.map((t: NativeTouchEvent) => ({
-      identifier: t.identifier,
+    const updatedTouches = e.nativeEvent.touches.map((t: NativeTouchEvent) => ({
+      identifier: Number(t.identifier),
       x: t.locationX,
       y: t.locationY,
     }));
@@ -141,8 +179,8 @@ export default function FingerTapScreen() {
   };
 
   const onTouchEnd = (e: GestureResponderEvent) => {
-    const remainingTouches: TouchData[] = e.nativeEvent.touches.map((t: NativeTouchEvent) => ({
-      identifier: t.identifier,
+    const remainingTouches = e.nativeEvent.touches.map((t: NativeTouchEvent) => ({
+      identifier: Number(t.identifier),
       x: t.locationX,
       y: t.locationY,
     }));
@@ -163,6 +201,9 @@ export default function FingerTapScreen() {
     setWinner({ x: chosen.x, y: chosen.y });
     triggerParticles(chosen.x, chosen.y);
     setPhase('winner');
+    
+    // Haptic feedback on winner selection
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     
     capture('finger_tap_winner_picked', {
       winner_x: chosen.x,
@@ -218,53 +259,67 @@ export default function FingerTapScreen() {
   return (
     <Animated.View style={[styles.container, { backgroundColor: bgColor }]}>
       <LinearGradient
-        colors={['#F3E889', '#FFE082', '#FFF9C4']}
-        style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+        colors={[Design.colors.background.light, Design.colors.background.medium, Design.colors.background.lightest]}
+        locations={[0, 0.5, 1]}
+        style={StyleSheet.absoluteFillObject}
       />
       
-      <Animated.View
-        style={[styles.container, { backgroundColor: 'transparent' }]}
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
       >
+        <Animated.View
+          style={[styles.container, { backgroundColor: 'transparent' }]}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
+        >
 
         {/* Enhanced Instructions for waiting phase */}
         {phase === 'waiting' && (
-          <YStack
-            position="absolute"
-            top={height * 0.25}
-            left={20}
-            right={20}
-            alignItems="center"
-            zIndex={10}
+          <Animated.View
+            style={{
+              position: 'absolute',
+              top: height * 0.25,
+              left: Design.spacing.md,
+              right: Design.spacing.md,
+              opacity: headerFadeAnim,
+              transform: [{ translateY: headerSlideAnim }],
+              zIndex: 10,
+            }}
           >
-            <Text fontSize={40} marginBottom={16}>✨👆✨</Text>
-            <Text fontSize={20} fontWeight="700" color="#333" textAlign="center" marginBottom={8}>
-              Multifinger Challenge!
-            </Text>
-            <YStack
-              backgroundColor="rgba(255, 255, 255, 0.95)"
-              borderRadius={16}
-              padding={20}
-              alignItems="center"
-              shadowColor="#000"
-              shadowOpacity={0.1}
-              shadowOffset={{ width: 0, height: 4 }}
-              shadowRadius={8}
-            >
-              <Text
-                fontSize={16}
-                fontWeight="600"
-                color="#333"
-                textAlign="center"
-                lineHeight={22}
+            <YStack alignItems="center">
+              <Text fontSize={Design.typography.sizes.xxxl} marginBottom={Design.spacing.md}>✨👆✨</Text>
+              <Text 
+                fontSize={Design.typography.sizes.xl} 
+                fontWeight={Design.typography.weights.bold} 
+                color={Design.colors.text.primary} 
+                textAlign="center" 
+                marginBottom={Design.spacing.sm}
+                letterSpacing={Design.typography.letterSpacing.tight}
               >
-                Every player touch and hold one finger to the screen. 
-                You can move your finger around!
+                Multifinger Challenge!
               </Text>
+              <YStack
+                backgroundColor="rgba(255, 255, 255, 0.95)"
+                borderRadius={Design.borderRadius.lg}
+                padding={Design.spacing.lg}
+                alignItems="center"
+                {...Design.shadows.md}
+              >
+                <Text
+                  fontSize={Design.typography.sizes.md}
+                  fontWeight={Design.typography.weights.semibold}
+                  color={Design.colors.text.primary}
+                  textAlign="center"
+                  lineHeight={Design.typography.sizes.md * 1.4}
+                >
+                  Every player touch and hold one finger to the screen. 
+                  You can move your finger around!
+                </Text>
+              </YStack>
             </YStack>
-          </YStack>
+          </Animated.View>
         )}
 
         {/* Enhanced Ripples */}
@@ -299,7 +354,7 @@ export default function FingerTapScreen() {
             zIndex={5}
           >
             <LinearGradient
-              colors={['#4CAF50', '#66BB6A', '#81C784']}
+              colors={[Design.colors.primary, Design.colors.primaryLight, '#81C784']}
               style={{
                 width: 160,
                 height: 160,
@@ -307,10 +362,19 @@ export default function FingerTapScreen() {
                 position: 'absolute',
               }}
             />
-            <Text fontSize={56} fontWeight="bold" color="white">
+            <Text 
+              fontSize={Design.typography.sizes.xxxl + 8} 
+              fontWeight={Design.typography.weights.bold} 
+              color={Design.colors.text.white}
+            >
               {countdown}
             </Text>
-            <Text fontSize={14} color="white" fontWeight="600" marginTop={4}>
+            <Text 
+              fontSize={Design.typography.sizes.sm} 
+              color={Design.colors.text.white} 
+              fontWeight={Design.typography.weights.semibold} 
+              marginTop={Design.spacing.xs}
+            >
               GET READY!
             </Text>
           </YStack>
@@ -385,29 +449,59 @@ export default function FingerTapScreen() {
         )}
 
         {/* Enhanced Reset Button */}
-        <Button
-          position="absolute"
-          bottom={80}
-          alignSelf="center"
-          backgroundColor="#FF5722"
-          borderRadius={50}
-          paddingHorizontal={32}
-          paddingVertical={5}
-          pressStyle={{ scale: 0.95, backgroundColor: "#E64A19" }}
-          shadowColor="#000"
-          shadowOpacity={0.2}
-          shadowOffset={{ width: 0, height: 6 }}
-          shadowRadius={10}
-          elevation={8}
-          onPress={reset}
-          onTouchStart={(e) => e.stopPropagation()}
-          onTouchMove={(e) => e.stopPropagation()}
-          onTouchEnd={(e) => e.stopPropagation()}
+        <Animated.View
+          style={{
+            position: 'absolute',
+            bottom: 80,
+            alignSelf: 'center',
+            opacity: buttonFadeAnim,
+            transform: [{ translateY: buttonSlideAnim }],
+          }}
         >
-          <Text color="white" fontSize={18} fontWeight="bold">
-            🔄 Reset Game
-          </Text>
-        </Button>
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              reset();
+            }}
+            onTouchStart={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
+            onTouchEnd={(e) => e.stopPropagation()}
+            style={({ pressed }) => [
+              {
+                borderRadius: Design.borderRadius.full,
+                overflow: 'hidden',
+                backgroundColor: '#FFFFFF',
+                ...Design.shadows.lg,
+                transform: [{ scale: pressed ? Design.pressScale.md : 1 }],
+              },
+            ]}
+          >
+            <LinearGradient
+              colors={['#FF5722', '#E64A19', '#D84315']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                paddingVertical: Design.spacing.md + 2,
+                paddingHorizontal: Design.spacing.xl,
+                borderRadius: Design.borderRadius.full,
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: 48,
+              }}
+            >
+              <XStack alignItems="center" gap={Design.spacing.sm}>
+                <Text fontSize={Design.typography.sizes.lg}>🔄</Text>
+                <Text 
+                  color={Design.colors.text.white} 
+                  fontSize={Design.typography.sizes.lg} 
+                  fontWeight={Design.typography.weights.bold}
+                >
+                  Reset Game
+                </Text>
+              </XStack>
+            </LinearGradient>
+          </Pressable>
+        </Animated.View>
 
         {/* Players indicator */}
         {phase === 'countdown' && touches.length > 0 && (
@@ -416,16 +510,22 @@ export default function FingerTapScreen() {
             bottom={160}
             alignSelf="center"
             backgroundColor="rgba(76, 175, 80, 0.9)"
-            borderRadius={20}
-            paddingVertical={8}
-            paddingHorizontal={16}
+            borderRadius={Design.borderRadius.lg}
+            paddingVertical={Design.spacing.sm}
+            paddingHorizontal={Design.spacing.md}
+            {...Design.shadows.sm}
           >
-            <Text color="white" fontSize={14} fontWeight="600">
+            <Text 
+              color={Design.colors.text.white} 
+              fontSize={Design.typography.sizes.sm} 
+              fontWeight={Design.typography.weights.semibold}
+            >
               👥 {touches.length} Player{touches.length !== 1 ? 's' : ''} Ready!
             </Text>
           </YStack>
         )}
-      </Animated.View>
+        </Animated.View>
+      </ScrollView>
     </Animated.View>
   );
 }

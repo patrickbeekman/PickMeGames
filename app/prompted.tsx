@@ -1,10 +1,10 @@
-import { Button } from '@tamagui/button';
 import { Text } from '@tamagui/core';
-import { YStack } from '@tamagui/stacks';
+import { XStack, YStack } from '@tamagui/stacks';
+import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing } from 'react-native';
+import { Animated, Easing, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { usePrompts } from '../hooks/usePrompts';
@@ -18,6 +18,12 @@ export default function PromptSelector() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const headerFadeAnim = useRef(new Animated.Value(0)).current;
+  const headerSlideAnim = useRef(new Animated.Value(20)).current;
+  const buttonFadeAnim = useRef(new Animated.Value(0)).current;
+  const buttonSlideAnim = useRef(new Animated.Value(30)).current;
+  const cardFadeAnim = useRef(new Animated.Value(0)).current;
+  const cardSlideAnim = useRef(new Animated.Value(20)).current;
 
   // Load filtered prompts when component mounts or when returning from settings - FIX: Add loading guard
   useEffect(() => {
@@ -72,6 +78,51 @@ export default function PromptSelector() {
     }
   }, [capture, isReady, loading, filteredPrompts.length]);
 
+  // Entrance animations
+  useEffect(() => {
+    if (!loading && filteredPrompts.length > 0) {
+      Animated.parallel([
+        Animated.timing(headerFadeAnim, {
+          toValue: 1,
+          duration: Design.animation.normal,
+          useNativeDriver: true,
+        }),
+        Animated.timing(headerSlideAnim, {
+          toValue: 0,
+          duration: Design.animation.normal,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(cardFadeAnim, {
+          toValue: 1,
+          duration: Design.animation.normal,
+          delay: 100,
+          useNativeDriver: true,
+        }),
+        Animated.timing(cardSlideAnim, {
+          toValue: 0,
+          duration: Design.animation.normal,
+          delay: 100,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(buttonFadeAnim, {
+          toValue: 1,
+          duration: Design.animation.normal,
+          delay: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(buttonSlideAnim, {
+          toValue: 0,
+          duration: Design.animation.normal,
+          delay: 200,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [loading, filteredPrompts.length]);
+
   // Store animation refs for cleanup
   const animationRefs = useRef<Animated.CompositeAnimation[]>([]);
 
@@ -87,6 +138,9 @@ export default function PromptSelector() {
 
   const nextPrompt = () => {
     if (filteredPrompts.length === 0) return;
+    
+    // Haptic feedback on press
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     
     // Stop any running animations
     animationRefs.current.forEach((anim) => {
@@ -148,6 +202,8 @@ export default function PromptSelector() {
       const inAnimation = Animated.parallel([fadeInAnim, scaleInAnim]);
       animationRefs.current.push(inAnimation);
       inAnimation.start(() => {
+        // Haptic feedback on new prompt
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         // Remove completed animations from refs
         animationRefs.current = animationRefs.current.filter(anim => anim !== inAnimation);
       });
@@ -164,133 +220,256 @@ export default function PromptSelector() {
 
   if (loading) {
     return (
-      <YStack flex={1} backgroundColor="#F3E889" alignItems="center" justifyContent="center">
+      <YStack flex={1} backgroundColor={Design.colors.background.light} alignItems="center" justifyContent="center">
         <LinearGradient
-          colors={['#F3E889', '#FFE082', '#FFF9C4']}
-          style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+          colors={[Design.colors.background.light, Design.colors.background.medium, Design.colors.background.lightest]}
+          locations={[0, 0.5, 1]}
+          style={StyleSheet.absoluteFillObject}
         />
-        <Text fontSize={18} color="#333">Loading prompts...</Text>
+        <Text fontSize={Design.typography.sizes.lg} color={Design.colors.text.primary}>Loading prompts...</Text>
       </YStack>
     );
   }
 
   return (
-    <YStack flex={1} backgroundColor="#F3E889" alignItems="center" justifyContent="center" padding={20}>
+    <YStack flex={1} backgroundColor={Design.colors.background.light}>
       <LinearGradient
-        colors={['#F3E889', '#FFE082', '#FFF9C4']}
-        style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
+        colors={[Design.colors.background.light, Design.colors.background.medium, Design.colors.background.lightest]}
+        locations={[0, 0.5, 1]}
+        style={StyleSheet.absoluteFillObject}
       />
-
-      {/* Header with emojis */}
-      <YStack alignItems="center" marginBottom={40}>
-        <Text fontSize={40} marginBottom={16}>✨💭✨</Text>
-        <Text fontSize={20} fontWeight="700" color="#333" textAlign="center" marginBottom={8}>
-          Decision Prompt Challenge!
-        </Text>
-        <Text fontSize={14} color="#666" textAlign="center" maxWidth={300}>
-          Get a random prompt to help make your decision! 
-          Tap "New Prompt" for another idea.
-        </Text>
-      </YStack>
-
-      {/* Enhanced Prompt Display */}
-      <Animated.View
-        style={{
-          transform: [{ scale: scaleAnim }],
-          opacity: fadeAnim,
+      
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: Design.spacing.lg,
+          paddingBottom: Design.spacing.xxl,
         }}
+        showsVerticalScrollIndicator={false}
       >
-        <YStack
-          backgroundColor="rgba(255,255,255,0.95)"
-          borderRadius={20}
-          padding={30}
-          marginVertical={20}
-          maxWidth="90%"
-          minHeight={200}
-          justifyContent="center"
-          alignItems="center"
-          shadowColor="#000"
-          shadowOpacity={0.15}
-          shadowOffset={{ width: 0, height: 8 }}
-          shadowRadius={16}
-          elevation={8}
-          borderWidth={3}
-          borderColor="#4CAF50"
+
+        {/* Header with emojis */}
+        <Animated.View
+          style={{
+            opacity: headerFadeAnim,
+            transform: [{ translateY: headerSlideAnim }],
+            alignItems: 'center',
+            marginBottom: Design.spacing.xl,
+          }}
         >
-          <Text fontSize={22} color="#333" textAlign="center" fontWeight="500" lineHeight={32}>
-            {currentPrompt}
-          </Text>
-        </YStack>
-      </Animated.View>
-
-      {/* Call to action for custom prompts */}
-      <YStack alignItems="center" marginTop={12} marginBottom={12}>
-        <Link href="/prompt-settings" asChild>
-          <Button
-            backgroundColor="#FFF3E0"
-            borderRadius={28}
-            paddingHorizontal={32}
-            paddingVertical={12}
-            marginTop={8}
-            borderWidth={2}
-            borderColor="#FF9800"
-            pressStyle={{ scale: 0.97, backgroundColor: "#FFE0B2" }}
-            size="$4"
-            elevation={4}
-            shadowColor="#FF9800"
-            shadowOpacity={0.15}
-            shadowOffset={{ width: 0, height: 4 }}
-            shadowRadius={10}
-          >
-            <Text fontSize={15} color="#FF9800" fontWeight="bold">
-              ➕ Add Custom Prompts
+          <YStack alignItems="center">
+            <Text fontSize={Design.typography.sizes.xxxl} marginBottom={Design.spacing.md}>✨💭✨</Text>
+            <Text 
+              fontSize={Design.typography.sizes.xl} 
+              fontWeight={Design.typography.weights.bold} 
+              color={Design.colors.text.primary} 
+              textAlign="center" 
+              marginBottom={Design.spacing.sm}
+              letterSpacing={Design.typography.letterSpacing.tight}
+            >
+              Decision Prompt Challenge!
             </Text>
-          </Button>
-        </Link>
-        <Text fontSize={12} color="#888" marginTop={6} textAlign="center" maxWidth={260}>
-          Manage your prompts anytime from this page.
-        </Text>
-      </YStack>
+            <Text 
+              fontSize={Design.typography.sizes.sm} 
+              color={Design.colors.text.secondary} 
+              textAlign="center" 
+              maxWidth={300}
+              lineHeight={Design.typography.sizes.sm * 1.4}
+            >
+              Get a random prompt to help make your decision! 
+              Tap "New Prompt" for another idea.
+            </Text>
+          </YStack>
+        </Animated.View>
 
-      {/* Enhanced Button */}
-      <Button
-        backgroundColor="#4CAF50"
-        borderRadius={50}
-        paddingHorizontal={40}
-        paddingVertical={5}
-        pressStyle={{ scale: 0.95, backgroundColor: "#45a049" }}
-        shadowColor="#000"
-        shadowOpacity={0.2}
-        shadowOffset={{ width: 0, height: 6 }}
-        shadowRadius={12}
-        elevation={8}
-        onPress={nextPrompt}
-        marginTop={20}
-        accessibilityLabel="Get a new random prompt"
-      >
-        <Text fontSize={20} color="white" fontWeight="bold">
-          🎲 New Prompt
-        </Text>
-      </Button>
+        {/* Enhanced Prompt Display */}
+        <Animated.View
+          style={{
+            opacity: fadeAnim,
+            transform: [
+              { scale: scaleAnim },
+              { translateY: cardSlideAnim },
+            ],
+            width: '100%',
+            maxWidth: 360,
+            marginBottom: Design.spacing.lg,
+          }}
+        >
+          <YStack
+            backgroundColor="rgba(255,255,255,0.95)"
+            borderRadius={Design.borderRadius.xl}
+            padding={Design.spacing.xl}
+            marginVertical={Design.spacing.lg}
+            minHeight={200}
+            justifyContent="center"
+            alignItems="center"
+            {...Design.shadows.lg}
+            borderWidth={3}
+            borderColor={Design.colors.primary}
+          >
+            <Text 
+              fontSize={Design.typography.sizes.xl} 
+              color={Design.colors.text.primary} 
+              textAlign="center" 
+              fontWeight={Design.typography.weights.medium} 
+              lineHeight={Design.typography.sizes.xl * 1.4}
+            >
+              {currentPrompt}
+            </Text>
+          </YStack>
+        </Animated.View>
 
-      {/* Prompt counter */}
-      <YStack 
-        alignItems="center" 
-        marginTop={20}
-        backgroundColor="rgba(76, 175, 80, 0.1)"
-        borderRadius={16}
-        padding={16}
-      >
-        <Text fontSize={14} color="#666" textAlign="center" fontWeight="500">
-          💡 Prompt {usedPrompts.size + 1} of {filteredPrompts.length}
-        </Text>
-        {usedPrompts.size >= filteredPrompts.length - 1 && (
-          <Text fontSize={12} color="#999" textAlign="center" marginTop={4}>
-            Next prompt will reset the cycle
+        {/* Call to action for custom prompts */}
+        <Animated.View
+          style={{
+            opacity: buttonFadeAnim,
+            transform: [{ translateY: buttonSlideAnim }],
+            width: '100%',
+            maxWidth: 360,
+            marginBottom: Design.spacing.md,
+          }}
+        >
+          <Link href="/prompt-settings" asChild>
+            <Pressable
+              style={({ pressed }) => [
+                {
+                  borderRadius: Design.borderRadius.lg,
+                  overflow: 'hidden',
+                  backgroundColor: '#FFFFFF',
+                  borderWidth: 2,
+                  borderColor: Design.colors.accent.orange,
+                  ...Design.shadows.md,
+                  transform: [{ scale: pressed ? Design.pressScale.md : 1 }],
+                },
+              ]}
+            >
+              <LinearGradient
+                colors={['#FFF3E0', '#FFE0B2', '#FFCC80']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  paddingVertical: Design.spacing.md,
+                  paddingHorizontal: Design.spacing.xl,
+                  borderRadius: Design.borderRadius.lg,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <XStack alignItems="center" gap={Design.spacing.sm}>
+                  <Text fontSize={Design.typography.sizes.md}>➕</Text>
+                  <Text 
+                    fontSize={Design.typography.sizes.md} 
+                    color={Design.colors.accent.orange} 
+                    fontWeight={Design.typography.weights.bold}
+                  >
+                    Add Custom Prompts
+                  </Text>
+                </XStack>
+              </LinearGradient>
+            </Pressable>
+          </Link>
+          <Text 
+            fontSize={Design.typography.sizes.xs} 
+            color={Design.colors.text.tertiary} 
+            marginTop={Design.spacing.xs} 
+            textAlign="center" 
+            maxWidth={260}
+          >
+            Manage your prompts anytime from this page.
           </Text>
-        )}
-      </YStack>
+        </Animated.View>
 
+        {/* Enhanced Button */}
+        <Animated.View
+          style={{
+            opacity: buttonFadeAnim,
+            transform: [{ translateY: buttonSlideAnim }],
+            width: '100%',
+            maxWidth: 360,
+            marginTop: Design.spacing.lg,
+            marginBottom: Design.spacing.md,
+          }}
+        >
+          <Pressable
+            onPress={nextPrompt}
+            style={({ pressed }) => [
+              {
+                borderRadius: Design.borderRadius.lg,
+                overflow: 'hidden',
+                backgroundColor: '#FFFFFF',
+                ...Design.shadows.lg,
+                transform: [{ scale: pressed ? Design.pressScale.md : 1 }],
+              },
+            ]}
+          >
+            <LinearGradient
+              colors={[Design.colors.primary, Design.colors.primaryDark, '#3d8b40']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                paddingVertical: Design.spacing.md + 4,
+                paddingHorizontal: Design.spacing.xl + 8,
+                borderRadius: Design.borderRadius.lg,
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: 56,
+              }}
+            >
+              <XStack alignItems="center" gap={Design.spacing.md}>
+                <Text fontSize={Design.typography.sizes.xl}>🎲</Text>
+                <Text 
+                  fontSize={Design.typography.sizes.lg + 2} 
+                  color={Design.colors.text.white} 
+                  fontWeight={Design.typography.weights.bold}
+                  letterSpacing={Design.typography.letterSpacing.wide}
+                >
+                  New Prompt
+                </Text>
+              </XStack>
+            </LinearGradient>
+          </Pressable>
+        </Animated.View>
+
+        {/* Prompt counter */}
+        <Animated.View
+          style={{
+            opacity: buttonFadeAnim,
+            transform: [{ translateY: buttonSlideAnim }],
+            width: '100%',
+            maxWidth: 360,
+            marginTop: Design.spacing.lg,
+          }}
+        >
+          <YStack 
+            alignItems="center" 
+            backgroundColor="rgba(76, 175, 80, 0.1)"
+            borderRadius={Design.borderRadius.lg}
+            padding={Design.spacing.md}
+            {...Design.shadows.sm}
+          >
+            <Text 
+              fontSize={Design.typography.sizes.sm} 
+              color={Design.colors.text.secondary} 
+              textAlign="center" 
+              fontWeight={Design.typography.weights.medium}
+            >
+              💡 Prompt {usedPrompts.size + 1} of {filteredPrompts.length}
+            </Text>
+            {usedPrompts.size >= filteredPrompts.length - 1 && (
+              <Text 
+                fontSize={Design.typography.sizes.xs} 
+                color={Design.colors.text.tertiary} 
+                textAlign="center" 
+                marginTop={Design.spacing.xs}
+              >
+                Next prompt will reset the cycle
+              </Text>
+            )}
+          </YStack>
+        </Animated.View>
+      </ScrollView>
     </YStack>
   );
 }
