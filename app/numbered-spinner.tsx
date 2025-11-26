@@ -54,6 +54,8 @@ export default function SpinnerSelector() {
   const [showConfetti, setShowConfetti] = useState(false);
   const rotation = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const glowAnim = useRef(new Animated.Value(0)).current;
   const [spinnerSize, setSpinnerSize] = useState(getSpinnerSize());
 
   useLayoutEffect(() => {
@@ -110,21 +112,77 @@ export default function SpinnerSelector() {
       useNativeDriver: true,
     }).start();
 
+    // Pulse animation during spin
+    const pulseAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.05,
+          duration: 400,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 400,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    // Glow animation during spin
+    const glowAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glowAnim, {
+          toValue: 1,
+          duration: 600,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(glowAnim, {
+          toValue: 0.3,
+          duration: 600,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+
+    pulseAnimation.start();
+    glowAnimation.start();
+
+    // Enhanced spin animation with better easing
     Animated.timing(rotation, {
       toValue: targetRotation,
       duration: 3000,
-      easing: Easing.out(Easing.cubic),
+      easing: Easing.out(Easing.quad),
       useNativeDriver: true,
     }).start(() => {
       setSpinning(false);
       setShowConfetti(true);
 
-      // Reset button scale
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
+      // Stop animations
+      pulseAnimation.stop();
+      glowAnimation.stop();
+
+      // Reset animations
+      Animated.parallel([
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.timing(glowAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
 
       // Hide confetti after 3 seconds
       setTimeout(() => setShowConfetti(false), 3000);
@@ -170,10 +228,22 @@ export default function SpinnerSelector() {
       paths.push(
         <G key={i}>
           <Path d={pathData} fill={colors[0]} />
+          {/* Text shadow effect using duplicate text */}
+          <SvgText
+            x={labelX}
+            y={labelY + 1}
+            fontSize={spinnerSize > 250 ? 20 : 16}
+            fontWeight="bold"
+            fill="rgba(0,0,0,0.3)"
+            textAnchor="middle"
+            alignmentBaseline="middle"
+          >
+            {i + 1}
+          </SvgText>
           <SvgText
             x={labelX}
             y={labelY}
-            fontSize={spinnerSize > 250 ? 18 : 14}
+            fontSize={spinnerSize > 250 ? 20 : 16}
             fontWeight="bold"
             fill="#fff"
             textAnchor="middle"
@@ -206,7 +276,7 @@ export default function SpinnerSelector() {
         contentContainerStyle={{
           paddingHorizontal: Design.spacing.lg,
           paddingTop: Design.spacing.lg,
-          paddingBottom: Design.spacing.xl,
+          paddingBottom: Design.spacing.xxl + 20, // Extra padding to avoid home indicator
           alignItems: 'center',
         }}
         showsVerticalScrollIndicator={false}
@@ -233,38 +303,47 @@ export default function SpinnerSelector() {
           </Text>
         </YStack>
 
-        {/* Spinner Container with Responsive Arrow */}
-        <YStack
-          alignItems="center"
-          justifyContent="center"
-          backgroundColor="rgba(255,255,255,0.15)"
-          borderRadius={(spinnerSize / 2) + Design.spacing.lg}
-          padding={Design.spacing.lg}
-          marginBottom={Design.spacing.xl}
-          {...Design.shadows.lg}
-          style={{ position: 'relative' }}
+        {/* Arrow positioned completely outside spinner area */}
+        <View
+          style={[
+            styles.arrowContainer,
+            {
+              marginBottom: Design.spacing.sm,
+              alignItems: 'center',
+            },
+          ]}
         >
-          {/* Responsive Arrow Pointer - centered above spinner */}
-          <View
-            style={[
-              styles.arrowContainer,
-              {
-                top: -28,
-                left: '50%',
-                marginLeft: -12, // Half arrow width (24/2)
-              },
-            ]}
+          <View style={styles.arrowShadow} />
+          <View style={styles.arrow} />
+        </View>
+
+        {/* Spinner Container */}
+        <View style={{ alignItems: 'center', marginBottom: Design.spacing.xl }}>
+          <Animated.View
+            style={{
+              transform: [{ scale: pulseAnim }],
+              opacity: glowAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [1, 0.85],
+              }),
+            }}
           >
-            <View style={styles.arrowShadow} />
-            <View style={styles.arrow} />
-          </View>
-          
-          <Animated.View style={{ transform: [{ rotate }] }}>
-            <Svg width={spinnerSize} height={spinnerSize}>
-              {renderWheel()}
-            </Svg>
+            <YStack
+              alignItems="center"
+              justifyContent="center"
+              backgroundColor="rgba(255,255,255,0.15)"
+              borderRadius={(spinnerSize / 2) + Design.spacing.lg}
+              padding={Design.spacing.lg}
+              {...Design.shadows.lg}
+            >
+              <Animated.View style={{ transform: [{ rotate }] }}>
+                <Svg width={spinnerSize} height={spinnerSize}>
+                  {renderWheel()}
+                </Svg>
+              </Animated.View>
+            </YStack>
           </Animated.View>
-        </YStack>
+        </View>
 
         {/* Controls Card */}
         <View
@@ -272,16 +351,18 @@ export default function SpinnerSelector() {
             width: '100%',
             maxWidth: 360,
             backgroundColor: '#FFFFFF',
-            borderRadius: Design.borderRadius.xl,
-            padding: Design.spacing.lg,
-            ...Design.shadows.lg,
+            borderRadius: Design.borderRadius.lg,
+            padding: Design.spacing.md,
+            paddingBottom: Design.spacing.sm,
+            ...Design.shadows.md,
+            marginBottom: Design.spacing.md,
           }}
         >
           {/* Player Count Display */}
-          <XStack alignItems="center" justifyContent="center" marginBottom={Design.spacing.md}>
-            <Text fontSize={Design.typography.sizes.lg} marginRight={Design.spacing.xs}>👥</Text>
+          <XStack alignItems="center" justifyContent="center" marginBottom={Design.spacing.sm}>
+            <Text fontSize={Design.typography.sizes.md} marginRight={Design.spacing.xs}>👥</Text>
             <Text 
-              fontSize={Design.typography.sizes.lg} 
+              fontSize={Design.typography.sizes.md} 
               fontWeight={Design.typography.weights.bold} 
               color={Design.colors.text.primary}
             >
@@ -293,7 +374,7 @@ export default function SpinnerSelector() {
           <Animated.View 
             style={{ 
               transform: [{ scale: scaleAnim }],
-              marginBottom: Design.spacing.lg,
+              marginBottom: Design.spacing.sm,
             }}
           >
             <Pressable
@@ -301,10 +382,10 @@ export default function SpinnerSelector() {
               disabled={spinning}
               style={({ pressed }) => [
                 {
-                  borderRadius: Design.borderRadius.lg,
+                  borderRadius: Design.borderRadius.md,
                   overflow: 'hidden',
                   backgroundColor: '#FFFFFF',
-                  ...Design.shadows.md,
+                  ...Design.shadows.sm,
                   transform: [{ scale: pressed ? 0.95 : 1 }],
                   opacity: spinning ? 0.7 : 1,
                 },
@@ -315,19 +396,19 @@ export default function SpinnerSelector() {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={{
-                  paddingVertical: Design.spacing.md + 2,
-                  paddingHorizontal: Design.spacing.xl,
-                  borderRadius: Design.borderRadius.lg,
+                  paddingVertical: Design.spacing.sm + 2,
+                  paddingHorizontal: Design.spacing.lg,
+                  borderRadius: Design.borderRadius.md,
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}
               >
-                <XStack alignItems="center" gap={Design.spacing.sm}>
-                  <Text fontSize={Design.typography.sizes.lg}>
+                <XStack alignItems="center" gap={Design.spacing.xs}>
+                  <Text fontSize={Design.typography.sizes.md}>
                     {spinning ? '🌀' : '🎯'}
                   </Text>
                   <Text 
-                    fontSize={Design.typography.sizes.lg} 
+                    fontSize={Design.typography.sizes.md} 
                     color={Design.colors.text.white} 
                     fontWeight={Design.typography.weights.bold}
                   >
@@ -346,7 +427,7 @@ export default function SpinnerSelector() {
             value={playerCount}
             onValueChange={setPlayerCount}
             disabled={spinning}
-            style={{ width: '100%', height: 40 }}
+            style={{ width: '100%', height: 32 }}
             minimumTrackTintColor={Design.colors.primary}
             maximumTrackTintColor="#E0E0E0"
             thumbTintColor={Design.colors.primary}
@@ -355,9 +436,10 @@ export default function SpinnerSelector() {
             fontSize={Design.typography.sizes.xs} 
             color={Design.colors.text.secondary} 
             textAlign="center" 
-            marginTop={Design.spacing.sm}
+            marginTop={Design.spacing.xs}
+            marginBottom={Design.spacing.xs}
           >
-            Slide to adjust the number of players
+            Slide to adjust players
           </Text>
         </View>
       </ScrollView>
@@ -379,10 +461,10 @@ export default function SpinnerSelector() {
 
 const styles = StyleSheet.create({
   arrowContainer: {
-    position: 'absolute',
-    zIndex: 10,
     alignItems: 'center',
     justifyContent: 'center',
+    width: 24,
+    height: 30,
   },
   arrowShadow: {
     position: 'absolute',
