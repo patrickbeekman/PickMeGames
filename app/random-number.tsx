@@ -1,4 +1,3 @@
-import Slider from '@react-native-community/slider';
 import { Text } from '@tamagui/core';
 import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
@@ -30,9 +29,20 @@ export default function NumberGuesser() {
   const cardFadeAnim = useRef(new Animated.Value(0)).current;
   const cardSlideAnim = useRef(new Animated.Value(20)).current;
 
-  const RANGE_OPTIONS = [10, 100, 1000, 10000, 100000, 1000000];
-  const [rangeIndex, setRangeIndex] = useState(1); // default to 100
-  const maxNumber = RANGE_OPTIONS[rangeIndex];
+  // Quick preset ranges
+  const PRESET_RANGES = [
+    { label: '🎲 Dice', min: 1, max: 6 },
+    { label: '🎯 D20', min: 1, max: 20 },
+    { label: '🔢 1-100', min: 1, max: 100 },
+    { label: '🎪 1-1K', min: 1, max: 1000 },
+    { label: '🌟 1-10K', min: 1, max: 10000 },
+    { label: '💫 1-100K', min: 1, max: 100000 },
+    { label: '🚀 1-1M', min: 1, max: 1000000 },
+  ];
+
+  const [minNumber, setMinNumber] = useState(1);
+  const [maxNumber, setMaxNumber] = useState(100);
+  const [selectedPreset, setSelectedPreset] = useState<number>(2); // Default to 1-100
 
   useEffect(() => {
     navigation.setOptions({
@@ -100,8 +110,17 @@ export default function NumberGuesser() {
     ]).start();
   }, []);
 
+  const applyPreset = (presetIndex: number) => {
+    const preset = PRESET_RANGES[presetIndex];
+    setMinNumber(preset.min);
+    setMaxNumber(preset.max);
+    setSelectedPreset(presetIndex);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  };
+
   const revealNumber = () => {
     if (isRevealing) return;
+    if (minNumber >= maxNumber) return; // Validate range
     
     // Haptic feedback on press
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -113,7 +132,7 @@ export default function NumberGuesser() {
     rotateAnim.setValue(0);
     Animated.timing(rotateAnim, {
       toValue: 1,
-      duration: 1000,
+      duration: 1200,
       easing: Easing.out(Easing.quad),
       useNativeDriver: true,
     }).start();
@@ -134,7 +153,9 @@ export default function NumberGuesser() {
 
     capture('number_revealed', {
       randomNumber,
+      minNumber,
       maxNumber,
+      range: maxNumber - minNumber + 1,
     });
   };
 
@@ -157,20 +178,64 @@ export default function NumberGuesser() {
       );
       pulseAnimation.start();
 
+      // Digit-by-digit reveal animation
+      const range = maxNumber - minNumber + 1;
+      const startValue = minNumber;
+      const endValue = Math.floor(Math.random() * range) + minNumber;
+      const endValueStr = String(endValue);
+      const numDigits = endValueStr.length;
+      
+      let currentDigit = 0;
+      let currentDisplay = '?'.repeat(numDigits);
+
       const interval = setInterval(() => {
-        setAnimatedNumber(String(Math.floor(Math.random() * maxNumber) + 1));
-      }, 50);
+        // Show random digits for unrevealed positions
+        const revealed = endValueStr.substring(0, currentDigit);
+        const remaining = '?'.repeat(numDigits - currentDigit);
+        setAnimatedNumber(revealed + remaining);
+        
+        // Gradually reveal digits
+        if (Math.random() > 0.7 && currentDigit < numDigits) {
+          currentDigit++;
+        } else {
+          // Show random numbers for remaining digits
+          const randomDigits = Array.from({ length: numDigits - currentDigit }, () => 
+            String(Math.floor(Math.random() * 10))
+          ).join('');
+          setAnimatedNumber(revealed + randomDigits);
+        }
+      }, 80);
 
       const timeout = setTimeout(() => {
         clearInterval(interval);
         pulseAnimation.stop();
         pulseAnim.setValue(1);
 
-        const final = Math.floor(Math.random() * maxNumber) + 1;
-        setRandomNumber(final);
-        setAnimatedNumber(String(final));
+        // Final reveal - show actual number digit by digit
+        let revealIndex = 0;
+        const finalRevealInterval = setInterval(() => {
+          if (revealIndex < numDigits) {
+            const revealed = endValueStr.substring(0, revealIndex + 1);
+            const remaining = '?'.repeat(numDigits - revealIndex - 1);
+            setAnimatedNumber(revealed + remaining);
+            revealIndex++;
+          } else {
+            clearInterval(finalRevealInterval);
+            setRandomNumber(endValue);
+            setAnimatedNumber(endValueStr);
         setIsRevealing(false);
         setShowConfetti(true);
+          }
+        }, 150);
+        
+        // Fallback timeout
+        setTimeout(() => {
+          clearInterval(finalRevealInterval);
+          setRandomNumber(endValue);
+          setAnimatedNumber(endValueStr);
+          setIsRevealing(false);
+          setShowConfetti(true);
+        }, 2000);
 
         // Haptic feedback on completion
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -203,7 +268,7 @@ export default function NumberGuesser() {
         pulseAnimation.stop();
       };
     }
-  }, [isRevealing, maxNumber]);
+  }, [isRevealing, minNumber, maxNumber]);
 
   const spin = rotateAnim.interpolate({
     inputRange: [0, 1],
@@ -233,75 +298,7 @@ export default function NumberGuesser() {
         }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Range slider */}
-        <Animated.View
-          style={{
-            opacity: cardFadeAnim,
-            transform: [{ translateY: cardSlideAnim }],
-            width: '100%',
-            maxWidth: 360,
-            marginBottom: Design.spacing.xl,
-          }}
-        >
-          <YStack
-            alignItems="center"
-            backgroundColor="rgba(255,255,255,0.95)"
-            borderRadius={Design.borderRadius.lg}
-            padding={Design.spacing.lg}
-            {...Design.shadows.md}
-            width="100%"
-          >
-            <Text 
-              fontSize={Design.typography.sizes.md} 
-              fontWeight={Design.typography.weights.semibold} 
-              color={Design.colors.text.primary} 
-              marginBottom={Design.spacing.sm}
-            >
-              Max Number: <Text fontWeight={Design.typography.weights.bold} color={Design.colors.primary}>{maxNumber.toLocaleString()}</Text>
-            </Text>
-            <Slider
-              minimumValue={0}
-              maximumValue={RANGE_OPTIONS.length - 1}
-              step={1}
-              value={rangeIndex}
-              onValueChange={val => setRangeIndex(Math.round(val))}
-              disabled={isRevealing}
-              style={{ width: '100%', maxWidth: 280, height: 40 }}
-              minimumTrackTintColor={Design.colors.primary}
-              maximumTrackTintColor="#E0E0E0"
-              thumbTintColor={Design.colors.primary}
-            />
-            <XStack 
-              flexDirection="row" 
-              justifyContent="space-between" 
-              width="100%" 
-              maxWidth={280}
-              marginTop={Design.spacing.xs}
-            >
-              {RANGE_OPTIONS.map((val, idx) => (
-                <Text
-                  key={val}
-                  fontSize={Design.typography.sizes.xs}
-                  color={idx === rangeIndex ? Design.colors.primary : Design.colors.text.tertiary}
-                  fontWeight={idx === rangeIndex ? Design.typography.weights.bold : Design.typography.weights.regular}
-                  style={{ width: 36, textAlign: 'center' }}
-                >
-                  {val === 1000000
-                    ? '1M'
-                    : val === 100000
-                      ? '100k'
-                      : val === 10000
-                        ? '10k'
-                        : val === 1000
-                          ? '1k'
-                          : val}
-                </Text>
-              ))}
-            </XStack>
-          </YStack>
-        </Animated.View>
-
-        {/* Fun header with emoji */}
+        {/* Header with emoji */}
         <Animated.View
           style={{
             opacity: headerFadeAnim,
@@ -321,8 +318,8 @@ export default function NumberGuesser() {
               letterSpacing={Design.typography.letterSpacing.tight}
             >
               Lucky Number Challenge!
-            </Text>
-            <Text 
+        </Text>
+            <Text
               fontSize={Design.typography.sizes.md} 
               fontWeight={Design.typography.weights.medium} 
               color={Design.colors.text.secondary} 
@@ -330,11 +327,73 @@ export default function NumberGuesser() {
               maxWidth={300}
               lineHeight={Design.typography.sizes.md * 1.4}
             >
-              Everyone pick a number from 1 to {maxNumber.toLocaleString()}.
+              Everyone pick a number from {minNumber.toLocaleString()} to {maxNumber.toLocaleString()}.
               Closest guess without going over wins!
             </Text>
           </YStack>
         </Animated.View>
+
+        {/* Quick Preset Buttons */}
+        <Animated.View
+          style={{
+            opacity: cardFadeAnim,
+            transform: [{ translateY: cardSlideAnim }],
+            width: '100%',
+            maxWidth: 360,
+            marginBottom: Design.spacing.lg,
+          }}
+        >
+          <YStack
+            backgroundColor="rgba(255,255,255,0.95)"
+            borderRadius={Design.borderRadius.lg}
+            padding={Design.spacing.md}
+            {...Design.shadows.md}
+            width="100%"
+            gap={Design.spacing.sm}
+          >
+            <XStack flexWrap="wrap" gap={Design.spacing.xs} justifyContent="center">
+              {PRESET_RANGES.map((preset, idx) => (
+                <Pressable
+                  key={idx}
+                  onPress={() => applyPreset(idx)}
+                  disabled={isRevealing}
+                  style={({ pressed }) => [
+                    {
+                      borderRadius: Design.borderRadius.md,
+                      overflow: 'hidden',
+                      backgroundColor: selectedPreset === idx ? Design.colors.primary : '#FFFFFF',
+                      borderWidth: 2,
+                      borderColor: selectedPreset === idx ? Design.colors.primary : '#E0E0E0',
+                      ...Design.shadows.sm,
+                      transform: [{ scale: pressed ? Design.pressScale.sm : 1 }],
+                      opacity: isRevealing ? 0.6 : 1,
+                    },
+                  ]}
+                >
+                  <YStack
+                    paddingVertical={Design.spacing.xs + 2}
+                    paddingHorizontal={Design.spacing.sm}
+                    alignItems="center"
+                    justifyContent="center"
+                    minWidth={70}
+                  >
+                    <Text
+                      fontSize={Design.typography.sizes.xs}
+                      fontWeight={Design.typography.weights.semibold}
+                      color={selectedPreset === idx ? Design.colors.text.white : Design.colors.text.primary}
+                      textAlign="center"
+                    >
+                      {preset.label}
+                    </Text>
+                  </YStack>
+                </Pressable>
+              ))}
+            </XStack>
+        </YStack>
+        </Animated.View>
+
+
+
       
       {/* Animated number display */}
       <Animated.View
@@ -343,56 +402,55 @@ export default function NumberGuesser() {
             { scale: Animated.multiply(scaleAnim, pulseAnim) },
             { rotate: spin },
             { translateY: bounce }
-          ]
+            ],
+            width: '100%',
+            maxWidth: 360,
+            marginBottom: Design.spacing.xl,
         }}
       >
         <YStack
-          width={180}
-          height={180}
-          borderRadius={90}
+            width="100%"
+            minHeight={200}
+            borderRadius={Design.borderRadius.xl}
           backgroundColor="rgba(255,255,255,0.95)"
           alignItems="center"
           justifyContent="center"
-          {...Design.shadows.lg}
-          marginBottom={Design.spacing.xxl}
+            {...Design.shadows.lg}
           borderWidth={4}
-          borderColor={randomNumber !== null ? Design.colors.primary : "#FFD700"}
-        >
-          {/*
-            Dynamically scale font size based on number length.
-            - 7+ digits: 32
-            - 6 digits: 40
-            - 5 digits: 48
-            - 4 digits: 56
-            - else: 72/56
-          */}
-            <Text 
-              fontSize={
-                (() => {
-                  const numStr = isRevealing
-                    ? animatedNumber
-                    : randomNumber !== null
-                      ? String(randomNumber)
-                      : '?';
-                  if (numStr.length >= 7) return 32;
-                  if (numStr.length === 6) return 40;
-                  if (numStr.length === 5) return 48;
-                  if (numStr.length === 4) return 56;
-                  return randomNumber !== null ? 56 : 72;
-                })()
-              }
+            borderColor={randomNumber !== null ? Design.colors.primary : "#FFD700"}
+            padding={Design.spacing.xl}
+          >
+            {/* Main number display */}
+          <Text 
+            fontSize={
+              (() => {
+                const numStr = isRevealing
+                  ? animatedNumber
+                  : randomNumber !== null
+                    ? String(randomNumber)
+                    : '?';
+                  const len = numStr.replace(/\?/g, '').length || numStr.length;
+                  if (len >= 7) return Design.typography.sizes.xxxl - 8;
+                  if (len === 6) return Design.typography.sizes.xxxl - 4;
+                  if (len === 5) return Design.typography.sizes.xxxl;
+                  if (len === 4) return Design.typography.sizes.xxxl + 8;
+                  return Design.typography.sizes.xxxl + 16;
+              })()
+            }
               fontWeight={Design.typography.weights.bold} 
               color={randomNumber !== null ? Design.colors.primary : Design.colors.text.primary} 
-              textAlign="center"
-              numberOfLines={1}
-              adjustsFontSizeToFit
-            >
-              {isRevealing ? animatedNumber : randomNumber !== null ? randomNumber : '?'}
-            </Text>
-          </YStack>
-        </Animated.View>
-        
-        {/* Animated button */}
+            textAlign="center"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+              letterSpacing={Design.typography.letterSpacing.tight}
+          >
+              {isRevealing ? animatedNumber : randomNumber !== null ? randomNumber.toLocaleString() : '?'}
+          </Text>
+
+        </YStack>
+      </Animated.View>
+      
+      {/* Animated button */}
         <Animated.View 
           style={{ 
             opacity: buttonFadeAnim,
@@ -403,8 +461,8 @@ export default function NumberGuesser() {
           }}
         >
           <Pressable
-            onPress={revealNumber}
-            disabled={isRevealing}
+          onPress={revealNumber}
+          disabled={isRevealing}
             style={({ pressed }) => [
               {
                 borderRadius: Design.borderRadius.lg,
@@ -442,24 +500,24 @@ export default function NumberGuesser() {
                   letterSpacing={Design.typography.letterSpacing.wide}
                 >
                   {isRevealing ? 'Rolling...' : randomNumber !== null ? 'Roll Again' : 'Reveal Number'}
-                </Text>
+          </Text>
               </XStack>
             </LinearGradient>
           </Pressable>
-        </Animated.View>
+      </Animated.View>
 
-        {/* Reset instruction */}
-        {randomNumber !== null && !isRevealing && (
+      {/* Reset instruction */}
+      {randomNumber !== null && !isRevealing && (
           <Animated.View style={{ opacity: 1, marginTop: Design.spacing.lg }}>
             <Text 
               fontSize={Design.typography.sizes.sm} 
               color={Design.colors.text.secondary} 
               textAlign="center"
             >
-              Tap "Roll Again" for a new number! 🎲
-            </Text>
-          </Animated.View>
-        )}
+            Tap "Roll Again" for a new number! 🎲
+          </Text>
+        </Animated.View>
+      )}
       </ScrollView>
 
       {/* Confetti celebration */}
