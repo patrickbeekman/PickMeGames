@@ -24,10 +24,10 @@ export default function HomeScreen() {
   
   const options = [
     { title: 'Multifinger Tap', route: '/finger-tap', emoji: '👆', gradient: ['#4CAF50', '#66BB6A'] },
-    { title: 'Spinner', route: '/spinner', emoji: '🌀', gradient: ['#2196F3', '#42A5F5'] },
-    { title: 'Numbered Spinner', route: '/numbered-spinner', emoji: '🍭', gradient: ['#9C27B0', '#BA68C8'] },
-    { title: 'Random Number', route: '/random-number', emoji: '🎲', gradient: ['#FF9800', '#FFB74D'] },
-    { title: 'Prompted', route: '/prompted', emoji: '💭', gradient: ['#E91E63', '#F06292'] },
+    { title: 'Spinner', route: '/spinner', emoji: '🌀', gradient: ['#1976D2', '#42A5F5'] }, // Updated for better contrast
+    { title: 'Numbered Spinner', route: '/numbered-spinner', emoji: '🍭', gradient: ['#7B1FA2', '#BA68C8'] }, // Updated for better contrast
+    { title: 'Random Number', route: '/random-number', emoji: '🎲', gradient: ['#F57C00', '#FFB74D'] }, // Updated for better contrast
+    { title: 'Prompted', route: '/prompted', emoji: '💭', gradient: ['#C2185B', '#F06292'] }, // Updated for better contrast
   ];
 
   // Create animation values for each button

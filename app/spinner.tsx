@@ -394,7 +394,7 @@ const TwisterSpinner = () => {
             ]}
           >
             <LinearGradient
-              colors={spinning ? ['#FF9800', '#F57C00', '#E65100'] : [Design.colors.primary, Design.colors.primaryDark, '#3d8b40']}
+              colors={spinning ? ['#F57C00', '#E65100', '#D84315'] : [Design.colors.primary, Design.colors.primaryDark, '#388E3C']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={{

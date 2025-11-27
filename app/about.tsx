@@ -43,11 +43,11 @@ export default function AboutScreen() {
             />
           </YStack>
           
-          <Text fontSize={32} fontWeight="800" color="#333" textAlign="center">
+          <Text fontSize={32} fontWeight="800" color="#1A1A1A" textAlign="center">
             PickMe Games
           </Text>
           
-          <Text fontSize={18} color="#666" textAlign="center" maxWidth={280}>
+          <Text fontSize={18} color="#4A4A4A" textAlign="center" maxWidth={280}>
             Making decisions fun, one game at a time
           </Text>
         </YStack>
@@ -64,7 +64,7 @@ export default function AboutScreen() {
                 width={40}
                 height={40}
                 borderRadius={20}
-                backgroundColor="#2196F3"
+                backgroundColor="#1976D2"
                 alignItems="center"
                 justifyContent="center"
               >
@@ -72,7 +72,7 @@ export default function AboutScreen() {
               </YStack>
               <YStack flex={1}>
                 <Text fontWeight="600" fontSize={16}>Version {Constants.expoConfig?.version ?? '1.0.0'}</Text>
-                <Text color="#666" fontSize={14}>Latest & Greatest</Text>
+                <Text color="#4A4A4A" fontSize={14}>Latest & Greatest</Text>
               </YStack>
             </XStack>
           </YStack>
@@ -87,7 +87,7 @@ export default function AboutScreen() {
                 width={40}
                 height={40}
                 borderRadius={20}
-                backgroundColor="#FF9800"
+                backgroundColor="#F57C00"
                 alignItems="center"
                 justifyContent="center"
               >
@@ -95,7 +95,7 @@ export default function AboutScreen() {
               </YStack>
               <YStack flex={1}>
                 <Text fontWeight="600" fontSize={16}>Created by Patrick Beekman</Text>
-                <Text color="#666" fontSize={14}>With ❤️ for learning & fun</Text>
+                <Text color="#4A4A4A" fontSize={14}>With ❤️ for learning & fun</Text>
               </YStack>
             </XStack>
           </YStack>
@@ -118,7 +118,7 @@ export default function AboutScreen() {
               </YStack>
               <YStack flex={1}>
                 <Text fontWeight="600" fontSize={16}>No Ads. Just Games.</Text>
-                <Text color="#666" fontSize={14}>Pure fun experience</Text>
+                <Text color="#4A4A4A" fontSize={14}>Pure fun experience</Text>
               </YStack>
             </XStack>
           </YStack>
@@ -155,10 +155,10 @@ export default function AboutScreen() {
 
         {/* Footer */}
         <YStack alignItems="center" marginTop={10} marginBottom={30}>
-          <Text fontSize={12} color="#999" textAlign="center">
+          <Text fontSize={12} color="#6B6B6B" textAlign="center">
             Made with React Native & Tamagui
           </Text>
-          <Text fontSize={12} color="#999" textAlign="center">
+          <Text fontSize={12} color="#6B6B6B" textAlign="center">
             Open source • MIT License
           </Text>
         </YStack>

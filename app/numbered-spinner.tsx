@@ -453,7 +453,7 @@ export default function SpinnerSelector() {
               ]}
             >
               <LinearGradient
-                colors={spinning ? ['#FF9800', '#F57C00'] : [Design.colors.primary, Design.colors.primaryDark]}
+                colors={spinning ? ['#F57C00', '#E65100'] : [Design.colors.primary, Design.colors.primaryDark]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={{
