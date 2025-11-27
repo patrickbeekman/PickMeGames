@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, ScrollView, StyleSheet, AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { usePrompts } from '../hooks/usePrompts';

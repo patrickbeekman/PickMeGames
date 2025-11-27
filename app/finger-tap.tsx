@@ -5,6 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
+    AccessibilityInfo,
     Animated,
     Dimensions,
     Easing,
@@ -13,7 +14,6 @@ import {
     Pressable,
     ScrollView,
     StyleSheet,
-    AccessibilityInfo,
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';

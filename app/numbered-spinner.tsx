@@ -4,7 +4,7 @@ import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Easing, Pressable, ScrollView, StyleSheet, View, AccessibilityInfo } from 'react-native';
+import { AccessibilityInfo, Animated, Dimensions, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
 import { Design } from '../constants/Design';
