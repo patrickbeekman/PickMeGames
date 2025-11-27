@@ -79,15 +79,14 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <YStack flex={1} backgroundColor={Design.colors.background.light}>
-        <LinearGradient
-          colors={[Design.colors.background.light, Design.colors.background.medium, Design.colors.background.lightest]}
-          locations={[0, 0.5, 1]}
-          style={StyleSheet.absoluteFillObject}
-        />
-        <StatusBar barStyle="dark-content" backgroundColor={Design.colors.background.light} />
-        
+    <View style={{ flex: 1 }}>
+      <LinearGradient
+        colors={[Design.colors.background.light, Design.colors.background.medium, Design.colors.background.lightest]}
+        locations={[0, 0.5, 1]}
+        style={StyleSheet.absoluteFillObject}
+      />
+      <StatusBar barStyle="dark-content" backgroundColor={Design.colors.background.light} />
+      <SafeAreaView style={{ flex: 1 }}>
         <YStack flex={1} paddingHorizontal={Design.spacing.lg}>
           {/* Scrollable Content Area */}
           <ScrollView
@@ -315,7 +314,7 @@ export default function HomeScreen() {
             </Link>
           </Animated.View>
         </YStack>
-      </YStack>
-    </SafeAreaView>
+      </SafeAreaView>
+    </View>
   );
 }
