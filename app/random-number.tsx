@@ -3,7 +3,7 @@ import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Design } from '../constants/Design';
@@ -286,6 +286,41 @@ export default function NumberGuesser() {
     outputRange: [0, -20],
   });
 
+  // Memoize font size calculation and display values
+  const { fontSize, displayText, accessibilityLabel } = useMemo(() => {
+    const numStr = isRevealing
+      ? animatedNumber
+      : randomNumber !== null
+        ? String(randomNumber)
+        : '?';
+    const len = numStr.replace(/\?/g, '').length || numStr.length;
+    
+    let calculatedFontSize: number;
+    if (len >= 7) calculatedFontSize = Design.typography.sizes.xxxl - 8;
+    else if (len === 6) calculatedFontSize = Design.typography.sizes.xxxl - 4;
+    else if (len === 5) calculatedFontSize = Design.typography.sizes.xxxl;
+    else if (len === 4) calculatedFontSize = Design.typography.sizes.xxxl + 8;
+    else calculatedFontSize = Design.typography.sizes.xxxl + 16;
+
+    const display = isRevealing 
+      ? animatedNumber 
+      : randomNumber !== null 
+        ? randomNumber.toLocaleString() 
+        : '?';
+    
+    const a11yLabel = isRevealing 
+      ? 'Revealing number' 
+      : randomNumber !== null 
+        ? `Random number: ${randomNumber.toLocaleString()}` 
+        : 'Number not yet revealed';
+
+    return {
+      fontSize: calculatedFontSize,
+      displayText: display,
+      accessibilityLabel: a11yLabel,
+    };
+  }, [isRevealing, animatedNumber, randomNumber]);
+
   return (
     <YStack flex={1} backgroundColor={Design.colors.background.light}>
       <LinearGradient
@@ -432,31 +467,17 @@ export default function NumberGuesser() {
           >
             {/* Main number display */}
           <Text 
-            fontSize={
-              (() => {
-                const numStr = isRevealing
-                  ? animatedNumber
-                  : randomNumber !== null
-                    ? String(randomNumber)
-                    : '?';
-                  const len = numStr.replace(/\?/g, '').length || numStr.length;
-                  if (len >= 7) return Design.typography.sizes.xxxl - 8;
-                  if (len === 6) return Design.typography.sizes.xxxl - 4;
-                  if (len === 5) return Design.typography.sizes.xxxl;
-                  if (len === 4) return Design.typography.sizes.xxxl + 8;
-                  return Design.typography.sizes.xxxl + 16;
-              })()
-            }
-              fontWeight={Design.typography.weights.bold} 
-              color={randomNumber !== null ? Design.colors.primary : Design.colors.text.primary} 
+            fontSize={fontSize}
+            fontWeight={Design.typography.weights.bold} 
+            color={randomNumber !== null ? Design.colors.primary : Design.colors.text.primary} 
             textAlign="center"
             numberOfLines={1}
             adjustsFontSizeToFit
-              letterSpacing={Design.typography.letterSpacing.tight}
+            letterSpacing={Design.typography.letterSpacing.tight}
             accessibilityRole="text"
-            accessibilityLabel={isRevealing ? 'Revealing number' : randomNumber !== null ? `Random number: ${randomNumber.toLocaleString()}` : 'Number not yet revealed'}
+            accessibilityLabel={accessibilityLabel}
           >
-              {isRevealing ? animatedNumber : randomNumber !== null ? randomNumber.toLocaleString() : '?'}
+            {displayText}
           </Text>
 
         </YStack>

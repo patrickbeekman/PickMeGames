@@ -3,7 +3,7 @@ import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useNavigation } from 'expo-router';
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { Animated, Pressable, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Design } from '../constants/Design';
@@ -22,13 +22,14 @@ export default function HomeScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
   
-  const options = [
+  // Memoize options array to prevent recreation on every render
+  const options = useMemo(() => [
     { title: 'Multifinger Tap', route: '/finger-tap', emoji: '👆', gradient: ['#4CAF50', '#66BB6A'] },
     { title: 'Spinner', route: '/spinner', emoji: '🌀', gradient: ['#1976D2', '#42A5F5'] }, // Updated for better contrast
     { title: 'Numbered Spinner', route: '/numbered-spinner', emoji: '🍭', gradient: ['#7B1FA2', '#BA68C8'] }, // Updated for better contrast
     { title: 'Random Number', route: '/random-number', emoji: '🎲', gradient: ['#F57C00', '#FFB74D'] }, // Updated for better contrast
     { title: 'Prompted', route: '/prompted', emoji: '💭', gradient: ['#C2185B', '#F06292'] }, // Updated for better contrast
-  ];
+  ], []);
 
   // Create animation values for each button
   const buttonAnims = useRef(

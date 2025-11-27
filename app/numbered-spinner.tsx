@@ -3,7 +3,7 @@ import { Text } from '@tamagui/core';
 import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Dimensions, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
@@ -217,7 +217,8 @@ export default function SpinnerSelector() {
     });
   };
 
-  const renderWheel = () => {
+  // Memoize wheel rendering to avoid recalculating SVG paths on every render
+  const wheelPaths = useMemo(() => {
     const angleStep = 360 / playerCount;
     const radius = spinnerSize / 2;
     const paths = [];
@@ -285,7 +286,7 @@ export default function SpinnerSelector() {
     }
 
     return paths;
-  };
+  }, [playerCount, spinnerSize]);
 
   const rotate = rotation.interpolate({
     inputRange: [0, 360],
@@ -385,7 +386,7 @@ export default function SpinnerSelector() {
             >
               <Animated.View style={{ transform: [{ rotate }] }}>
                 <Svg width={spinnerSize} height={spinnerSize}>
-                  {renderWheel()}
+                  {wheelPaths}
                 </Svg>
               </Animated.View>
             </YStack>
