@@ -5,15 +5,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
-    AccessibilityInfo,
-    Animated,
-    Dimensions,
-    Easing,
-    GestureResponderEvent,
-    NativeTouchEvent,
-    Pressable,
-    ScrollView,
-    StyleSheet,
+  AccessibilityInfo,
+  Animated,
+  Dimensions,
+  Easing,
+  GestureResponderEvent,
+  NativeTouchEvent,
+  Pressable,
+  ScrollView,
+  StyleSheet,
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
@@ -320,9 +320,20 @@ export default function FingerTapScreen() {
                   color={Design.colors.text.primary}
                   textAlign="center"
                   lineHeight={Design.typography.sizes.md * 1.4}
+                  marginBottom={Design.spacing.sm}
                 >
                   Every player touch and hold one finger to the screen. 
                   You can move your finger around!
+                </Text>
+                <Text
+                  fontSize={Design.typography.sizes.sm}
+                  fontWeight={Design.typography.weights.regular}
+                  color={Design.colors.text.secondary}
+                  textAlign="center"
+                  lineHeight={Design.typography.sizes.sm * 1.4}
+                  fontStyle="italic"
+                >
+                  Note: iPhone has a limit of 5 simultaneous touches
                 </Text>
               </YStack>
             </YStack>

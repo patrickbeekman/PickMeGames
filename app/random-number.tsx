@@ -125,6 +125,9 @@ export default function NumberGuesser() {
     // Haptic feedback on press
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     
+    // Reset state for new roll to prevent stale values
+    setRandomNumber(null);
+    setAnimatedNumber('?');
     setIsRevealing(true);
     setShowConfetti(false);
     
