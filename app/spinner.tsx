@@ -11,6 +11,7 @@ import {
     Pressable,
     ScrollView,
     StyleSheet,
+    AccessibilityInfo,
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Design } from '../constants/Design';
@@ -167,6 +168,9 @@ const TwisterSpinner = () => {
         // Haptic feedback on completion
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
+        // Screen reader announcement
+        AccessibilityInfo.announceForAccessibility('Spinner has stopped. Check the arrow position to see who goes first.');
+
         // Stop animations
         pulseAnimation.stop();
         glowAnimation.stop();
@@ -268,6 +272,7 @@ const TwisterSpinner = () => {
               textAlign="center"
               marginBottom={Design.spacing.xs}
               letterSpacing={Design.typography.letterSpacing.tight}
+              accessibilityRole="header"
             >
               Classic Spinner!
             </Text>
@@ -277,6 +282,7 @@ const TwisterSpinner = () => {
               textAlign="center" 
               maxWidth={320}
               lineHeight={Design.typography.sizes.sm * 1.4}
+              accessibilityRole="text"
             >
               Place your phone in the center of your group so everyone is equidistant from the spinner!
             </Text>
@@ -285,6 +291,8 @@ const TwisterSpinner = () => {
 
         {/* Spinner Container with Animations */}
         <View 
+          accessibilityRole="none"
+          accessibilityLabel={spinning ? 'Spinner is rotating' : 'Spinner ready to spin'}
           style={{ 
             width: SPINNER_SIZE + 20, 
             height: SPINNER_SIZE + 20, 
@@ -370,6 +378,10 @@ const TwisterSpinner = () => {
           <Pressable
             onPress={spin}
             disabled={spinning}
+            accessibilityRole="button"
+            accessibilityLabel={spinning ? 'Spinner is spinning' : 'Spin the spinner'}
+            accessibilityHint="Spins the spinner to randomly select who goes first"
+            accessibilityState={{ disabled: spinning }}
             style={({ pressed }) => [
               {
                 borderRadius: Design.borderRadius.lg,

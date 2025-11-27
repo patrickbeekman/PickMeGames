@@ -4,7 +4,7 @@ import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Animated, Dimensions, Easing, Pressable, ScrollView, StyleSheet, View, AccessibilityInfo } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
 import { Design } from '../constants/Design';
@@ -179,6 +179,10 @@ export default function SpinnerSelector() {
     }).start(() => {
       setSpinning(false);
       setShowConfetti(true);
+
+      // Screen reader announcement
+      const selectedSegment = Math.floor((360 - (targetRotation % 360)) / (360 / playerCount)) % playerCount + 1;
+      AccessibilityInfo.announceForAccessibility(`Spinner stopped on segment ${selectedSegment} of ${playerCount}. Player ${selectedSegment} goes first.`);
 
       // Stop animations
       pulseAnimation.stop();
@@ -433,6 +437,10 @@ export default function SpinnerSelector() {
             <Pressable
               onPress={spin}
               disabled={spinning}
+              accessibilityRole="button"
+              accessibilityLabel={spinning ? 'Spinner is spinning' : 'Spin the numbered spinner'}
+              accessibilityHint={`Spins the spinner with ${playerCount} segments to randomly select which player goes first`}
+              accessibilityState={{ disabled: spinning }}
               style={({ pressed }) => [
                 {
                   borderRadius: Design.borderRadius.md,

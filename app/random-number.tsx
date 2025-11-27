@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
@@ -240,6 +240,9 @@ export default function NumberGuesser() {
         // Haptic feedback on completion
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
+        // Screen reader announcement
+        AccessibilityInfo.announceForAccessibility(`Random number revealed: ${endValue.toLocaleString()}`);
+
         // Victory bounce animation
         Animated.sequence([
           Animated.timing(bounceAnim, {
@@ -316,6 +319,7 @@ export default function NumberGuesser() {
               textAlign="center" 
               marginBottom={Design.spacing.sm}
               letterSpacing={Design.typography.letterSpacing.tight}
+              accessibilityRole="header"
             >
               Lucky Number Challenge!
         </Text>
@@ -357,6 +361,9 @@ export default function NumberGuesser() {
                   key={idx}
                   onPress={() => applyPreset(idx)}
                   disabled={isRevealing}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Set range to ${preset.label}, from ${preset.min} to ${preset.max}`}
+                  accessibilityState={{ selected: selectedPreset === idx, disabled: isRevealing }}
                   style={({ pressed }) => [
                     {
                       borderRadius: Design.borderRadius.md,
@@ -443,6 +450,8 @@ export default function NumberGuesser() {
             numberOfLines={1}
             adjustsFontSizeToFit
               letterSpacing={Design.typography.letterSpacing.tight}
+            accessibilityRole="text"
+            accessibilityLabel={isRevealing ? 'Revealing number' : randomNumber !== null ? `Random number: ${randomNumber.toLocaleString()}` : 'Number not yet revealed'}
           >
               {isRevealing ? animatedNumber : randomNumber !== null ? randomNumber.toLocaleString() : '?'}
           </Text>
@@ -463,6 +472,10 @@ export default function NumberGuesser() {
           <Pressable
           onPress={revealNumber}
           disabled={isRevealing}
+            accessibilityRole="button"
+            accessibilityLabel={isRevealing ? 'Revealing number' : randomNumber !== null ? 'Generate new random number' : 'Reveal random number'}
+            accessibilityHint={randomNumber !== null ? 'Generates a new random number' : `Reveals a random number between ${minNumber.toLocaleString()} and ${maxNumber.toLocaleString()}`}
+            accessibilityState={{ disabled: isRevealing }}
             style={({ pressed }) => [
               {
                 borderRadius: Design.borderRadius.lg,

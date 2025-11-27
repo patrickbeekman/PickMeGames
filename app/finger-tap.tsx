@@ -13,6 +13,7 @@ import {
     Pressable,
     ScrollView,
     StyleSheet,
+    AccessibilityInfo,
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
@@ -205,6 +206,9 @@ export default function FingerTapScreen() {
     // Haptic feedback on winner selection
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     
+    // Screen reader announcement
+    AccessibilityInfo.announceForAccessibility(`Winner selected! ${touches.length} player${touches.length !== 1 ? 's' : ''} participated.`);
+    
     capture('finger_tap_winner_picked', {
       winner_x: chosen.x,
       winner_y: chosen.y,
@@ -273,6 +277,8 @@ export default function FingerTapScreen() {
           onTouchStart={onTouchStart}
           onTouchMove={onTouchMove}
           onTouchEnd={onTouchEnd}
+          accessibilityRole="none"
+          accessibilityLabel={phase === 'waiting' ? 'Touch screen to start game' : phase === 'countdown' ? `Countdown: ${countdown} seconds` : phase === 'winner' ? 'Winner selected' : 'Game in progress'}
         >
 
         {/* Enhanced Instructions for waiting phase */}
@@ -297,6 +303,7 @@ export default function FingerTapScreen() {
                 textAlign="center" 
                 marginBottom={Design.spacing.sm}
                 letterSpacing={Design.typography.letterSpacing.tight}
+                accessibilityRole="header"
               >
                 Multifinger Challenge!
               </Text>
@@ -466,6 +473,9 @@ export default function FingerTapScreen() {
             onTouchStart={(e) => e.stopPropagation()}
             onTouchMove={(e) => e.stopPropagation()}
             onTouchEnd={(e) => e.stopPropagation()}
+            accessibilityRole="button"
+            accessibilityLabel="Reset game"
+            accessibilityHint="Resets the game to start a new round"
             style={({ pressed }) => [
               {
                 borderRadius: Design.borderRadius.full,

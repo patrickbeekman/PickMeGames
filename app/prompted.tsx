@@ -4,7 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Animated, Easing, Pressable, ScrollView, StyleSheet, AccessibilityInfo } from 'react-native';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { usePrompts } from '../hooks/usePrompts';
@@ -204,6 +204,9 @@ export default function PromptSelector() {
       inAnimation.start(() => {
         // Haptic feedback on new prompt
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        // Screen reader announcement
+        const newPrompt = filteredPrompts[next];
+        AccessibilityInfo.announceForAccessibility(`New prompt: ${newPrompt}`);
         // Remove completed animations from refs
         animationRefs.current = animationRefs.current.filter(anim => anim !== inAnimation);
       });
@@ -268,6 +271,7 @@ export default function PromptSelector() {
               textAlign="center" 
               marginBottom={Design.spacing.sm}
               letterSpacing={Design.typography.letterSpacing.tight}
+              accessibilityRole="header"
             >
               Decision Prompt Challenge!
             </Text>
@@ -315,6 +319,8 @@ export default function PromptSelector() {
               textAlign="center" 
               fontWeight={Design.typography.weights.medium} 
               lineHeight={Design.typography.sizes.xl * 1.4}
+              accessibilityRole="text"
+              accessibilityLabel={`Current prompt: ${currentPrompt}`}
             >
               {currentPrompt}
             </Text>
@@ -333,6 +339,9 @@ export default function PromptSelector() {
         >
           <Link href="/prompt-settings" asChild>
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Add custom prompts"
+              accessibilityHint="Opens settings to add or manage custom prompts"
               style={({ pressed }) => [
                 {
                   borderRadius: Design.borderRadius.lg,
@@ -394,6 +403,9 @@ export default function PromptSelector() {
         >
           <Pressable
             onPress={nextPrompt}
+            accessibilityRole="button"
+            accessibilityLabel="Get new prompt"
+            accessibilityHint="Generates a new random prompt to help decide who goes first"
             style={({ pressed }) => [
               {
                 borderRadius: Design.borderRadius.lg,

@@ -124,6 +124,8 @@ export default function HomeScreen() {
                   height={140}
                   objectFit='contain'
                   alt='PickMe Games Logo'
+                  accessibilityRole="image"
+                  accessibilityLabel="PickMe Games Logo"
                 />
               </YStack>
               
@@ -136,6 +138,7 @@ export default function HomeScreen() {
                   textAlign="center" 
                   marginBottom={Design.spacing.xs}
                   letterSpacing={Design.typography.letterSpacing.tight}
+                  accessibilityRole="header"
                 >
                   Who goes first?
                 </Text>
@@ -145,6 +148,7 @@ export default function HomeScreen() {
                   textAlign="center"
                   maxWidth={320}
                   lineHeight={Design.typography.sizes.sm * 1.4}
+                  accessibilityRole="text"
                 >
                   Pick a mode below and follow the instructions to let fate decide who goes first.
                 </Text>
@@ -163,6 +167,9 @@ export default function HomeScreen() {
                   >
                     <Link href={opt.route as any} asChild>
                       <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Open ${opt.title} game mode`}
+                        accessibilityHint={`Starts the ${opt.title} game mode to help decide who goes first`}
                         style={({ pressed }) => [
                           {
                             borderRadius: Design.borderRadius.lg,
@@ -261,6 +268,9 @@ export default function HomeScreen() {
           >
             <Link href="/about" asChild>
               <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="About"
+                accessibilityHint="Opens the about page with app information"
                 style={({ pressed }) => [
                   {
                     borderRadius: Design.borderRadius.lg,
