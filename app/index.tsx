@@ -29,6 +29,9 @@ export default function HomeScreen() {
     { title: 'Numbered Spinner', route: '/numbered-spinner', emoji: '🍭', gradient: ['#7B1FA2', '#BA68C8'] }, // Updated for better contrast
     { title: 'Random Number', route: '/random-number', emoji: '🎲', gradient: ['#F57C00', '#FFB74D'] }, // Updated for better contrast
     { title: 'Prompted', route: '/prompted', emoji: '💭', gradient: ['#C2185B', '#F06292'] }, // Updated for better contrast
+    { title: 'Coin Flip', route: '/coin-flip', emoji: '🪙', gradient: ['#FFD700', '#FFA500'] },
+    { title: 'Timer Countdown', route: '/timer-countdown', emoji: '⏱️', gradient: ['#4ECDC4', '#45B7D1'] },
+    { title: 'Color Matcher', route: '/color-matcher', emoji: '🎨', gradient: ['#FF6B6B', '#FF8E8E'] },
   ], []);
 
   // Create animation values for each button
