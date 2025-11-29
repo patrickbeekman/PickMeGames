@@ -189,8 +189,8 @@ export default function TimerCountdownScreen() {
       timestamp: touchTimestamp,
     }));
     
-    // Accept all touches (up to 5 on iOS, but we'll just take the first one)
-    const validTouches = newTouches.slice(0, 5); // iOS limit
+    // Accept all touches (we'll just take the first one that taps)
+    const validTouches = newTouches.slice(0, 1);
     
     if (validTouches.length > 0 && flashTime) {
       const reactionTime = touchTimestamp - flashTime;
@@ -362,18 +362,8 @@ export default function TimerCountdownScreen() {
                     color={Design.colors.text.secondary}
                     textAlign="center"
                     lineHeight={Design.typography.sizes.sm * 1.4}
-                    marginBottom={Design.spacing.xs}
                   >
                     The screen will flash and change color between 2-10 seconds. Fastest reaction wins!
-                  </Text>
-                  <Text
-                    fontSize={Design.typography.sizes.xs}
-                    color={Design.colors.text.tertiary}
-                    textAlign="center"
-                    fontStyle="italic"
-                    lineHeight={Design.typography.sizes.xs * 1.4}
-                  >
-                    Note: iPhone has a limit of 5 simultaneous touches
                   </Text>
                 </YStack>
               </YStack>
