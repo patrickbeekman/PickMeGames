@@ -1,14 +1,25 @@
 {
   "name": "readyplayerone",
   "main": "expo-router/entry",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "scripts": {
     "start": "expo start",
+    "start:phone": "expo start --tunnel",
+    "start:lan": "expo start --lan",
+    "start:usb": "expo start --localhost",
+    "start:clear": "expo start --clear",
+    "start:phone:clear": "expo start --tunnel --clear",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
+    "android:device": "expo run:android --device",
     "ios": "expo run:ios",
+    "ios:device": "expo run:ios --device",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "clear": "expo start --clear",
+    "clear:all": "rm -rf node_modules/.cache .expo && npm run clear",
+    "logs:ios": "xcrun simctl spawn booted log stream --predicate 'processImagePath contains \"PickMeGames\"' --level debug",
+    "logs:device": "xcrun devicectl device process monitor --device $(xcrun devicectl list devices | grep -i iphone | head -1 | awk '{print $1}') 2>/dev/null || echo 'Use Console.app or Xcode → Window → Devices to view logs'"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
