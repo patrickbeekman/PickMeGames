@@ -13,8 +13,7 @@ import {
   NativeTouchEvent,
   Pressable,
   ScrollView,
-  StyleSheet,
-  View,
+  StyleSheet
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
@@ -30,7 +29,7 @@ type Phase = 'waiting' | 'ready' | 'flashing' | 'winner';
 
 export default function TimerCountdownScreen() {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const [phase, setPhase] = useState<Phase>('waiting');
   const [touches, setTouches] = useState<{ identifier: number; x: number; y: number; timestamp: number }[]>([]);
   const [winner, setWinner] = useState<{ x: number; y: number; identifier: number } | null>(null);
@@ -65,10 +64,8 @@ export default function TimerCountdownScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_timer_countdown');
-    }
-  }, [capture, isReady]);
+    capture('entered_timer_countdown');
+  }, [capture]);
 
   // Entrance animations
   useEffect(() => {

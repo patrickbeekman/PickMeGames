@@ -71,7 +71,7 @@ export default function AboutScreen() {
                 <Text fontSize={20}>⭐</Text>
               </YStack>
               <YStack flex={1}>
-                <Text fontWeight="600" fontSize={16}>Version {Constants.expoConfig?.version ?? '1.0.0'}</Text>
+                <Text fontWeight="600" fontSize={16}>Version {Constants.expoConfig?.version ?? '1.1.0'}</Text>
                 <Text color="#4A4A4A" fontSize={14}>Latest & Greatest</Text>
               </YStack>
             </XStack>

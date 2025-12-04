@@ -89,7 +89,6 @@ export default function RootLayout() {
         apiKey={POSTHOG_API_KEY}
         options={{ 
           host: POSTHOG_HOST,
-          captureMode: 'form',
           flushAt: 20,
           flushInterval: 30000,
         }}

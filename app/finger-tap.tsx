@@ -5,15 +5,15 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
-  AccessibilityInfo,
-  Animated,
-  Dimensions,
-  Easing,
-  GestureResponderEvent,
-  NativeTouchEvent,
-  Pressable,
-  ScrollView,
-  StyleSheet,
+    AccessibilityInfo,
+    Animated,
+    Dimensions,
+    Easing,
+    GestureResponderEvent,
+    NativeTouchEvent,
+    Pressable,
+    ScrollView,
+    StyleSheet,
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
@@ -39,7 +39,7 @@ const { width, height } = Dimensions.get('window');
 
 export default function FingerTapScreen() {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const [touches, setTouches] = useState<{ identifier: number; x: number; y: number }[]>([]);
   const [winner, setWinner] = useState<{ x: number; y: number } | null>(null);
   const [particles, setParticles] = useState<Animated.ValueXY[]>([]);
@@ -70,10 +70,8 @@ export default function FingerTapScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_finger_tap');
-    }
-  }, [capture, isReady]);
+    capture('entered_finger_tap');
+  }, [capture]);
 
   // Entrance animations
   useEffect(() => {

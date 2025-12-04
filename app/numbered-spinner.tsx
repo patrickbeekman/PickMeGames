@@ -48,7 +48,7 @@ const { width, height } = Dimensions.get('window');
 
 export default function SpinnerSelector() {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const [playerCount, setPlayerCount] = useState(6);
   const [spinning, setSpinning] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -78,10 +78,8 @@ export default function SpinnerSelector() {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_numbered_spinner');
-    }
-  }, [capture, isReady]);
+    capture('entered_numbered_spinner');
+  }, [capture]);
 
   // Update spinner size on dimension changes
   useEffect(() => {

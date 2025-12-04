@@ -11,7 +11,7 @@ import { useAnalytics } from '../hooks/useAnalytics';
 
 export default function NumberGuesser() {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const [randomNumber, setRandomNumber] = useState<number | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
   const [animatedNumber, setAnimatedNumber] = useState('?');
@@ -62,10 +62,8 @@ export default function NumberGuesser() {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_number_guesser');
-    }
-  }, [capture, isReady]);
+    capture('entered_number_guesser');
+  }, [capture]);
 
   // Entrance animations
   useEffect(() => {

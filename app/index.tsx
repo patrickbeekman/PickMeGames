@@ -18,7 +18,7 @@ export default function HomeScreen() {
     });
   }, [navigation]);
 
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
   
@@ -43,10 +43,8 @@ export default function HomeScreen() {
   ).current;
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_home_screen');
-    }
-  }, [capture, isReady]);
+    capture('entered_home_screen');
+  }, [capture]);
 
   useEffect(() => {
     // Main content entrance animation

@@ -5,13 +5,13 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
-    AccessibilityInfo,
-    Animated,
-    Dimensions,
-    Easing,
-    Pressable,
-    ScrollView,
-    StyleSheet,
+  AccessibilityInfo,
+  Animated,
+  Dimensions,
+  Easing,
+  Pressable,
+  ScrollView,
+  StyleSheet,
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Design } from '../constants/Design';
@@ -26,7 +26,7 @@ const SPINNER_CENTER_Y = height / 2;
 
 const TwisterSpinner = () => {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const rotation = useRef(new Animated.Value(0)).current;
   const [spinning, setSpinning] = useState(false);
   const [baseRotation, setBaseRotation] = useState(0);
@@ -58,10 +58,8 @@ const TwisterSpinner = () => {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_spinner');
-    }
-  }, [capture, isReady]);
+    capture('entered_spinner');
+  }, [capture]);
 
   useEffect(() => {
     isMounted.current = true;

@@ -6,7 +6,7 @@ import { useNavigation } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Dimensions, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
-import Svg, { Circle, Defs, LinearGradient as SvgLinearGradient, Path, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, Path, Stop, LinearGradient as SvgLinearGradient } from 'react-native-svg';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
 
@@ -96,7 +96,7 @@ interface PlayerGuess {
 
 export default function ColorMatcherScreen() {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const [playerCount, setPlayerCount] = useState(2);
   const [phase, setPhase] = useState<GamePhase>('setup');
   const [targetColor, setTargetColor] = useState<string>('#FF0000');
@@ -132,10 +132,8 @@ export default function ColorMatcherScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_color_matcher');
-    }
-  }, [capture, isReady]);
+    capture('entered_color_matcher');
+  }, [capture]);
 
   // Entrance animations
   useEffect(() => {

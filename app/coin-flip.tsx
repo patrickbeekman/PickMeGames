@@ -13,7 +13,7 @@ type CoinSide = 'heads' | 'tails' | null;
 
 export default function CoinFlipScreen() {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const [result, setResult] = useState<CoinSide>(null);
   const [isFlipping, setIsFlipping] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -49,10 +49,8 @@ export default function CoinFlipScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_coin_flip');
-    }
-  }, [capture, isReady]);
+    capture('entered_coin_flip');
+  }, [capture]);
 
   // Entrance animations
   useEffect(() => {
