@@ -9,6 +9,7 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useAppRating } from '../hooks/useAppRating';
 
 // Modern color palette with gradients
 const SEGMENT_COLORS = [
@@ -49,6 +50,7 @@ const { width, height } = Dimensions.get('window');
 export default function SpinnerSelector() {
   const navigation = useNavigation();
   const { capture } = useAnalytics();
+  const { trackGameCompletion } = useAppRating();
   const [playerCount, setPlayerCount] = useState(6);
   const [spinning, setSpinning] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -177,6 +179,9 @@ export default function SpinnerSelector() {
     }).start(() => {
       setSpinning(false);
       setShowConfetti(true);
+      
+      // Track game completion for rating prompt
+      trackGameCompletion();
 
       // Screen reader announcement
       const selectedSegment = Math.floor((360 - (targetRotation % 360)) / (360 / playerCount)) % playerCount + 1;

@@ -8,10 +8,12 @@ import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet 
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useAppRating } from '../hooks/useAppRating';
 
 export default function NumberGuesser() {
   const navigation = useNavigation();
   const { capture } = useAnalytics();
+  const { trackGameCompletion } = useAppRating();
   const [randomNumber, setRandomNumber] = useState<number | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
   const [animatedNumber, setAnimatedNumber] = useState('?');
@@ -226,6 +228,9 @@ export default function NumberGuesser() {
             setAnimatedNumber(endValueStr);
         setIsRevealing(false);
         setShowConfetti(true);
+        
+        // Track game completion for rating prompt
+        trackGameCompletion();
           }
         }, 150);
         

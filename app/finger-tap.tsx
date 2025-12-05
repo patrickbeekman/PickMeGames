@@ -19,6 +19,7 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useAppRating } from '../hooks/useAppRating';
 
 // TypeScript interfaces for touch events
 interface TouchData {
@@ -40,6 +41,7 @@ const { width, height } = Dimensions.get('window');
 export default function FingerTapScreen() {
   const navigation = useNavigation();
   const { capture } = useAnalytics();
+  const { trackGameCompletion } = useAppRating();
   const [touches, setTouches] = useState<{ identifier: number; x: number; y: number }[]>([]);
   const [winner, setWinner] = useState<{ x: number; y: number } | null>(null);
   const [particles, setParticles] = useState<Animated.ValueXY[]>([]);
@@ -200,6 +202,9 @@ export default function FingerTapScreen() {
     setWinner({ x: chosen.x, y: chosen.y });
     triggerParticles(chosen.x, chosen.y);
     setPhase('winner');
+    
+    // Track game completion for rating prompt
+    trackGameCompletion();
     
     // Haptic feedback on winner selection
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

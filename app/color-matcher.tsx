@@ -9,6 +9,7 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import Svg, { Circle, Defs, Path, Stop, LinearGradient as SvgLinearGradient } from 'react-native-svg';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useAppRating } from '../hooks/useAppRating';
 
 const { width } = Dimensions.get('window');
 const COLOR_WHEEL_SIZE = Math.min(width - 48, 300);
@@ -97,6 +98,7 @@ interface PlayerGuess {
 export default function ColorMatcherScreen() {
   const navigation = useNavigation();
   const { capture } = useAnalytics();
+  const { trackGameCompletion } = useAppRating();
   const [playerCount, setPlayerCount] = useState(2);
   const [phase, setPhase] = useState<GamePhase>('setup');
   const [targetColor, setTargetColor] = useState<string>('#FF0000');
@@ -289,6 +291,9 @@ export default function ColorMatcherScreen() {
     setWinner(winnerIndex);
     setPhase('results');
     setShowConfetti(true);
+
+    // Track game completion for rating prompt
+    trackGameCompletion();
 
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     AccessibilityInfo.announceForAccessibility(`Player ${winnerIndex + 1} wins with the closest color match!`);

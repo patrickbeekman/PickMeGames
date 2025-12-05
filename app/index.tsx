@@ -4,10 +4,29 @@ import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useNavigation } from 'expo-router';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import { Animated, Pressable, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import { Animated, Linking, Pressable, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useAppRating } from '../hooks/useAppRating';
+
+// Component to handle native rating prompt - triggers directly without custom modal
+function RatingPromptHandler({ shouldShow, onOpenStore, onComplete }: { shouldShow: boolean; onOpenStore: () => void; onComplete: () => void }) {
+  const hasShownRef = useRef(false);
+  
+  useEffect(() => {
+    if (shouldShow && !hasShownRef.current) {
+      hasShownRef.current = true;
+      // Small delay to ensure UI is ready
+      setTimeout(() => {
+        onOpenStore();
+        onComplete();
+      }, 500);
+    }
+  }, [shouldShow, onOpenStore, onComplete]);
+  
+  return null;
+}
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -19,8 +38,16 @@ export default function HomeScreen() {
   }, [navigation]);
 
   const { capture } = useAnalytics();
+  const {
+    shouldShowRating,
+    trackAppOpen,
+    markRatingCompleted,
+    openStoreRating,
+    checkShouldShowRating,
+  } = useAppRating();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
+  const scrollViewRef = useRef<ScrollView>(null);
   
   // Memoize options array to prevent recreation on every render
   const options = useMemo(() => [
@@ -44,7 +71,25 @@ export default function HomeScreen() {
 
   useEffect(() => {
     capture('entered_home_screen');
-  }, [capture]);
+    trackAppOpen();
+  }, [capture, trackAppOpen]);
+  
+  // Re-check rating state when screen comes into focus
+  // This ensures the prompt shows if conditions were met while on another screen
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      // Re-check rating state when returning to home screen
+      checkShouldShowRating();
+    });
+    return unsubscribe;
+  }, [navigation, checkShouldShowRating]);
+  
+  // Separate effect to log rating state (for debugging)
+  useEffect(() => {
+    if (__DEV__) {
+      console.log('Home screen - shouldShowRating:', shouldShowRating);
+    }
+  }, [shouldShowRating]);
 
   useEffect(() => {
     // Main content entrance animation
@@ -78,6 +123,22 @@ export default function HomeScreen() {
         }),
       ]).start();
     });
+
+    // Scroll hint animation - gently scrolls down and back up to indicate more content
+    // Wait for all entrance animations to complete first
+    const totalAnimationTime = 200 + (options.length - 1) * 100 + 500;
+    setTimeout(() => {
+      if (scrollViewRef.current) {
+        // Scroll down smoothly
+        scrollViewRef.current.scrollTo({ y: 120, animated: true });
+        // Then scroll back up after a brief pause
+        setTimeout(() => {
+          if (scrollViewRef.current) {
+            scrollViewRef.current.scrollTo({ y: 0, animated: true });
+          }
+        }, 800);
+      }
+    }, totalAnimationTime + 300);
   }, []);
 
   return (
@@ -92,6 +153,7 @@ export default function HomeScreen() {
         <YStack flex={1} paddingHorizontal={Design.spacing.lg}>
           {/* Scrollable Content Area */}
           <ScrollView
+            ref={scrollViewRef}
             contentContainerStyle={{
               paddingTop: Design.spacing.lg,
               paddingBottom: Design.spacing.xl,
@@ -121,8 +183,8 @@ export default function HomeScreen() {
               >
                 <Image
                   source={require('../assets/images/pickmelogo_transparent.png')}
-                  width={140}
-                  height={140}
+                  width={180}
+                  height={180}
                   objectFit='contain'
                   alt='PickMe Games Logo'
                   accessibilityRole="image"
@@ -254,69 +316,126 @@ export default function HomeScreen() {
                     </Link>
                   </Animated.View>
                 ))}
+                
+                {/* About and Feedback Buttons - Side by Side */}
+                <Animated.View
+                  style={{
+                    width: '100%',
+                    opacity: fadeAnim,
+                    transform: [{ translateY: slideAnim }],
+                    marginTop: Design.spacing.sm,
+                  }}
+                >
+                  <XStack width="100%" gap={Design.spacing.sm}>
+                    {/* About Button - Half Width */}
+                    <View style={{ flex: 1 }}>
+                      <Link href="/about" asChild>
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel="About"
+                          accessibilityHint="Opens the about page with app information"
+                          style={({ pressed }) => [
+                            {
+                              borderRadius: Design.borderRadius.lg,
+                              overflow: 'hidden',
+                              backgroundColor: '#FFFFFF',
+                              ...Design.shadows.md,
+                              transform: [{ scale: pressed ? Design.pressScale.sm : 1 }],
+                              opacity: pressed ? 0.95 : 1,
+                            },
+                          ]}
+                        >
+                          <LinearGradient
+                            colors={[Design.colors.primary, Design.colors.primaryDark]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={{
+                              paddingVertical: Design.spacing.md,
+                              paddingHorizontal: Design.spacing.md,
+                              borderRadius: Design.borderRadius.lg,
+                              minHeight: 56,
+                              justifyContent: 'center',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <XStack alignItems="center" justifyContent="center" gap={Design.spacing.xs}>
+                              <Text fontSize={Design.typography.sizes.md + 2}>👨🏻‍🌾</Text>
+                              <Text 
+                                color={Design.colors.text.white} 
+                                fontWeight={Design.typography.weights.bold} 
+                                fontSize={Design.typography.sizes.md}
+                              >
+                                About
+                              </Text>
+                            </XStack>
+                          </LinearGradient>
+                        </Pressable>
+                      </Link>
+                    </View>
+                    
+                    {/* Feedback Button - Half Width */}
+                    <View style={{ flex: 1 }}>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel="Send Feedback"
+                        accessibilityHint="Opens feedback form"
+                        onPress={() => {
+                          capture('feedback_button_pressed');
+                          Linking.openURL('https://airtable.com/appPI2noUjKkmeNWM/pagrjCubfIJqODIOQ/form');
+                        }}
+                        style={({ pressed }) => [
+                          {
+                            borderRadius: Design.borderRadius.lg,
+                            overflow: 'hidden',
+                            backgroundColor: '#FFFFFF',
+                            ...Design.shadows.md,
+                            transform: [{ scale: pressed ? Design.pressScale.sm : 1 }],
+                            opacity: pressed ? 0.95 : 1,
+                          },
+                        ]}
+                      >
+                        <LinearGradient
+                          colors={['#9E9E9E', '#757575']}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 0 }}
+                          style={{
+                            paddingVertical: Design.spacing.md,
+                            paddingHorizontal: Design.spacing.md,
+                            borderRadius: Design.borderRadius.lg,
+                            minHeight: 56,
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <XStack alignItems="center" justifyContent="center" gap={Design.spacing.xs}>
+                            <Text fontSize={Design.typography.sizes.md + 2}>💬</Text>
+                            <Text 
+                              color={Design.colors.text.white} 
+                              fontWeight={Design.typography.weights.bold} 
+                              fontSize={Design.typography.sizes.md}
+                            >
+                              Feedback
+                            </Text>
+                          </XStack>
+                        </LinearGradient>
+                      </Pressable>
+                    </View>
+                  </XStack>
+                </Animated.View>
               </YStack>
             </Animated.View>
           </ScrollView>
-          
-          {/* Bottom About Button - Fixed Position */}
-          <Animated.View
-            style={{
-              opacity: fadeAnim,
-              width: '100%',
-              paddingBottom: Design.spacing.md,
-              paddingTop: Design.spacing.sm,
-            }}
-          >
-            <Link href="/about" asChild>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="About"
-                accessibilityHint="Opens the about page with app information"
-                style={({ pressed }) => [
-                  {
-                    borderRadius: Design.borderRadius.lg,
-                    overflow: 'hidden',
-                    backgroundColor: '#FFFFFF',
-                    ...Design.shadows.lg,
-                    transform: [{ scale: pressed ? Design.pressScale.sm : 1 }],
-                    opacity: pressed ? 0.95 : 1,
-                  },
-                ]}
-              >
-                <LinearGradient
-                  colors={[Design.colors.primary, Design.colors.primaryDark]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={{
-                    paddingVertical: Design.spacing.md + 6,
-                    paddingHorizontal: Design.spacing.lg,
-                    borderRadius: Design.borderRadius.lg,
-                    minHeight: 56,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  <XStack alignItems="center" justifyContent="center" gap={Design.spacing.sm}>
-                    <Text fontSize={Design.typography.sizes.lg + 2}>👨🏻‍🌾</Text>
-                    <Text 
-                      color={Design.colors.text.white} 
-                      fontWeight={Design.typography.weights.bold} 
-                      fontSize={Design.typography.sizes.lg}
-                      style={{ 
-                        textShadowColor: 'rgba(0, 0, 0, 0.4)', 
-                        textShadowOffset: { width: 0, height: 1 }, 
-                        textShadowRadius: 3 
-                      }}
-                    >
-                      About
-                    </Text>
-                  </XStack>
-                </LinearGradient>
-              </Pressable>
-            </Link>
-          </Animated.View>
         </YStack>
       </SafeAreaView>
+      
+      {/* Rating Prompt Handler - Directly trigger native review */}
+      {shouldShowRating && (
+        <RatingPromptHandler
+          shouldShow={shouldShowRating}
+          onOpenStore={openStoreRating}
+          onComplete={markRatingCompleted}
+        />
+      )}
     </View>
   );
 }
