@@ -8,14 +8,12 @@ import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet,
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
-import { useAppRating } from '../hooks/useAppRating';
 
 type CoinSide = 'heads' | 'tails' | null;
 
 export default function CoinFlipScreen() {
   const navigation = useNavigation();
-  const { capture } = useAnalytics();
-  const { trackGameCompletion } = useAppRating();
+  const { capture, isReady } = useAnalytics();
   const [result, setResult] = useState<CoinSide>(null);
   const [isFlipping, setIsFlipping] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -51,8 +49,10 @@ export default function CoinFlipScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    capture('entered_coin_flip');
-  }, [capture]);
+    if (isReady) {
+      capture('entered_coin_flip');
+    }
+  }, [capture, isReady]);
 
   // Entrance animations
   useEffect(() => {
@@ -193,9 +193,6 @@ export default function CoinFlipScreen() {
       setIsFlipping(false);
       setShowConfetti(true);
       setFlipCount(prev => prev + 1);
-      
-      // Track game completion for rating prompt
-      trackGameCompletion();
       
       // Haptic feedback on completion
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);

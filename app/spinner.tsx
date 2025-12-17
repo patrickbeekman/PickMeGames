@@ -16,7 +16,6 @@ import {
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
-import { useAppRating } from '../hooks/useAppRating';
 
 const { width, height } = Dimensions.get('window');
 const SPINNER_SIZE = width * 0.8;
@@ -27,8 +26,7 @@ const SPINNER_CENTER_Y = height / 2;
 
 const TwisterSpinner = () => {
   const navigation = useNavigation();
-  const { capture } = useAnalytics();
-  const { trackGameCompletion } = useAppRating();
+  const { capture, isReady } = useAnalytics();
   const rotation = useRef(new Animated.Value(0)).current;
   const [spinning, setSpinning] = useState(false);
   const [baseRotation, setBaseRotation] = useState(0);
@@ -60,8 +58,10 @@ const TwisterSpinner = () => {
   }, [navigation]);
 
   useEffect(() => {
-    capture('entered_spinner');
-  }, [capture]);
+    if (isReady) {
+      capture('entered_spinner');
+    }
+  }, [capture, isReady]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -162,10 +162,6 @@ const TwisterSpinner = () => {
     animationRef.current.start(() => {
       if (isMounted.current) {
         setSpinning(false);
-        
-        // Track game completion for rating prompt
-        trackGameCompletion();
-        
         setBaseRotation(targetRotation);
         setShowConfetti(true);
 

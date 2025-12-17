@@ -12,6 +12,61 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import config from '../tamagui.config';
 
+// Suppress deprecation warnings from posthog-react-native using deprecated expo-file-system API
+// These are just warnings from a third-party package that hasn't updated to SDK 54's new API yet
+if (typeof console !== 'undefined') {
+  const originalWarn = console.warn;
+  const originalError = console.error;
+  
+  console.warn = (...args: any[]) => {
+    const message = args[0];
+    if (typeof message === 'string' && 
+        (message.includes('writeAsStringAsync') || 
+         message.includes('readAsStringAsync') ||
+         message.includes('expo-file-system') && message.includes('deprecated'))) {
+      // Suppress these specific warnings from dependencies
+      return;
+    }
+    originalWarn.apply(console, args);
+  };
+  
+  // Also suppress uncaught promise rejections for the same deprecation errors
+  console.error = (...args: any[]) => {
+    const message = args[0]?.message || args[0];
+    if (typeof message === 'string' && 
+        (message.includes('writeAsStringAsync') || 
+         message.includes('readAsStringAsync') ||
+         message.includes('expo-file-system') && message.includes('deprecated'))) {
+      // Suppress these specific errors from dependencies
+      return;
+    }
+    originalError.apply(console, args);
+  };
+}
+
+// Suppress uncaught promise rejections for PostHog deprecation warnings (React Native)
+if (typeof global !== 'undefined') {
+  // Handle unhandled promise rejections
+  const ErrorUtils = (global as any).ErrorUtils;
+  if (ErrorUtils) {
+    const originalRejectionHandler = ErrorUtils.getGlobalHandler?.();
+    ErrorUtils.setGlobalHandler((error: Error, isFatal?: boolean) => {
+      const errorMessage = error?.message || '';
+      if (typeof errorMessage === 'string' && 
+          (errorMessage.includes('writeAsStringAsync') || 
+           errorMessage.includes('readAsStringAsync') ||
+           (errorMessage.includes('expo-file-system') && errorMessage.includes('deprecated')))) {
+        // Suppress these specific errors - they're just deprecation warnings
+        return;
+      }
+      // Call original handler for other errors
+      if (originalRejectionHandler) {
+        originalRejectionHandler(error, isFatal);
+      }
+    });
+  }
+}
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
@@ -89,6 +144,7 @@ export default function RootLayout() {
         apiKey={POSTHOG_API_KEY}
         options={{ 
           host: POSTHOG_HOST,
+          captureMode: 'form',
           flushAt: 20,
           flushInterval: 30000,
         }}

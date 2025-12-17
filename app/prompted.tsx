@@ -11,7 +11,7 @@ import { usePrompts } from '../hooks/usePrompts';
 
 export default function PromptSelector() {
   const navigation = useNavigation();
-  const { capture } = useAnalytics();
+  const { capture, isReady } = useAnalytics();
   const { getFilteredPrompts, loading } = usePrompts();
   const [filteredPrompts, setFilteredPrompts] = useState<string[]>([]);
   const [usedPrompts, setUsedPrompts] = useState<Set<number>>(new Set());
@@ -73,10 +73,10 @@ export default function PromptSelector() {
 
   useEffect(() => {
     // Only capture once when component mounts and prompts are loaded
-    if (!loading && filteredPrompts.length > 0) {
+    if (isReady && !loading && filteredPrompts.length > 0) {
       capture('enter_prompt_selector');
     }
-  }, [capture, loading, filteredPrompts.length]);
+  }, [capture, isReady, loading, filteredPrompts.length]);
 
   // Entrance animations
   useEffect(() => {

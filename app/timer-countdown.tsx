@@ -19,7 +19,6 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
-import { useAppRating } from '../hooks/useAppRating';
 
 const { width, height } = Dimensions.get('window');
 const MIN_DELAY = 2000; // 2 seconds
@@ -30,8 +29,7 @@ type Phase = 'waiting' | 'ready' | 'flashing' | 'winner';
 
 export default function TimerCountdownScreen() {
   const navigation = useNavigation();
-  const { capture } = useAnalytics();
-  const { trackGameCompletion } = useAppRating();
+  const { capture, isReady } = useAnalytics();
   const [phase, setPhase] = useState<Phase>('waiting');
   const [touches, setTouches] = useState<{ identifier: number; x: number; y: number; timestamp: number }[]>([]);
   const [winner, setWinner] = useState<{ x: number; y: number; identifier: number } | null>(null);
@@ -66,8 +64,10 @@ export default function TimerCountdownScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    capture('entered_timer_countdown');
-  }, [capture]);
+    if (isReady) {
+      capture('entered_timer_countdown');
+    }
+  }, [capture, isReady]);
 
   // Entrance animations
   useEffect(() => {
@@ -205,9 +205,6 @@ export default function TimerCountdownScreen() {
         });
         triggerParticles(fastestTouch.x, fastestTouch.y);
         setPhase('winner');
-        
-        // Track game completion for rating prompt
-        trackGameCompletion();
         
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         AccessibilityInfo.announceForAccessibility(`Winner! Reaction time: ${reactionTime}ms`);
