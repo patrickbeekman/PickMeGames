@@ -1,4 +1,5 @@
 import { Text } from '@tamagui/core';
+import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -96,7 +97,7 @@ interface PlayerGuess {
 
 export default function ColorMatcherScreen() {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const [playerCount, setPlayerCount] = useState(2);
   const [phase, setPhase] = useState<GamePhase>('setup');
   const [targetColor, setTargetColor] = useState<string>('#FF0000');
@@ -112,7 +113,7 @@ export default function ColorMatcherScreen() {
   const buttonFadeAnim = useRef(new Animated.Value(0)).current;
   const buttonSlideAnim = useRef(new Animated.Value(30)).current;
   const targetColorOpacity = useRef(new Animated.Value(0)).current;
-  const targetColorTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const targetColorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     navigation.setOptions({
@@ -132,10 +133,8 @@ export default function ColorMatcherScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_color_matcher');
-    }
-  }, [capture, isReady]);
+    capture('entered_color_matcher');
+  }, [capture]);
 
   // Entrance animations
   useEffect(() => {
@@ -395,7 +394,15 @@ export default function ColorMatcherScreen() {
             }}
           >
             <YStack alignItems="center">
-              <Text fontSize={Design.typography.sizes.xxxl} marginBottom={Design.spacing.md}>🎨</Text>
+              <Image
+                source={require('../icons/color-matcher.png')}
+                width={88}
+                height={88}
+                objectFit="contain"
+                resizeMode="contain"
+                marginBottom={Design.spacing.md}
+                accessibilityLabel="Color matcher icon"
+              />
               <Text 
                 fontSize={Design.typography.sizes.xl} 
                 fontWeight={Design.typography.weights.bold} 
@@ -405,19 +412,7 @@ export default function ColorMatcherScreen() {
                 letterSpacing={Design.typography.letterSpacing.tight}
                 accessibilityRole="header"
               >
-                Color Matcher!
-              </Text>
-              <Text
-                fontSize={Design.typography.sizes.md} 
-                fontWeight={Design.typography.weights.medium} 
-                color={Design.colors.text.secondary} 
-                textAlign="center" 
-                maxWidth={300}
-                lineHeight={Design.typography.sizes.md * 1.4}
-              >
-                {phase === 'setup' 
-                  ? 'Match the target color as closely as possible!'
-                  : `Player ${currentPlayer + 1}'s turn`}
+                Match the target color
               </Text>
             </YStack>
           </Animated.View>
@@ -743,7 +738,7 @@ export default function ColorMatcherScreen() {
                 Players: {playerCount}
               </Text>
               <XStack gap={Design.spacing.xs} alignItems="center">
-                {[2, 3, 4, 5].map((count) => (
+                {[2, 3, 4, 5, 6].map((count) => (
                   <Pressable
                     key={count}
                     onPress={() => setPlayerCount(count)}

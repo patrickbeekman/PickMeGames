@@ -13,7 +13,7 @@ import { usePrompts } from '../hooks/usePrompts';
 
 export default function PromptSettings() {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const { 
     prompts, 
     loading, 
@@ -111,10 +111,8 @@ export default function PromptSettings() {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_prompt_settings');
-    }
-  }, [capture, isReady]);
+    capture('entered_prompt_settings');
+  }, [capture]);
 
   const handleAddPrompt = async () => {
     if (!newPrompt.trim()) return;

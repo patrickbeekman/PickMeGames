@@ -1,4 +1,5 @@
 import { Text } from '@tamagui/core';
+import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -13,7 +14,7 @@ type CoinSide = 'heads' | 'tails' | null;
 
 export default function CoinFlipScreen() {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const [result, setResult] = useState<CoinSide>(null);
   const [isFlipping, setIsFlipping] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -49,10 +50,8 @@ export default function CoinFlipScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_coin_flip');
-    }
-  }, [capture, isReady]);
+    capture('entered_coin_flip');
+  }, [capture]);
 
   // Entrance animations
   useEffect(() => {
@@ -261,7 +260,15 @@ export default function CoinFlipScreen() {
           }}
         >
           <YStack alignItems="center">
-            <Text fontSize={Design.typography.sizes.xxxl} marginBottom={Design.spacing.md}>🪙</Text>
+            <Image
+              source={require('../icons/coin-flip.png')}
+              width={88}
+              height={88}
+              objectFit="contain"
+              resizeMode="contain"
+              marginBottom={Design.spacing.md}
+              accessibilityLabel="Coin flip icon"
+            />
             <Text 
               fontSize={Design.typography.sizes.xl} 
               fontWeight={Design.typography.weights.bold} 
@@ -271,17 +278,7 @@ export default function CoinFlipScreen() {
               letterSpacing={Design.typography.letterSpacing.tight}
               accessibilityRole="header"
             >
-              Coin Flip!
-            </Text>
-            <Text
-              fontSize={Design.typography.sizes.md} 
-              fontWeight={Design.typography.weights.medium} 
-              color={Design.colors.text.secondary} 
-              textAlign="center" 
-              maxWidth={300}
-              lineHeight={Design.typography.sizes.md * 1.4}
-            >
-              Flip the coin to make a decision. Heads or tails?
+              Flip to decide
             </Text>
           </YStack>
         </Animated.View>

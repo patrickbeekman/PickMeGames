@@ -1,4 +1,5 @@
 import { Text } from '@tamagui/core';
+import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,7 +12,7 @@ import { useAnalytics } from '../hooks/useAnalytics';
 
 export default function NumberGuesser() {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const [randomNumber, setRandomNumber] = useState<number | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
   const [animatedNumber, setAnimatedNumber] = useState('?');
@@ -62,10 +63,8 @@ export default function NumberGuesser() {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_number_guesser');
-    }
-  }, [capture, isReady]);
+    capture('entered_number_guesser');
+  }, [capture]);
 
   // Entrance animations
   useEffect(() => {
@@ -349,7 +348,15 @@ export default function NumberGuesser() {
           }}
         >
           <YStack alignItems="center">
-            <Text fontSize={Design.typography.sizes.xxxl} marginBottom={Design.spacing.md}>✨🎲✨</Text>
+            <Image
+              source={require('../icons/random-number.png')}
+              width={88}
+              height={88}
+              objectFit="contain"
+              resizeMode="contain"
+              marginBottom={Design.spacing.md}
+              accessibilityLabel="Random number icon"
+            />
             <Text 
               fontSize={Design.typography.sizes.xl} 
               fontWeight={Design.typography.weights.bold} 
@@ -359,19 +366,8 @@ export default function NumberGuesser() {
               letterSpacing={Design.typography.letterSpacing.tight}
               accessibilityRole="header"
             >
-              Lucky Number Challenge!
+              Roll a random number
         </Text>
-            <Text
-              fontSize={Design.typography.sizes.md} 
-              fontWeight={Design.typography.weights.medium} 
-              color={Design.colors.text.secondary} 
-              textAlign="center" 
-              maxWidth={300}
-              lineHeight={Design.typography.sizes.md * 1.4}
-            >
-              Everyone pick a number from {minNumber.toLocaleString()} to {maxNumber.toLocaleString()}.
-              Closest guess without going over wins!
-            </Text>
           </YStack>
         </Animated.View>
 

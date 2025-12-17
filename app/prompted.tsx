@@ -1,4 +1,5 @@
 import { Text } from '@tamagui/core';
+import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,7 +12,7 @@ import { usePrompts } from '../hooks/usePrompts';
 
 export default function PromptSelector() {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const { getFilteredPrompts, loading } = usePrompts();
   const [filteredPrompts, setFilteredPrompts] = useState<string[]>([]);
   const [usedPrompts, setUsedPrompts] = useState<Set<number>>(new Set());
@@ -73,10 +74,10 @@ export default function PromptSelector() {
 
   useEffect(() => {
     // Only capture once when component mounts and prompts are loaded
-    if (isReady && !loading && filteredPrompts.length > 0) {
+    if (!loading && filteredPrompts.length > 0) {
       capture('enter_prompt_selector');
     }
-  }, [capture, isReady, loading, filteredPrompts.length]);
+  }, [capture, loading, filteredPrompts.length]);
 
   // Entrance animations
   useEffect(() => {
@@ -263,7 +264,15 @@ export default function PromptSelector() {
           }}
         >
           <YStack alignItems="center">
-            <Text fontSize={Design.typography.sizes.xxxl} marginBottom={Design.spacing.md}>✨💭✨</Text>
+            <Image
+              source={require('../icons/prompt.png')}
+              width={88}
+              height={88}
+              objectFit="contain"
+              resizeMode="contain"
+              marginBottom={Design.spacing.md}
+              accessibilityLabel="Prompted icon"
+            />
             <Text 
               fontSize={Design.typography.sizes.xl} 
               fontWeight={Design.typography.weights.bold} 
@@ -273,17 +282,7 @@ export default function PromptSelector() {
               letterSpacing={Design.typography.letterSpacing.tight}
               accessibilityRole="header"
             >
-              Decision Prompt Challenge!
-            </Text>
-            <Text 
-              fontSize={Design.typography.sizes.sm} 
-              color={Design.colors.text.secondary} 
-              textAlign="center" 
-              maxWidth={300}
-              lineHeight={Design.typography.sizes.sm * 1.4}
-            >
-              Get a random prompt to help make your decision! 
-              Tap "New Prompt" for another idea.
+              Pick a prompt for ideas
             </Text>
           </YStack>
         </Animated.View>

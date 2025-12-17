@@ -1,4 +1,5 @@
 import { Text } from '@tamagui/core';
+import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -39,7 +40,7 @@ const { width, height } = Dimensions.get('window');
 
 export default function FingerTapScreen() {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const [touches, setTouches] = useState<{ identifier: number; x: number; y: number }[]>([]);
   const [winner, setWinner] = useState<{ x: number; y: number } | null>(null);
   const [particles, setParticles] = useState<Animated.ValueXY[]>([]);
@@ -70,10 +71,8 @@ export default function FingerTapScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_finger_tap');
-    }
-  }, [capture, isReady]);
+    capture('entered_finger_tap');
+  }, [capture]);
 
   // Entrance animations
   useEffect(() => {
@@ -295,7 +294,15 @@ export default function FingerTapScreen() {
             }}
           >
             <YStack alignItems="center">
-              <Text fontSize={Design.typography.sizes.xxxl} marginBottom={Design.spacing.md}>✨👆✨</Text>
+              <Image
+                source={require('../icons/finger-tap.png')}
+                width={88}
+                height={88}
+                objectFit="contain"
+                resizeMode="contain"
+                marginBottom={Design.spacing.md}
+                accessibilityLabel="Multifinger tap icon"
+              />
               <Text 
                 fontSize={Design.typography.sizes.xl} 
                 fontWeight={Design.typography.weights.bold} 
@@ -305,7 +312,7 @@ export default function FingerTapScreen() {
                 letterSpacing={Design.typography.letterSpacing.tight}
                 accessibilityRole="header"
               >
-                Multifinger Challenge!
+                Touch and hold together
               </Text>
               <YStack
                 backgroundColor="rgba(255, 255, 255, 0.95)"

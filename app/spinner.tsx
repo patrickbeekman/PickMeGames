@@ -1,4 +1,5 @@
 import { Text, View } from '@tamagui/core';
+import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -26,7 +27,7 @@ const SPINNER_CENTER_Y = height / 2;
 
 const TwisterSpinner = () => {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const rotation = useRef(new Animated.Value(0)).current;
   const [spinning, setSpinning] = useState(false);
   const [baseRotation, setBaseRotation] = useState(0);
@@ -58,10 +59,8 @@ const TwisterSpinner = () => {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_spinner');
-    }
-  }, [capture, isReady]);
+    capture('entered_spinner');
+  }, [capture]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -259,12 +258,15 @@ const TwisterSpinner = () => {
           }}
         >
           <YStack alignItems="center">
-            <Text 
-              fontSize={Design.typography.sizes.xxl + 4} 
+            <Image
+              source={require('../icons/spinner.png')}
+              width={88}
+              height={88}
+              objectFit="contain"
+              resizeMode="contain"
               marginBottom={Design.spacing.sm}
-            >
-              🎯
-            </Text>
+              accessibilityLabel="Spinner icon"
+            />
             <Text 
               fontSize={Design.typography.sizes.xl} 
               fontWeight={Design.typography.weights.bold} 
@@ -274,17 +276,7 @@ const TwisterSpinner = () => {
               letterSpacing={Design.typography.letterSpacing.tight}
               accessibilityRole="header"
             >
-              Classic Spinner!
-            </Text>
-            <Text 
-              fontSize={Design.typography.sizes.sm} 
-              color={Design.colors.text.secondary} 
-              textAlign="center" 
-              maxWidth={320}
-              lineHeight={Design.typography.sizes.sm * 1.4}
-              accessibilityRole="text"
-            >
-              Place your phone in the center of your group so everyone is equidistant from the spinner!
+              Spin to pick who starts
             </Text>
           </YStack>
         </Animated.View>
@@ -417,18 +409,30 @@ const TwisterSpinner = () => {
                     }] : [],
                   }}
                 >
-                  <Text fontSize={Design.typography.sizes.xl}>
-                    {spinning ? '🌀' : '🎯'}
-                  </Text>
-                </Animated.View>
+                  <Animated.View
+                    style={{
+                      transform: [
+                        ...(spinning
+                          ? [{
+                              rotate: rotation.interpolate({
+                                inputRange: [0, 360],
+                                outputRange: ['0deg', '360deg'],
+                              }),
+                            }]
+                          : []),
+                      ],
+                    }}
+                  >
                 <Text 
-                  fontSize={Design.typography.sizes.lg + 2} 
+                  fontSize={Design.typography.sizes.lg + 4} 
                   color={Design.colors.text.white} 
                   fontWeight={Design.typography.weights.bold}
-                  letterSpacing={Design.typography.letterSpacing.wide}
                 >
                   {spinning ? 'Spinning...' : 'SPIN!'}
                 </Text>
+                  </Animated.View>
+                </Animated.View>
+                
               </XStack>
             </LinearGradient>
           </Pressable>

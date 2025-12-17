@@ -1,5 +1,6 @@
 import Slider from '@react-native-community/slider';
 import { Text } from '@tamagui/core';
+import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
@@ -48,7 +49,7 @@ const { width, height } = Dimensions.get('window');
 
 export default function SpinnerSelector() {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const [playerCount, setPlayerCount] = useState(6);
   const [spinning, setSpinning] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -78,10 +79,8 @@ export default function SpinnerSelector() {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_numbered_spinner');
-    }
-  }, [capture, isReady]);
+    capture('entered_numbered_spinner');
+  }, [capture]);
 
   // Update spinner size on dimension changes
   useEffect(() => {
@@ -321,12 +320,15 @@ export default function SpinnerSelector() {
           }}
         >
           <YStack alignItems="center" marginBottom={Design.spacing.lg}>
-            <Text 
-              fontSize={Design.typography.sizes.xxl + 4} 
+            <Image
+              source={require('../icons/numbered-spinner.png')}
+              width={88}
+              height={88}
+              objectFit="contain"
+              resizeMode="contain"
               marginBottom={Design.spacing.sm}
-            >
-              🎭🎪
-            </Text>
+              accessibilityLabel="Numbered spinner icon"
+            />
             <Text 
               fontSize={Design.typography.sizes.xl} 
               fontWeight={Design.typography.weights.bold} 
@@ -335,16 +337,7 @@ export default function SpinnerSelector() {
               marginBottom={Design.spacing.xs}
               letterSpacing={Design.typography.letterSpacing.tight}
             >
-              Numbered Spinner Challenge!
-            </Text>
-            <Text 
-              fontSize={Design.typography.sizes.sm} 
-              color={Design.colors.text.secondary} 
-              textAlign="center" 
-              maxWidth={300}
-              lineHeight={Design.typography.sizes.sm * 1.4}
-            >
-              Each player gets a number - let the spinner decide!
+              Spin the numbers to choose
             </Text>
           </YStack>
         </Animated.View>

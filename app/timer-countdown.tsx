@@ -1,4 +1,5 @@
 import { Text } from '@tamagui/core';
+import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -29,7 +30,7 @@ type Phase = 'waiting' | 'ready' | 'flashing' | 'winner';
 
 export default function TimerCountdownScreen() {
   const navigation = useNavigation();
-  const { capture, isReady } = useAnalytics();
+  const { capture } = useAnalytics();
   const [phase, setPhase] = useState<Phase>('waiting');
   const [touches, setTouches] = useState<{ identifier: number; x: number; y: number; timestamp: number }[]>([]);
   const [winner, setWinner] = useState<{ x: number; y: number; identifier: number } | null>(null);
@@ -43,8 +44,8 @@ export default function TimerCountdownScreen() {
   const headerSlideAnim = useRef(new Animated.Value(20)).current;
   const buttonFadeAnim = useRef(new Animated.Value(0)).current;
   const buttonSlideAnim = useRef(new Animated.Value(30)).current;
-  const readyTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const flashTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const readyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     navigation.setOptions({
@@ -64,10 +65,8 @@ export default function TimerCountdownScreen() {
   }, [navigation]);
 
   useEffect(() => {
-    if (isReady) {
-      capture('entered_timer_countdown');
-    }
-  }, [capture, isReady]);
+    capture('entered_timer_countdown');
+  }, [capture]);
 
   // Entrance animations
   useEffect(() => {
@@ -326,7 +325,15 @@ export default function TimerCountdownScreen() {
               }}
             >
               <YStack alignItems="center">
-                <Text fontSize={Design.typography.sizes.xxxl} marginBottom={Design.spacing.md}>⏱️</Text>
+                <Image
+                  source={require('../icons/timer-countdown.png')}
+                  width={88}
+                  height={88}
+                  objectFit="contain"
+                  resizeMode="contain"
+                  marginBottom={Design.spacing.md}
+                  accessibilityLabel="Timer countdown icon"
+                />
                 <Text 
                   fontSize={Design.typography.sizes.xl} 
                   fontWeight={Design.typography.weights.bold} 
@@ -336,35 +343,8 @@ export default function TimerCountdownScreen() {
                   letterSpacing={Design.typography.letterSpacing.tight}
                   accessibilityRole="header"
                 >
-                  Timer Countdown!
+                  Race to tap first
                 </Text>
-                <YStack
-                  backgroundColor="rgba(255, 255, 255, 0.95)"
-                  borderRadius={Design.borderRadius.lg}
-                  padding={Design.spacing.lg}
-                  alignItems="center"
-                  {...Design.shadows.md}
-                  marginBottom={Design.spacing.md}
-                >
-                  <Text
-                    fontSize={Design.typography.sizes.md}
-                    fontWeight={Design.typography.weights.semibold}
-                    color={Design.colors.text.primary}
-                    textAlign="center"
-                    lineHeight={Design.typography.sizes.md * 1.4}
-                    marginBottom={Design.spacing.sm}
-                  >
-                    Tap the screen when it flashes green!
-                  </Text>
-                  <Text
-                    fontSize={Design.typography.sizes.sm}
-                    color={Design.colors.text.secondary}
-                    textAlign="center"
-                    lineHeight={Design.typography.sizes.sm * 1.4}
-                  >
-                    The screen will flash and change color between 2-10 seconds. Fastest reaction wins!
-                  </Text>
-                </YStack>
               </YStack>
             </Animated.View>
           )}
