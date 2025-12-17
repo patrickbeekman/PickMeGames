@@ -12,10 +12,6 @@ export default function AboutScreen() {
     Linking.openURL('https://github.com/patrickbeekman/PickMeGames/tree/master');
   };
 
-  const openFeedback = () => {
-    Linking.openURL('https://airtable.com/appPI2noUjKkmeNWM/pagrjCubfIJqODIOQ/form');
-  };
-
   return (
     <YStack flex={1} backgroundColor="#F3E889" padding={24}>
       <LinearGradient
@@ -139,18 +135,6 @@ export default function AboutScreen() {
             </XStack>
           </Button>
 
-          <Button
-            backgroundColor="#4CAF50"
-            borderRadius={8}
-            pressStyle={{ scale: 0.95, backgroundColor: "#45a049" }}
-            onPress={openFeedback}
-          >
-            <XStack alignItems="center" space={8}>
-              <Text fontSize={18}>💬</Text>
-              <Text color="white" fontWeight="600" fontSize={16}>Send Feedback</Text>
-              <Text color="white" fontSize={16}>→</Text>
-            </XStack>
-          </Button>
         </YStack>
 
         {/* Footer */}

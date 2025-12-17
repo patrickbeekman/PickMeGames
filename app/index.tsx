@@ -4,7 +4,7 @@ import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useNavigation } from 'expo-router';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
-import { Animated, Pressable, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
+import { Animated, Linking, Pressable, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
@@ -19,6 +19,10 @@ export default function HomeScreen() {
   }, [navigation]);
 
   const { capture } = useAnalytics();
+
+  const openFeedback = () => {
+    Linking.openURL('https://airtable.com/appPI2noUjKkmeNWM/pagrjCubfIJqODIOQ/form');
+  };
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
   
@@ -93,7 +97,7 @@ export default function HomeScreen() {
           {/* Scrollable Content Area */}
           <ScrollView
             contentContainerStyle={{
-              paddingTop: Design.spacing.lg,
+              paddingTop: Design.spacing.md,
               paddingBottom: Design.spacing.xl,
               alignItems: 'center',
             }}
@@ -109,7 +113,7 @@ export default function HomeScreen() {
             >
               {/* Logo */}
               <YStack 
-                marginBottom={Design.spacing.md} 
+                marginBottom={Design.spacing.sm} 
                 alignItems="center"
                 style={{
                   shadowColor: '#000',
@@ -121,8 +125,8 @@ export default function HomeScreen() {
               >
                 <Image
                   source={require('../assets/images/pickmelogo_transparent.png')}
-                  width={140}
-                  height={140}
+                  width={210}
+                  height={210}
                   objectFit='contain'
                   alt='PickMe Games Logo'
                   accessibilityRole="image"
@@ -131,7 +135,7 @@ export default function HomeScreen() {
               </YStack>
               
               {/* Title Section */}
-              <YStack alignItems="center" marginBottom={Design.spacing.lg} paddingHorizontal={Design.spacing.md}>
+              <YStack alignItems="center" marginBottom={Design.spacing.md} paddingHorizontal={Design.spacing.md}>
                 <Text 
                   fontSize={Design.typography.sizes.xxl} 
                   color={Design.colors.text.primary} 
@@ -245,7 +249,7 @@ export default function HomeScreen() {
                 ))}
               </YStack>
 
-              {/* About Button in Scroll */}
+              {/* About / Feedback Row */}
               <Animated.View
                 style={{
                   opacity: fadeAnim,
@@ -254,53 +258,112 @@ export default function HomeScreen() {
                   paddingBottom: Design.spacing.lg,
                 }}
               >
-                <Link href="/about" asChild>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="About"
-                    accessibilityHint="Opens the about page with app information"
-                    style={({ pressed }) => [
-                      {
-                        borderRadius: Design.borderRadius.lg,
-                        overflow: 'hidden',
-                        backgroundColor: '#FFFFFF',
-                        ...Design.shadows.lg,
-                        transform: [{ scale: pressed ? Design.pressScale.sm : 1 }],
-                        opacity: pressed ? 0.95 : 1,
-                      },
-                    ]}
-                  >
-                    <LinearGradient
-                      colors={[Design.colors.primary, Design.colors.primaryDark]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={{
-                        paddingVertical: Design.spacing.md + 6,
-                        paddingHorizontal: Design.spacing.lg,
-                        borderRadius: Design.borderRadius.lg,
-                        minHeight: 56,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <XStack alignItems="center" justifyContent="center" gap={Design.spacing.sm}>
-                        <Text fontSize={Design.typography.sizes.lg + 2}>👨🏻‍🌾</Text>
-                        <Text 
-                          color={Design.colors.text.white} 
-                          fontWeight={Design.typography.weights.bold} 
-                          fontSize={Design.typography.sizes.lg}
-                          style={{ 
-                            textShadowColor: 'rgba(0, 0, 0, 0.4)', 
-                            textShadowOffset: { width: 0, height: 1 }, 
-                            textShadowRadius: 3 
+                <XStack gap={Design.spacing.xs} width="100%" maxWidth={420} alignSelf="stretch">
+                  <XStack flex={1}>
+                    <Link href="/about" asChild>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel="About"
+                        accessibilityHint="Opens the about page with app information"
+                        style={({ pressed }) => [
+                          {
+                            flexGrow: 1,
+                            flexBasis: 0,
+                            width: '100%',
+                            borderRadius: Design.borderRadius.lg,
+                            overflow: 'hidden',
+                            backgroundColor: '#FFFFFF',
+                            ...Design.shadows.lg,
+                            transform: [{ scale: pressed ? Design.pressScale.sm : 1 }],
+                            opacity: pressed ? 0.95 : 1,
+                          },
+                        ]}
+                      >
+                        <LinearGradient
+                          colors={[Design.colors.primary, Design.colors.primaryDark]}
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 0 }}
+                          style={{
+                            paddingVertical: Design.spacing.md + 6,
+                            paddingHorizontal: Design.spacing.lg,
+                            borderRadius: Design.borderRadius.lg,
+                            minHeight: 56,
+                            justifyContent: 'center',
+                            alignItems: 'center',
                           }}
                         >
-                          About
-                        </Text>
-                      </XStack>
-                    </LinearGradient>
-                  </Pressable>
-                </Link>
+                          <XStack alignItems="center" justifyContent="center" gap={Design.spacing.sm}>
+                            <Text fontSize={Design.typography.sizes.lg + 2}>👨🏻‍🌾</Text>
+                            <Text 
+                              color={Design.colors.text.white} 
+                              fontWeight={Design.typography.weights.bold} 
+                              fontSize={Design.typography.sizes.lg}
+                              style={{ 
+                                textShadowColor: 'rgba(0, 0, 0, 0.4)', 
+                                textShadowOffset: { width: 0, height: 1 }, 
+                                textShadowRadius: 3 
+                              }}
+                            >
+                              About
+                            </Text>
+                          </XStack>
+                        </LinearGradient>
+                      </Pressable>
+                    </Link>
+                  </XStack>
+
+                  <XStack flex={1}>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel="Feedback"
+                      accessibilityHint="Opens the feedback form"
+                      onPress={openFeedback}
+                      style={({ pressed }) => [
+                        {
+                          flexGrow: 1,
+                          flexBasis: 0,
+                          width: '100%',
+                          borderRadius: Design.borderRadius.lg,
+                          overflow: 'hidden',
+                          backgroundColor: '#FFFFFF',
+                          ...Design.shadows.lg,
+                          transform: [{ scale: pressed ? Design.pressScale.sm : 1 }],
+                          opacity: pressed ? 0.95 : 1,
+                        },
+                      ]}
+                    >
+                      <LinearGradient
+                        colors={['#9AA3AD', '#7F8A95']}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 0 }}
+                        style={{
+                          paddingVertical: Design.spacing.md + 6,
+                          paddingHorizontal: Design.spacing.lg,
+                          borderRadius: Design.borderRadius.lg,
+                          minHeight: 56,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <XStack alignItems="center" justifyContent="center" gap={Design.spacing.sm}>
+                          <Text fontSize={Design.typography.sizes.lg + 2}>💬</Text>
+                          <Text 
+                            color={Design.colors.text.white} 
+                            fontWeight={Design.typography.weights.bold} 
+                            fontSize={Design.typography.sizes.lg}
+                            style={{ 
+                              textShadowColor: 'rgba(0, 0, 0, 0.4)', 
+                              textShadowOffset: { width: 0, height: 1 }, 
+                              textShadowRadius: 3 
+                            }}
+                          >
+                            Feedback
+                          </Text>
+                        </XStack>
+                      </LinearGradient>
+                    </Pressable>
+                  </XStack>
+                </XStack>
               </Animated.View>
             </Animated.View>
           </ScrollView>
