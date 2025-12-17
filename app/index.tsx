@@ -258,71 +258,15 @@ export default function HomeScreen() {
                   paddingBottom: Design.spacing.lg,
                 }}
               >
-                <XStack gap={Design.spacing.xs} width="100%" maxWidth={420} alignSelf="stretch">
-                  <XStack flex={1}>
-                    <Link href="/about" asChild>
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel="About"
-                        accessibilityHint="Opens the about page with app information"
-                        style={({ pressed }) => [
-                          {
-                            flexGrow: 1,
-                            flexBasis: 0,
-                            width: '100%',
-                            borderRadius: Design.borderRadius.lg,
-                            overflow: 'hidden',
-                            backgroundColor: '#FFFFFF',
-                            ...Design.shadows.lg,
-                            transform: [{ scale: pressed ? Design.pressScale.sm : 1 }],
-                            opacity: pressed ? 0.95 : 1,
-                          },
-                        ]}
-                      >
-                        <LinearGradient
-                          colors={[Design.colors.primary, Design.colors.primaryDark]}
-                          start={{ x: 0, y: 0 }}
-                          end={{ x: 1, y: 0 }}
-                          style={{
-                            paddingVertical: Design.spacing.md + 6,
-                            paddingHorizontal: Design.spacing.lg,
-                            borderRadius: Design.borderRadius.lg,
-                            minHeight: 56,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                          }}
-                        >
-                          <XStack alignItems="center" justifyContent="center" gap={Design.spacing.sm}>
-                            <Text fontSize={Design.typography.sizes.lg + 2}>👨🏻‍🌾</Text>
-                            <Text 
-                              color={Design.colors.text.white} 
-                              fontWeight={Design.typography.weights.bold} 
-                              fontSize={Design.typography.sizes.lg}
-                              style={{ 
-                                textShadowColor: 'rgba(0, 0, 0, 0.4)', 
-                                textShadowOffset: { width: 0, height: 1 }, 
-                                textShadowRadius: 3 
-                              }}
-                            >
-                              About
-                            </Text>
-                          </XStack>
-                        </LinearGradient>
-                      </Pressable>
-                    </Link>
-                  </XStack>
-
-                  <XStack flex={1}>
+                <XStack gap={Design.spacing.md} width="100%" maxWidth={380} alignSelf="center">
+                  <Link href="/about" asChild>
                     <Pressable
                       accessibilityRole="button"
-                      accessibilityLabel="Feedback"
-                      accessibilityHint="Opens the feedback form"
-                      onPress={openFeedback}
+                      accessibilityLabel="About"
+                      accessibilityHint="Opens the about page with app information"
                       style={({ pressed }) => [
                         {
-                          flexGrow: 1,
-                          flexBasis: 0,
-                          width: '100%',
+                          flex: 1,
                           borderRadius: Design.borderRadius.lg,
                           overflow: 'hidden',
                           backgroundColor: '#FFFFFF',
@@ -333,7 +277,7 @@ export default function HomeScreen() {
                       ]}
                     >
                       <LinearGradient
-                        colors={['#9AA3AD', '#7F8A95']}
+                        colors={[Design.colors.primary, Design.colors.primaryDark]}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 0 }}
                         style={{
@@ -346,7 +290,7 @@ export default function HomeScreen() {
                         }}
                       >
                         <XStack alignItems="center" justifyContent="center" gap={Design.spacing.sm}>
-                          <Text fontSize={Design.typography.sizes.lg + 2}>💬</Text>
+                          <Text fontSize={Design.typography.sizes.lg + 2}>👨🏻‍🌾</Text>
                           <Text 
                             color={Design.colors.text.white} 
                             fontWeight={Design.typography.weights.bold} 
@@ -357,12 +301,60 @@ export default function HomeScreen() {
                               textShadowRadius: 3 
                             }}
                           >
-                            Feedback
+                            About
                           </Text>
                         </XStack>
                       </LinearGradient>
                     </Pressable>
-                  </XStack>
+                  </Link>
+
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Feedback"
+                    accessibilityHint="Opens the feedback form"
+                    onPress={openFeedback}
+                    style={({ pressed }) => [
+                      {
+                        flex: 1,
+                        borderRadius: Design.borderRadius.lg,
+                        overflow: 'hidden',
+                        backgroundColor: '#FFFFFF',
+                        ...Design.shadows.lg,
+                        transform: [{ scale: pressed ? Design.pressScale.sm : 1 }],
+                        opacity: pressed ? 0.95 : 1,
+                      },
+                    ]}
+                  >
+                    <LinearGradient
+                      colors={['#9AA3AD', '#7F8A95']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 0 }}
+                      style={{
+                        paddingVertical: Design.spacing.md + 6,
+                        paddingHorizontal: Design.spacing.lg,
+                        borderRadius: Design.borderRadius.lg,
+                        minHeight: 56,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}
+                    >
+                      <XStack alignItems="center" justifyContent="center" gap={Design.spacing.sm}>
+                        <Text fontSize={Design.typography.sizes.lg + 2}>💬</Text>
+                        <Text 
+                          color={Design.colors.text.white} 
+                          fontWeight={Design.typography.weights.bold} 
+                          fontSize={Design.typography.sizes.lg}
+                          style={{ 
+                            textShadowColor: 'rgba(0, 0, 0, 0.4)', 
+                            textShadowOffset: { width: 0, height: 1 }, 
+                            textShadowRadius: 3 
+                          }}
+                        >
+                          Feedback
+                        </Text>
+                      </XStack>
+                    </LinearGradient>
+                  </Pressable>
                 </XStack>
               </Animated.View>
             </Animated.View>
