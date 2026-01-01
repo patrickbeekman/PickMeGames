@@ -54,13 +54,59 @@ const rgbToHex = (r: number, g: number, b: number): string => {
   }).join('');
 };
 
-// Calculate color distance using Euclidean distance in RGB space
-// Treating RGB values as 3D coordinates: d = sqrt((r2-r1)² + (g2-g1)² + (b2-b1)²)
-// This gives us the straight-line distance between two colors in RGB color space
-// Lower distance = closer match = better
+// Convert RGB to HSL (0-360, 0-100, 0-100)
+const rgbToHsl = (r: number, g: number, b: number): [number, number, number] => {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    
+    switch (max) {
+      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+      case g: h = ((b - r) / d + 2) / 6; break;
+      case b: h = ((r - g) / d + 4) / 6; break;
+    }
+  }
+  
+  return [h * 360, s * 100, l * 100];
+};
+
+// Calculate perceptually-aware color distance using weighted HSL distance
+// Hue is most important (weighted 2x), saturation and lightness are also important
+// This better matches human color perception than RGB distance
 const colorDistance = (r1: number, g1: number, b1: number, r2: number, g2: number, b2: number): number => {
+  const [h1, s1, l1] = rgbToHsl(r1, g1, b1);
+  const [h2, s2, l2] = rgbToHsl(r2, g2, b2);
+  
+  // Hue difference (handle circular nature: 360° wraps to 0°)
+  let hDiff = Math.abs(h1 - h2);
+  if (hDiff > 180) {
+    hDiff = 360 - hDiff; // Take the shorter arc
+  }
+  
+  // Weighted distance: hue is most perceptually important (2x weight)
+  // Normalize: hue 0-180, saturation 0-100, lightness 0-100
+  const hueWeight = 2.0;
+  const satWeight = 1.0;
+  const lightWeight = 1.0;
+  
+  const hueDist = (hDiff / 180) * 100; // Normalize to 0-100 scale
+  const satDist = Math.abs(s1 - s2);
+  const lightDist = Math.abs(l1 - l2);
+  
+  // Weighted Euclidean distance in normalized HSL space
   return Math.sqrt(
-    Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2)
+    Math.pow(hueDist * hueWeight, 2) +
+    Math.pow(satDist * satWeight, 2) +
+    Math.pow(lightDist * lightWeight, 2)
   );
 };
 
@@ -171,12 +217,14 @@ export default function ColorMatcherScreen() {
 
   const generateTargetColor = (): string => {
     const hue = Math.floor(Math.random() * 360);
-    const saturation = 70 + Math.floor(Math.random() * 30); // 70-100%
-    const lightness = 40 + Math.floor(Math.random() * 30); // 40-70%
+    // Allow full range of saturation (30-100%) to allow center picks
+    const saturation = 30 + Math.floor(Math.random() * 70); // 30-100%
+    // Allow wider range of lightness (30-70%) for more variety
+    const lightness = 30 + Math.floor(Math.random() * 40); // 30-70%
     const [r, g, b] = hslToRgb(hue, saturation, lightness);
     
     // Calculate position on wheel for the target color
-    const normalizedDistance = saturation / 100; // 0.7-1.0
+    const normalizedDistance = saturation / 100; // 0.3-1.0 (now includes center area)
     const distance = normalizedDistance * RADIUS;
     const angleRad = (hue * Math.PI) / 180;
     const x = CENTER_X + distance * Math.cos(angleRad);
@@ -701,7 +749,7 @@ export default function ColorMatcherScreen() {
                         fontSize={Design.typography.sizes.sm}
                         color={Design.colors.text.secondary}
                       >
-                        {Math.round(guess.distance)} pts
+                        {Math.max(0, Math.round(245 - guess.distance))} pts
                       </Text>
                     </XStack>
                   );
