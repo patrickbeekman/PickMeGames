@@ -7,6 +7,7 @@ import { StatusBar } from 'expo-status-bar';
 import { PostHogProvider } from 'posthog-react-native';
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
@@ -106,35 +107,37 @@ export default function RootLayout() {
   // All hooks above this line, no hooks in conditionals below
 
   const AppContent = (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <TamaguiProvider config={config}>
-        <Stack
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: '#F3E889',
-            },
-            headerTintColor: '#333',
-            headerTitleStyle: {
-              fontWeight: 'bold',
-            },
-            contentStyle: {
-              backgroundColor: '#F3E889',
-            },
-            headerShadowVisible: false, // <-- Add this line to remove the bottom border/shadow
-          }}>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-          <Stack.Screen name="prompted" />
-          <Stack.Screen name="prompt-settings" />
-          <Stack.Screen name="finger-tap" />
-          <Stack.Screen name="spinner" />
-          <Stack.Screen name="numbered-spinner" />
-          <Stack.Screen name="random-number" />
-          <Stack.Screen name="about" />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-      </TamaguiProvider>
-      <StatusBar backgroundColor="#F3E889" translucent={true} style='dark' />
-    </ThemeProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <TamaguiProvider config={config}>
+          <Stack
+            screenOptions={{
+              headerStyle: {
+                backgroundColor: '#F3E889',
+              },
+              headerTintColor: '#333',
+              headerTitleStyle: {
+                fontWeight: 'bold',
+              },
+              contentStyle: {
+                backgroundColor: '#F3E889',
+              },
+              headerShadowVisible: false, // <-- Add this line to remove the bottom border/shadow
+            }}>
+            <Stack.Screen name="index" options={{ headerShown: false }} />
+            <Stack.Screen name="prompted" />
+            <Stack.Screen name="prompt-settings" />
+            <Stack.Screen name="finger-tap" />
+            <Stack.Screen name="spinner" />
+            <Stack.Screen name="numbered-spinner" />
+            <Stack.Screen name="random-number" />
+            <Stack.Screen name="about" />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+        </TamaguiProvider>
+        <StatusBar backgroundColor="#F3E889" translucent={true} style='dark' />
+      </ThemeProvider>
+    </GestureHandlerRootView>
   );
 
   // Only use PostHogProvider if we have valid credentials
