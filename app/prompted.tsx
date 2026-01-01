@@ -57,7 +57,7 @@ export default function PromptSelector() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerTitle: 'Prompted',
+      headerTitle: 'Prompt to pick',
       headerStyle: {
         backgroundColor: Design.colors.background.light,
         borderBottomWidth: 0,
@@ -378,15 +378,16 @@ export default function PromptSelector() {
               </LinearGradient>
             </Pressable>
           </Link>
-          <Text 
-            fontSize={Design.typography.sizes.xs} 
-            color={Design.colors.text.tertiary} 
-            marginTop={Design.spacing.xs} 
-            textAlign="center" 
-            maxWidth={260}
-          >
-            Manage your prompts anytime from this page.
-          </Text>
+          <YStack alignItems="center" width="100%" marginTop={Design.spacing.xs}>
+            <Text 
+              fontSize={Design.typography.sizes.xs} 
+              color={Design.colors.text.tertiary} 
+              textAlign="center" 
+              maxWidth={260}
+            >
+              Manage your prompts anytime from this page.
+            </Text>
+          </YStack>
         </Animated.View>
 
         {/* Enhanced Button */}

@@ -11,28 +11,28 @@ import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
 
-// Modern color palette with gradients
+// Modern color palette with gradients - well-distributed variety across color families
 const SEGMENT_COLORS = [
   ['#FF6B6B', '#FF8E8E'], // Red
   ['#4ECDC4', '#6EDDD6'], // Teal
-  ['#45B7D1', '#6BC5D8'], // Blue
-  ['#FFA07A', '#FFB896'], // Peach
-  ['#98D8C8', '#B4E4D4'], // Mint
   ['#F7DC6F', '#F9E79F'], // Yellow
-  ['#BB8FCE', '#D4A5E0'], // Purple
-  ['#85C1E2', '#A8D4F0'], // Sky Blue
+  ['#9B59B6', '#BB8FCE'], // Purple
+  ['#FFA07A', '#FFB896'], // Peach/Orange
+  ['#52BE80', '#7DCEA0'], // Emerald Green
   ['#F1948A', '#F5B7B1'], // Pink
-  ['#82E0AA', '#A9DFBF'], // Green
-  ['#F8C471', '#FAD7A0'], // Orange
-  ['#85C1E9', '#AED6F1'], // Light Blue
-  ['#EC7063', '#F1948A'], // Coral
-  ['#52BE80', '#7DCEA0'], // Emerald
-  ['#F39C12', '#F7DC6F'], // Gold
-  ['#AF7AC5', '#C39BD3'], // Lavender
-  ['#5DADE2', '#85C1E9'], // Light Blue
   ['#E67E22', '#F39C12'], // Dark Orange
+  ['#3498DB', '#5DADE2'], // Bright Blue
+  ['#2ECC71', '#52BE80'], // Bright Green
+  ['#FF6B9D', '#FF8FB3'], // Hot Pink
+  ['#EC7063', '#F1948A'], // Coral
   ['#1ABC9C', '#52BE80'], // Turquoise
+  ['#F8C471', '#FAD7A0'], // Light Orange
+  ['#AF7AC5', '#C39BD3'], // Lavender
+  ['#45B7D1', '#6BC5D8'], // Blue
   ['#E74C3C', '#EC7063'], // Red Orange
+  ['#82E0AA', '#A9DFBF'], // Mint Green
+  ['#F39C12', '#F7DC6F'], // Gold
+  ['#5DADE2', '#85C1E9'], // Sky Blue
 ];
 
 // Calculate responsive spinner size

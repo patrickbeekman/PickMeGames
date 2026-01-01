@@ -478,6 +478,8 @@ const styles = StyleSheet.create({
     position: 'relative',
     borderRadius: 100,
     overflow: 'hidden',
+    // Ensure perfect circle on all platforms
+    borderWidth: 0,
   },
   coinSide: {
     position: 'absolute',
@@ -486,8 +488,8 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 3,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderWidth: 0, // Remove border that might cause clipping
+    overflow: 'hidden', // Ensure circular clipping
     ...Design.shadows.xl,
   },
   coinHeads: {

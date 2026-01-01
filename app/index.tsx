@@ -32,10 +32,10 @@ export default function HomeScreen() {
     { title: 'Color Matcher', route: '/color-matcher', icon: require('../icons/color-matcher.png'), gradient: ['#FF6B6B', '#FF8E8E'] },
     { title: 'Timer Countdown', route: '/timer-countdown', icon: require('../icons/timer-countdown.png'), gradient: ['#4ECDC4', '#45B7D1'] },
     { title: 'Numbered Spinner', route: '/numbered-spinner', icon: require('../icons/numbered-spinner.png'), gradient: ['#7B1FA2', '#BA68C8'] },
-    { title: 'Random Number', route: '/random-number', icon: require('../icons/random-number.png'), gradient: ['#F57C00', '#FFB74D'] },
-    { title: 'Prompted', route: '/prompted', icon: require('../icons/prompt.png'), gradient: ['#C2185B', '#F06292'] },
-    { title: 'Coin Flip', route: '/coin-flip', icon: require('../icons/coin-flip.png'), gradient: ['#FFD700', '#FFA500'] },
     { title: 'Spinner', route: '/spinner', icon: require('../icons/spinner.png'), gradient: ['#1976D2', '#42A5F5'] },
+    { title: 'Random Number', route: '/random-number', icon: require('../icons/random-number.png'), gradient: ['#F57C00', '#FFB74D'] },
+    { title: 'Prompt to pick', route: '/prompted', icon: require('../icons/prompt.png'), gradient: ['#C2185B', '#F06292'] },
+    { title: 'Coin Flip', route: '/coin-flip', icon: require('../icons/coin-flip.png'), gradient: ['#FFD700', '#FFA500'] },
   ], []);
 
   // Create animation values for each button
