@@ -186,7 +186,7 @@ export default function ColorMatcherScreen() {
     return rgbToHex(r, g, b);
   };
 
-  const flashTargetColor = () => {
+  const flashTargetColor = (displayDuration: number = 2500) => {
     setShowTargetColor(true);
     Animated.timing(targetColorOpacity, {
       toValue: 1,
@@ -201,7 +201,7 @@ export default function ColorMatcherScreen() {
         }).start(() => {
           setShowTargetColor(false);
         });
-      }, 500);
+      }, displayDuration);
     });
   };
 
@@ -423,7 +423,7 @@ export default function ColorMatcherScreen() {
           <Pressable
             onPress={() => {
               if (!showTargetColor) {
-                flashTargetColor();
+                flashTargetColor(1000); // 2x longer when clicked (1000ms = 2 * 500ms)
               }
             }}
             style={{ marginBottom: Design.spacing.lg }}
