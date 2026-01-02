@@ -59,9 +59,19 @@ export default function PromptSettings() {
   const visiblePrompts = showCustom ? getCustomPrompts() : filteredDefaultPrompts;
 
   const renderPromptItem = ({ item, index }: { item: string; index: number }) => {
-    // Adjust index for custom prompts view
-    const realIndex = showCustom ? index + defaultPromptsCount : index;
     const isDefault = !showCustom;
+    
+    // For default prompts, find the original index in the unfiltered array
+    // For custom prompts, calculate the real index in the full prompts array
+    let realIndex: number;
+    if (isDefault) {
+      // Find which original default prompt this is by matching the item
+      // and finding its position in the original default prompts array
+      const originalIndex = prompts.slice(0, defaultPromptsCount).findIndex(p => p === item);
+      realIndex = originalIndex >= 0 ? originalIndex : index;
+    } else {
+      realIndex = index + defaultPromptsCount;
+    }
 
     return (
       <YStack
@@ -129,7 +139,13 @@ export default function PromptSettings() {
   // Allow hiding default prompts instead of blocking deletion
   const handleRemovePrompt = (index: number, prompt: string, isDefault: boolean) => {
     if (isDefault) {
-      setHiddenDefaults((prev) => [...prev, index]);
+      // Only add if not already hidden (prevent duplicates)
+      setHiddenDefaults((prev) => {
+        if (prev.includes(index)) {
+          return prev; // Already hidden
+        }
+        return [...prev, index];
+      });
       return;
     }
     Alert.alert(

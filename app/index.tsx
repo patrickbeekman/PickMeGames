@@ -318,91 +318,91 @@ export default function HomeScreen() {
                     {orderedOptions.map((opt) => {
                       const anim = buttonAnimsMap.get(opt.route);
                       return (
-                      <Animated.View
-                        key={opt.route}
-                        style={{
-                          width: '100%',
-                          opacity: anim?.fade || 1,
-                          transform: [{ translateY: anim?.slide || 0 }],
-                        }}
-                      >
-                        <Link href={opt.route as any} asChild>
-                          <Pressable
-                            onLongPress={handleLongPress}
-                            accessibilityRole="button"
-                            accessibilityLabel={`Open ${opt.title} game mode`}
-                            accessibilityHint={`Long press to reorder. Starts the ${opt.title} game mode to help decide who goes first`}
-                            style={({ pressed }) => [
-                              {
-                                borderRadius: Design.borderRadius.lg,
-                                overflow: 'hidden',
-                                backgroundColor: '#FFFFFF',
-                                ...Design.shadows.md,
-                                transform: [{ scale: pressed ? Design.pressScale.md : 1 }],
-                                opacity: pressed ? 0.95 : 1,
-                              },
-                            ]}
-                          >
-                            <LinearGradient
-                              colors={opt.gradient as [string, string]}
-                              start={{ x: 0, y: 0 }}
-                              end={{ x: 1, y: 1 }}
-                              style={{
-                                paddingVertical: Design.spacing.md,
-                                paddingHorizontal: Design.spacing.md,
-                                borderRadius: Design.borderRadius.lg,
-                                minHeight: 56,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                              }}
+                        <Animated.View
+                          key={opt.route}
+                          style={{
+                            width: '100%',
+                            opacity: anim?.fade || 1,
+                            transform: [{ translateY: anim?.slide || 0 }],
+                          }}
+                        >
+                          <Link href={opt.route as any} asChild>
+                            <Pressable
+                              onLongPress={handleLongPress}
+                              accessibilityRole="button"
+                              accessibilityLabel={`Open ${opt.title} game mode`}
+                              accessibilityHint={`Long press to reorder. Starts the ${opt.title} game mode to help decide who goes first`}
+                              style={({ pressed }) => [
+                                {
+                                  borderRadius: Design.borderRadius.lg,
+                                  overflow: 'hidden',
+                                  backgroundColor: '#FFFFFF',
+                                  ...Design.shadows.md,
+                                  transform: [{ scale: pressed ? Design.pressScale.md : 1 }],
+                                  opacity: pressed ? 0.95 : 1,
+                                },
+                              ]}
                             >
-                              <XStack 
-                                alignItems="center" 
-                                justifyContent="space-between" 
-                                width="100%"
-                                gap={Design.spacing.sm}
+                              <LinearGradient
+                                colors={opt.gradient as [string, string]}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={{
+                                  paddingVertical: Design.spacing.md,
+                                  paddingHorizontal: Design.spacing.md,
+                                  borderRadius: Design.borderRadius.lg,
+                                  minHeight: 56,
+                                  justifyContent: 'center',
+                                  alignItems: 'center',
+                                }}
                               >
-                                <Image
-                                  source={opt.icon}
-                                  width={44}
-                                  height={44}
-                                  objectFit="contain"
-                                  resizeMode="contain"
-                                  accessibilityLabel={`${opt.title} icon`}
-                                />
-                                <Text 
-                                  color={Design.colors.text.white} 
-                                  fontSize={Design.typography.sizes.md} 
-                                  fontWeight={Design.typography.weights.bold} 
-                                  flex={1} 
-                                  textAlign="left"
-                                  letterSpacing={Design.typography.letterSpacing.normal}
+                                <XStack 
+                                  alignItems="center" 
+                                  justifyContent="space-between" 
+                                  width="100%"
+                                  gap={Design.spacing.sm}
                                 >
-                                  {opt.title}
-                                </Text>
-                                <View
-                                  style={{
-                                    width: 24,
-                                    height: 24,
-                                    borderRadius: Design.borderRadius.full,
-                                    backgroundColor: 'rgba(255, 255, 255, 0.35)',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                  }}
-                                >
+                                  <Image
+                                    source={opt.icon}
+                                    width={44}
+                                    height={44}
+                                    objectFit="contain"
+                                    resizeMode="contain"
+                                    accessibilityLabel={`${opt.title} icon`}
+                                  />
                                   <Text 
                                     color={Design.colors.text.white} 
-                                    fontSize={Design.typography.sizes.md}
-                                    fontWeight={Design.typography.weights.bold}
+                                    fontSize={Design.typography.sizes.md} 
+                                    fontWeight={Design.typography.weights.bold} 
+                                    flex={1} 
+                                    textAlign="left"
+                                    letterSpacing={Design.typography.letterSpacing.normal}
                                   >
-                                    →
+                                    {opt.title}
                                   </Text>
-                                </View>
-                              </XStack>
-                            </LinearGradient>
-                          </Pressable>
-                        </Link>
-                      </Animated.View>
+                                  <View
+                                    style={{
+                                      width: 24,
+                                      height: 24,
+                                      borderRadius: Design.borderRadius.full,
+                                      backgroundColor: 'rgba(255, 255, 255, 0.35)',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                    }}
+                                  >
+                                    <Text 
+                                      color={Design.colors.text.white} 
+                                      fontSize={Design.typography.sizes.md}
+                                      fontWeight={Design.typography.weights.bold}
+                                    >
+                                      →
+                                    </Text>
+                                  </View>
+                                </XStack>
+                              </LinearGradient>
+                            </Pressable>
+                          </Link>
+                        </Animated.View>
                       );
                     })}
                   </YStack>
