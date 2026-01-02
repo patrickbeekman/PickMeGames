@@ -56,12 +56,17 @@ export default function HomeScreen() {
     }
   }, [loading, hasSeenTip, isEditMode]);
 
-  // Create animation values for each button
-  const buttonAnims = useRef(
-    defaultOptions.map(() => ({
-      fade: new Animated.Value(0),
-      slide: new Animated.Value(30),
-    }))
+  // Create animation values for each button, keyed by route for consistent access
+  const buttonAnimsMap = useRef(
+    new Map(
+      defaultOptions.map(opt => [
+        opt.route,
+        {
+          fade: new Animated.Value(0),
+          slide: new Animated.Value(30),
+        }
+      ])
+    )
   ).current;
 
   const handleLongPress = () => {
@@ -91,6 +96,9 @@ export default function HomeScreen() {
     capture('entered_home_screen');
   }, [capture]);
 
+  // Track if we've done initial animation
+  const hasAnimated = useRef(false);
+
   useEffect(() => {
     // Main content entrance animation
     Animated.parallel([
@@ -106,24 +114,30 @@ export default function HomeScreen() {
       }),
     ]).start();
 
-    // Staggered button animations
-    buttonAnims.forEach((anim, index) => {
-      Animated.parallel([
-        Animated.timing(anim.fade, {
-          toValue: 1,
-          duration: 500,
-          delay: 200 + index * 100,
-          useNativeDriver: true,
-        }),
-        Animated.timing(anim.slide, {
-          toValue: 0,
-          duration: 500,
-          delay: 200 + index * 100,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    });
-  }, []);
+    // Staggered button animations - only animate once on initial load
+    if (!loading && orderedOptions.length > 0 && !hasAnimated.current) {
+      hasAnimated.current = true;
+      orderedOptions.forEach((opt, index) => {
+        const anim = buttonAnimsMap.get(opt.route);
+        if (anim) {
+          Animated.parallel([
+            Animated.timing(anim.fade, {
+              toValue: 1,
+              duration: 500,
+              delay: 200 + index * 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(anim.slide, {
+              toValue: 0,
+              duration: 500,
+              delay: 200 + index * 100,
+              useNativeDriver: true,
+            }),
+          ]).start();
+        }
+      });
+    }
+  }, [loading, orderedOptions]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -201,6 +215,13 @@ export default function HomeScreen() {
               </YStack>
 
               {/* Game Options */}
+              {loading || orderedOptions.length === 0 ? (
+                <View style={{ width: '100%', maxWidth: 360, alignItems: 'center', paddingVertical: Design.spacing.xl }}>
+                  <Text fontSize={Design.typography.sizes.md} color={Design.colors.text.secondary}>
+                    Loading...
+                  </Text>
+                </View>
+              ) : (
               <View style={{ width: '100%', maxWidth: 360 }}>
                 {isEditMode ? (
                   <DraggableFlatList
@@ -294,13 +315,15 @@ export default function HomeScreen() {
                   />
                 ) : (
                   <YStack width="100%" alignItems="center" gap={Design.spacing.sm}>
-                    {orderedOptions.map((opt, index) => (
+                    {orderedOptions.map((opt) => {
+                      const anim = buttonAnimsMap.get(opt.route);
+                      return (
                       <Animated.View
                         key={opt.route}
                         style={{
                           width: '100%',
-                          opacity: buttonAnims[index]?.fade || 1,
-                          transform: [{ translateY: buttonAnims[index]?.slide || 0 }],
+                          opacity: anim?.fade || 1,
+                          transform: [{ translateY: anim?.slide || 0 }],
                         }}
                       >
                         <Link href={opt.route as any} asChild>
@@ -380,10 +403,12 @@ export default function HomeScreen() {
                           </Pressable>
                         </Link>
                       </Animated.View>
-                    ))}
+                      );
+                    })}
                   </YStack>
                 )}
               </View>
+              )}
 
               {/* Edit Mode Done Button */}
               {isEditMode && (

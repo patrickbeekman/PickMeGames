@@ -341,7 +341,7 @@ export default function NumberGuesser() {
             transform: [{ translateY: cardSlideAnim }],
             width: '100%',
             maxWidth: 360,
-            marginBottom: Design.spacing.lg,
+            marginBottom: Design.spacing.xl,
           }}
         >
           <YStack
@@ -433,7 +433,8 @@ export default function NumberGuesser() {
         >
           <YStack
             width="100%"
-            minHeight={200}
+            minHeight={160}
+            maxHeight={180}
             borderRadius={Design.borderRadius.xl}
             backgroundColor="rgba(255,255,255,0.95)"
             alignItems="center"
@@ -441,7 +442,7 @@ export default function NumberGuesser() {
             {...Design.shadows.lg}
             borderWidth={4}
             borderColor={randomNumber !== null ? Design.colors.primary : "#FFD700"}
-            padding={Design.spacing.xl}
+            padding={Design.spacing.lg}
           >
             {/* Main number display */}
           <Text 

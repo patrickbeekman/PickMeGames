@@ -456,10 +456,18 @@ export default function PromptSelector() {
         >
           <YStack 
             alignItems="center" 
-            backgroundColor="rgba(76, 175, 80, 0.1)"
+            backgroundColor="rgba(255, 255, 255, 0.9)"
             borderRadius={Design.borderRadius.lg}
             padding={Design.spacing.md}
-            {...Design.shadows.sm}
+            borderWidth={1}
+            borderColor="rgba(76, 175, 80, 0.2)"
+            style={{
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.1,
+              shadowRadius: 2,
+              elevation: 2,
+            }}
           >
             <Text 
               fontSize={Design.typography.sizes.sm} 
