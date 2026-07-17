@@ -1,24 +1,29 @@
+import { useCallback, useRef } from 'react';
 import { usePostHog } from 'posthog-react-native';
 import { Platform } from 'react-native';
 
 export const useAnalytics = () => {
-  // Safely get PostHog - it may not be available if PostHogProvider is not rendered
-  let posthog: ReturnType<typeof usePostHog> | null = null;
+  // Use a ref to hold posthog - prevents capture/identify identity from
+  // changing on every render. Without this, usePostHog() returns a new
+  // object reference each render, causing useCallback deps to invalidate
+  // and cascading duplicate events through useEffect([capture]) chains.
+  const posthogRef = useRef<ReturnType<typeof usePostHog> | null>(null);
   
   try {
-    posthog = usePostHog();
+    posthogRef.current = usePostHog();
   } catch {
     // PostHogProvider is not available - this is expected when credentials are missing
-    posthog = null;
+    posthogRef.current = null;
   }
 
-  const capture = (event: string, properties?: Record<string, any>) => {
+  const capture = useCallback((event: string, properties?: Record<string, any>) => {
     try {
       if (Platform.OS === 'web') {
         console.log(`Analytics (web): ${event}`, properties);
         return;
       }
 
+      const posthog = posthogRef.current;
       if (!posthog) {
         return;
       }
@@ -29,15 +34,16 @@ export const useAnalytics = () => {
       // Analytics errors are non-critical and should not interrupt user experience
       // Fail silently to maintain smooth UX
     }
-  };
+  }, []); // Empty deps - stable identity, no re-render cascade
 
-  const identify = (userId: string, properties?: Record<string, any>) => {
+  const identify = useCallback((userId: string, properties?: Record<string, any>) => {
     try {
       if (Platform.OS === 'web') {
         console.log(`Analytics identify (web): ${userId}`, properties);
         return;
       }
 
+      const posthog = posthogRef.current;
       if (!posthog) {
         return;
       }
@@ -48,7 +54,7 @@ export const useAnalytics = () => {
       // Analytics errors are non-critical and should not interrupt user experience
       // Fail silently to maintain smooth UX
     }
-  };
+  }, []);
 
   return { capture, identify };
 };
