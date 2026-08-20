@@ -20,11 +20,13 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { impact, notify } from '../utils/haptics';
 
 const { width, height } = Dimensions.get('window');
 const MIN_DELAY = 2000; // 2 seconds
 const MAX_DELAY = 10000; // 10 seconds
 const WINNER_BG_COLOR = '#CBF578'; // Light bright green for winner screen
+const WINNER_BADGE_SIZE = 120;
 
 type Phase = 'waiting' | 'ready' | 'flashing' | 'winner';
 
@@ -46,6 +48,13 @@ export default function TimerCountdownScreen() {
   const buttonSlideAnim = useRef(new Animated.Value(30)).current;
   const readyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const phaseRef = useRef(phase);
+  const touchesRef = useRef(touches);
+  const particlesRef = useRef(particles);
+
+  useEffect(() => { phaseRef.current = phase; }, [phase]);
+  useEffect(() => { touchesRef.current = touches; }, [touches]);
+  useEffect(() => { particlesRef.current = particles; }, [particles]);
 
   useEffect(() => {
     navigation.setOptions({
@@ -135,7 +144,7 @@ export default function TimerCountdownScreen() {
   const startGame = () => {
     if (phase !== 'waiting') return;
     
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    impact(Haptics.ImpactFeedbackStyle.Light);
     setPhase('ready');
     setTouches([]);
     setWinner(null);
@@ -163,14 +172,14 @@ export default function TimerCountdownScreen() {
     }).start();
     
     // Haptic feedback for flash
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    impact(Haptics.ImpactFeedbackStyle.Heavy);
     
     // Sound would go here (using expo-av if needed)
     // For now, we rely on visual and haptic feedback
     
     // Auto-end game after 5 seconds if no one taps
     flashTimerRef.current = setTimeout(() => {
-      if (phase === 'flashing' && touches.length === 0) {
+      if (phaseRef.current === 'flashing' && touchesRef.current.length === 0) {
         reset();
       }
     }, 5000);
@@ -178,7 +187,12 @@ export default function TimerCountdownScreen() {
 
   const onTouchStart = (e: GestureResponderEvent) => {
     if (phase !== 'flashing') return;
-    
+
+    if (flashTimerRef.current) {
+      clearTimeout(flashTimerRef.current);
+      flashTimerRef.current = null;
+    }
+
     const touchTimestamp = Date.now();
     const newTouches = e.nativeEvent.touches.map((t: NativeTouchEvent) => ({
       identifier: Number(t.identifier),
@@ -205,7 +219,7 @@ export default function TimerCountdownScreen() {
         triggerParticles(fastestTouch.x, fastestTouch.y);
         setPhase('winner');
         
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        notify(Haptics.NotificationFeedbackType.Success);
         AccessibilityInfo.announceForAccessibility(`Winner! Reaction time: ${reactionTime}ms`);
         
         capture('timer_countdown_winner', {
@@ -260,7 +274,7 @@ export default function TimerCountdownScreen() {
       if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
       backgroundColor.stopAnimation();
       flashAnim.stopAnimation();
-      particles.forEach(p => p.stopAnimation());
+      particlesRef.current.forEach(p => p.stopAnimation());
     };
   }, []);
 
@@ -415,8 +429,8 @@ export default function TimerCountdownScreen() {
           {winner && (
             <YStack
               position="absolute"
-              left={winner.x - 55}
-              top={winner.y - 55}
+              left={Math.min(Math.max(winner.x - WINNER_BADGE_SIZE / 2, 8), width - WINNER_BADGE_SIZE - 8)}
+              top={Math.min(Math.max(winner.y - WINNER_BADGE_SIZE / 2, 8), height - WINNER_BADGE_SIZE - 8)}
               width={120}
               height={120}
               borderRadius={60}
