@@ -39,6 +39,10 @@ export default function TimerCountdownScreen() {
   const [particles, setParticles] = useState<Animated.ValueXY[]>([]);
   const [flashTime, setFlashTime] = useState<number | null>(null);
   const [reactionTimes, setReactionTimes] = useState<number[]>([]);
+  // Measured size of the play-area container the winner badge is absolutely
+  // positioned in (shorter than the full window because it sits below the
+  // nav header). Falls back to window dimensions until onLayout fires.
+  const [containerSize, setContainerSize] = useState<{ width: number; height: number }>({ width, height });
 
   const backgroundColor = useRef(new Animated.Value(0)).current;
   const flashAnim = useRef(new Animated.Value(0)).current;
@@ -304,6 +308,10 @@ export default function TimerCountdownScreen() {
         <Animated.View
           style={[styles.container, { backgroundColor: 'transparent' }]}
           onTouchStart={onTouchStart}
+          onLayout={(e) => {
+            const { width: w, height: h } = e.nativeEvent.layout;
+            setContainerSize({ width: w, height: h });
+          }}
           accessibilityRole="none"
           accessibilityLabel={
             phase === 'waiting' ? 'Tap start to begin game' :
@@ -429,11 +437,11 @@ export default function TimerCountdownScreen() {
           {winner && (
             <YStack
               position="absolute"
-              left={Math.min(Math.max(winner.x - WINNER_BADGE_SIZE / 2, 8), width - WINNER_BADGE_SIZE - 8)}
-              top={Math.min(Math.max(winner.y - WINNER_BADGE_SIZE / 2, 8), height - WINNER_BADGE_SIZE - 8)}
-              width={120}
-              height={120}
-              borderRadius={60}
+              left={Math.min(Math.max(winner.x - WINNER_BADGE_SIZE / 2, 8), containerSize.width - WINNER_BADGE_SIZE - 8)}
+              top={Math.min(Math.max(winner.y - WINNER_BADGE_SIZE / 2, 8), containerSize.height - WINNER_BADGE_SIZE - 8)}
+              width={WINNER_BADGE_SIZE}
+              height={WINNER_BADGE_SIZE}
+              borderRadius={WINNER_BADGE_SIZE / 2}
               justifyContent="center"
               alignItems="center"
               borderWidth={4}
@@ -447,9 +455,9 @@ export default function TimerCountdownScreen() {
               <LinearGradient
                 colors={['#FFD700', '#FFC107', '#FF8F00']}
                 style={{
-                  width: 120,
-                  height: 120,
-                  borderRadius: 60,
+                  width: WINNER_BADGE_SIZE,
+                  height: WINNER_BADGE_SIZE,
+                  borderRadius: WINNER_BADGE_SIZE / 2,
                   position: 'absolute',
                 }}
               />
