@@ -9,6 +9,7 @@ import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet,
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { impact, notify } from '../utils/haptics';
 
 type CoinSide = 'heads' | 'tails' | null;
 
@@ -19,7 +20,10 @@ export default function CoinFlipScreen() {
   const [isFlipping, setIsFlipping] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [flipCount, setFlipCount] = useState(0);
-  
+
+  const isMounted = useRef(true);
+  const confettiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // Animation values
   const flipAnim = useRef(new Animated.Value(0)).current;
   const scaleX = useRef(new Animated.Value(1)).current;
@@ -83,11 +87,19 @@ export default function CoinFlipScreen() {
     ]).start();
   }, []);
 
+  // Unmount cleanup
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+      if (confettiTimerRef.current) clearTimeout(confettiTimerRef.current);
+    };
+  }, []);
+
   const flipCoin = () => {
     if (isFlipping) return;
-    
+
     // Haptic feedback
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    impact();
     
     setIsFlipping(true);
     setShowConfetti(false);
@@ -188,17 +200,19 @@ export default function CoinFlipScreen() {
       }),
       flipSequence,
     ]).start(() => {
+      if (!isMounted.current) return;
+
       setResult(newResult);
       setIsFlipping(false);
       setShowConfetti(true);
       setFlipCount(prev => prev + 1);
-      
+
       // Haptic feedback on completion
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      
+      notify(Haptics.NotificationFeedbackType.Success);
+
       // Screen reader announcement
       AccessibilityInfo.announceForAccessibility(`Coin flip result: ${newResult}`);
-      
+
       // Victory bounce
       Animated.sequence([
         Animated.timing(bounceAnim, {
@@ -214,10 +228,10 @@ export default function CoinFlipScreen() {
           useNativeDriver: true,
         }),
       ]).start();
-      
+
       // Hide confetti after 3 seconds
-      setTimeout(() => setShowConfetti(false), 3000);
-      
+      confettiTimerRef.current = setTimeout(() => setShowConfetti(false), 3000);
+
       capture('coin_flipped', {
         result: newResult,
         flipCount: flipCount + 1,
