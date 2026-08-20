@@ -8,6 +8,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Dimensions, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
+import { SpinnerArrow } from '../components/SpinnerArrow';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
 
@@ -60,6 +61,19 @@ export default function SpinnerSelector() {
   const headerFadeAnim = useRef(new Animated.Value(0)).current;
   const headerSlideAnim = useRef(new Animated.Value(20)).current;
   const [spinnerSize, setSpinnerSize] = useState(getSpinnerSize());
+  const isMounted = useRef(true);
+  const pulseLoopRef = useRef<Animated.CompositeAnimation | null>(null);
+  const glowLoopRef = useRef<Animated.CompositeAnimation | null>(null);
+  const confettiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+      pulseLoopRef.current?.stop();
+      glowLoopRef.current?.stop();
+      if (confettiTimerRef.current) clearTimeout(confettiTimerRef.current);
+    };
+  }, []);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -166,6 +180,9 @@ export default function SpinnerSelector() {
       ])
     );
 
+    pulseLoopRef.current = pulseAnimation;
+    glowLoopRef.current = glowAnimation;
+
     pulseAnimation.start();
     glowAnimation.start();
 
@@ -176,16 +193,23 @@ export default function SpinnerSelector() {
       easing: Easing.out(Easing.quad),
       useNativeDriver: true,
     }).start(() => {
+      // Stop animations regardless of mount state to avoid leaked loops
+      pulseAnimation.stop();
+      glowAnimation.stop();
+
+      if (!isMounted.current) return;
+
       setSpinning(false);
       setShowConfetti(true);
 
-      // Screen reader announcement
-      const selectedSegment = Math.floor((360 - (targetRotation % 360)) / (360 / playerCount)) % playerCount + 1;
+      // Screen reader announcement.
+      // Local angle 0 = 3 o'clock, clockwise-positive (see wheel-drawing math above).
+      // The arrow sits at 12 o'clock = screen angle 270 in that convention.
+      // A local angle theta lands at screen angle (theta + targetRotation) mod 360,
+      // so the segment under the arrow is the one containing
+      // theta = (270 - targetRotation) mod 360.
+      const selectedSegment = Math.floor((((270 - (targetRotation % 360)) % 360 + 360) % 360) / (360 / playerCount)) % playerCount + 1;
       AccessibilityInfo.announceForAccessibility(`Spinner stopped on segment ${selectedSegment} of ${playerCount}. Player ${selectedSegment} goes first.`);
-
-      // Stop animations
-      pulseAnimation.stop();
-      glowAnimation.stop();
 
       // Reset animations
       Animated.parallel([
@@ -207,7 +231,10 @@ export default function SpinnerSelector() {
       ]).start();
 
       // Hide confetti after 3 seconds
-      setTimeout(() => setShowConfetti(false), 3000);
+      if (confettiTimerRef.current) clearTimeout(confettiTimerRef.current);
+      confettiTimerRef.current = setTimeout(() => {
+        if (isMounted.current) setShowConfetti(false);
+      }, 3000);
     });
 
     capture('spun_numbered_spinner', {
@@ -352,8 +379,9 @@ export default function SpinnerSelector() {
             },
           ]}
         >
-          <View style={styles.arrowShadow} />
-          <View style={styles.arrow} />
+          <View style={styles.arrowShadowWrapper}>
+            <SpinnerArrow width={24} height={30} color="#E74C3C" pointing="down" />
+          </View>
         </View>
 
         {/* Spinner Container */}
@@ -523,27 +551,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 30,
   },
-  arrowShadow: {
-    position: 'absolute',
-    top: 2,
-    width: 0,
-    height: 0,
-    borderLeftWidth: 14,
-    borderRightWidth: 14,
-    borderTopWidth: 32,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderTopColor: 'rgba(0,0,0,0.25)',
-  },
-  arrow: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 12,
-    borderRightWidth: 12,
-    borderTopWidth: 30,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderTopColor: '#E74C3C',
+  arrowShadowWrapper: {
     shadowColor: '#000',
     shadowOpacity: 0.4,
     shadowOffset: { width: 0, height: 3 },
