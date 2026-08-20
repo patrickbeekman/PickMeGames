@@ -15,8 +15,10 @@ import {
   StyleSheet,
 } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
+import { SpinnerArrow } from '../components/SpinnerArrow';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { impact, notify } from '../utils/haptics';
 
 const { width, height } = Dimensions.get('window');
 const SPINNER_SIZE = width * 0.8;
@@ -34,6 +36,9 @@ const TwisterSpinner = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const isMounted = useRef(true);
   const animationRef = useRef<Animated.CompositeAnimation | null>(null);
+  const pulseLoopRef = useRef<Animated.CompositeAnimation | null>(null);
+  const glowLoopRef = useRef<Animated.CompositeAnimation | null>(null);
+  const confettiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
@@ -70,6 +75,11 @@ const TwisterSpinner = () => {
       if (animationRef.current) {
         animationRef.current.stop();
       }
+      pulseLoopRef.current?.stop();
+      glowLoopRef.current?.stop();
+      if (confettiTimeoutRef.current) {
+        clearTimeout(confettiTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -94,7 +104,7 @@ const TwisterSpinner = () => {
     if (spinning) return;
     
     // Haptic feedback on press
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    impact(Haptics.ImpactFeedbackStyle.Medium);
     
     setShowConfetti(false);
   
@@ -147,9 +157,12 @@ const TwisterSpinner = () => {
       ])
     );
 
+    pulseLoopRef.current = pulseAnimation;
+    glowLoopRef.current = glowAnimation;
+
     pulseAnimation.start();
     glowAnimation.start();
-  
+
     // Save animation ref so we can stop it on unmount
     animationRef.current = Animated.timing(rotation, {
       toValue: targetRotation,
@@ -165,7 +178,7 @@ const TwisterSpinner = () => {
         setShowConfetti(true);
 
         // Haptic feedback on completion
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        notify(Haptics.NotificationFeedbackType.Success);
 
         // Screen reader announcement
         AccessibilityInfo.announceForAccessibility('Spinner has stopped. Check the arrow position to see who goes first.');
@@ -210,7 +223,14 @@ const TwisterSpinner = () => {
         ]).start();
 
         // Hide confetti after 3 seconds
-        setTimeout(() => setShowConfetti(false), 3000);
+        if (confettiTimeoutRef.current) {
+          clearTimeout(confettiTimeoutRef.current);
+        }
+        confettiTimeoutRef.current = setTimeout(() => {
+          if (isMounted.current) {
+            setShowConfetti(false);
+          }
+        }, 3000);
       }
     });
 
@@ -352,8 +372,9 @@ const TwisterSpinner = () => {
 
             {/* Rotating arrow with enhanced styling */}
             <Animated.View style={[styles.arrowContainer, { transform: [{ rotate }] }]}>
-              <View style={styles.arrowShadow} />
-              <View style={styles.arrow} />
+              <View style={styles.arrowShadowWrapper}>
+                <SpinnerArrow width={28} height={ARROW_LENGTH + 5} color={Design.colors.primary} pointing="up" />
+              </View>
             </Animated.View>
           </Animated.View>
         </View>
@@ -550,28 +571,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
   },
-  arrowShadow: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 12,
-    borderRightWidth: 12,
-    borderBottomWidth: ARROW_LENGTH + 2,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderBottomColor: 'rgba(0,0,0,0.2)',
-    position: 'absolute',
-    top: SPINNER_SIZE / 2 - ARROW_LENGTH - 2,
-    left: SPINNER_SIZE / 2 - 12,
-  },
-  arrow: {
-    width: 0,
-    height: 0,
-    borderLeftWidth: 14,
-    borderRightWidth: 14,
-    borderBottomWidth: ARROW_LENGTH + 5,
-    borderLeftColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderBottomColor: Design.colors.primary,
+  arrowShadowWrapper: {
     position: 'absolute',
     top: SPINNER_SIZE / 2 - ARROW_LENGTH - 5,
     left: SPINNER_SIZE / 2 - 14,
