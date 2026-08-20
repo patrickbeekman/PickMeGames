@@ -5,6 +5,7 @@ import { Input } from '@tamagui/input';
 import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
+import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, Keyboard, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -25,10 +26,11 @@ export default function PromptSettings() {
   } = usePrompts();
   const [newPrompt, setNewPrompt] = useState('');
   const [showCustom, setShowCustom] = useState(false);
-  const inputRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Track deleted default prompts locally so they don't show up again
   const [hiddenDefaults, setHiddenDefaults] = useState<number[]>([]);
+  const [hiddenLoaded, setHiddenLoaded] = useState(false);
 
   // Load hidden defaults from AsyncStorage on mount
   useEffect(() => {
@@ -36,13 +38,16 @@ export default function PromptSettings() {
       .then(stored => {
         if (stored) setHiddenDefaults(JSON.parse(stored));
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setHiddenLoaded(true));
   }, []);
 
-  // Save hidden defaults to AsyncStorage
+  // Save hidden defaults to AsyncStorage (gated on load completion so we
+  // don't overwrite stored data with the initial empty state before it loads)
   useEffect(() => {
+    if (!hiddenLoaded) return;
     AsyncStorage.setItem('hidden_default_prompts', JSON.stringify(hiddenDefaults)).catch(() => {});
-  }, [hiddenDefaults]);
+  }, [hiddenDefaults, hiddenLoaded]);
 
   // Helper to hide all default prompts
   const hideAllDefaults = () => {
@@ -130,9 +135,6 @@ export default function PromptSettings() {
     const success = await addPrompt(newPrompt);
     if (success) {
       setNewPrompt('');
-      Alert.alert('Success', 'Prompt added successfully!');
-    } else {
-      Alert.alert('Error', 'Prompt already exists or is invalid.');
     }
   };
 
@@ -171,7 +173,10 @@ export default function PromptSettings() {
         {
           text: 'Reset',
           style: 'destructive',
-          onPress: resetToDefaults,
+          onPress: () => {
+            resetToDefaults();
+            restoreAllDefaults();
+          },
         },
       ]
     );
@@ -225,7 +230,12 @@ export default function PromptSettings() {
             ref={inputRef}
             placeholder="Enter your custom prompt..."
             value={newPrompt}
-            onChangeText={setNewPrompt}
+            // This @tamagui/input version's .d.ts mistypes onChangeText as
+            // TextInputProps['onChange'] (an event-object signature), but on
+            // native it passes the prop straight through unchanged to RN's
+            // TextInput, which calls it with the plain string as always.
+            // The cast fixes the type without altering runtime behavior.
+            onChangeText={setNewPrompt as any}
             backgroundColor="white"
             borderRadius={8}
             borderWidth={1}
@@ -323,10 +333,7 @@ export default function PromptSettings() {
               backgroundColor="#4CAF50"
               borderRadius={12}
               pressStyle={{ scale: 0.95, backgroundColor: "#388E3C" }}
-              onPress={() => {
-                handleResetToDefaults();
-                restoreAllDefaults();
-              }}
+              onPress={handleResetToDefaults}
               flex={1}
             >
               <Text color="white" fontWeight="bold">

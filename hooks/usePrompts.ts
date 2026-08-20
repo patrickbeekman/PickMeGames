@@ -80,9 +80,9 @@ export const usePrompts = () => {
     }
     try {
       const updatedPrompts = [...prompts, trimmed];
-      setPrompts(updatedPrompts);
       const customPrompts = updatedPrompts.slice(defaultPrompts.length);
       await saveCustomPrompts(customPrompts);
+      setPrompts(updatedPrompts);
       capture('prompt_added', {
         prompt: trimmed,
         totalPrompts: updatedPrompts.length,
@@ -100,9 +100,9 @@ export const usePrompts = () => {
     try {
       const promptToRemove = prompts[index];
       const updatedPrompts = prompts.filter((_, i) => i !== index);
-      setPrompts(updatedPrompts);
       const customPrompts = updatedPrompts.slice(defaultPrompts.length);
       await saveCustomPrompts(customPrompts);
+      setPrompts(updatedPrompts);
       capture('prompt_removed', {
         prompt: promptToRemove,
         totalPrompts: updatedPrompts.length,
