@@ -9,6 +9,7 @@ import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet 
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { usePrompts } from '../hooks/usePrompts';
+import { impact } from '../utils/haptics';
 
 export default function PromptSelector() {
   const navigation = useNavigation();
@@ -48,12 +49,13 @@ export default function PromptSelector() {
       if (!loading) {
         loadFilteredPrompts();
       }
+      capture('enter_prompt_selector');
     });
     return () => {
       isMounted = false;
       unsubscribe();
     };
-  }, [navigation, loading]); // getFilteredPrompts is stable, so not needed in deps
+  }, [navigation, loading, capture]); // getFilteredPrompts is stable, so not needed in deps
 
   useEffect(() => {
     navigation.setOptions({
@@ -71,13 +73,6 @@ export default function PromptSelector() {
       },
     });
   }, [navigation]);
-
-  useEffect(() => {
-    // Only capture once when component mounts and prompts are loaded
-    if (!loading && filteredPrompts.length > 0) {
-      capture('enter_prompt_selector');
-    }
-  }, [capture, loading, filteredPrompts.length]);
 
   // Entrance animations
   useEffect(() => {
@@ -139,9 +134,9 @@ export default function PromptSelector() {
 
   const nextPrompt = () => {
     if (filteredPrompts.length === 0) return;
-    
+
     // Haptic feedback on press
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    impact();
     
     // Stop any running animations
     animationRefs.current.forEach((anim) => {
@@ -204,7 +199,7 @@ export default function PromptSelector() {
       animationRefs.current.push(inAnimation);
       inAnimation.start(() => {
         // Haptic feedback on new prompt
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+        impact(Haptics.ImpactFeedbackStyle.Light);
         // Screen reader announcement
         const newPrompt = filteredPrompts[next];
         AccessibilityInfo.announceForAccessibility(`New prompt: ${newPrompt}`);
