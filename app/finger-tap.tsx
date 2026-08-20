@@ -3,7 +3,6 @@ import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
     AccessibilityInfo,
@@ -20,6 +19,8 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useEntranceAnimation } from '../hooks/useEntranceAnimation';
+import { useGameScreenHeader } from '../hooks/useGameScreenHeader';
 import { impact, notify } from '../utils/haptics';
 
 // TypeScript interfaces for touch events
@@ -41,7 +42,6 @@ const WINNER_BADGE_SIZE = 120;
 const { width, height } = Dimensions.get('window');
 
 export default function FingerTapScreen() {
-  const navigation = useNavigation();
   const { capture } = useAnalytics();
   const [touches, setTouches] = useState<{ identifier: number; x: number; y: number }[]>([]);
   const [winner, setWinner] = useState<{ x: number; y: number } | null>(null);
@@ -54,61 +54,15 @@ export default function FingerTapScreen() {
   const [containerSize, setContainerSize] = useState<{ width: number; height: number }>({ width, height });
 
   const backgroundColor = useRef(new Animated.Value(0)).current;
-  const headerFadeAnim = useRef(new Animated.Value(0)).current;
-  const headerSlideAnim = useRef(new Animated.Value(20)).current;
-  const buttonFadeAnim = useRef(new Animated.Value(0)).current;
-  const buttonSlideAnim = useRef(new Animated.Value(30)).current;
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'Multifinger Tap',
-      headerStyle: {
-        backgroundColor: Design.colors.background.light,
-        borderBottomWidth: 0,
-        shadowOpacity: 0,
-        elevation: 0,
-      },
-      headerTintColor: Design.colors.text.primary,
-      headerTitleStyle: {
-        fontWeight: Design.typography.weights.bold,
-        fontSize: Design.typography.sizes.xl,
-      },
-    });
-  }, [navigation]);
+  useGameScreenHeader('Multifinger Tap');
+
+  const { fade: headerFadeAnim, slide: headerSlideAnim } = useEntranceAnimation({ distance: 20, duration: Design.animation.normal });
+  const { fade: buttonFadeAnim, slide: buttonSlideAnim } = useEntranceAnimation({ distance: 30, duration: Design.animation.normal, delay: 200 });
 
   useEffect(() => {
     capture('entered_finger_tap');
   }, [capture]);
-
-  // Entrance animations
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(headerFadeAnim, {
-        toValue: 1,
-        duration: Design.animation.normal,
-        useNativeDriver: true,
-      }),
-      Animated.timing(headerSlideAnim, {
-        toValue: 0,
-        duration: Design.animation.normal,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-      Animated.timing(buttonFadeAnim, {
-        toValue: 1,
-        duration: Design.animation.normal,
-        delay: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(buttonSlideAnim, {
-        toValue: 0,
-        duration: Design.animation.normal,
-        delay: 200,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
 
   useEffect(() => {
     if (countdown !== null && countdown > 0) {

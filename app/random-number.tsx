@@ -4,31 +4,25 @@ import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useEntranceAnimation } from '../hooks/useEntranceAnimation';
+import { useGameScreenHeader } from '../hooks/useGameScreenHeader';
 import { impact, notify } from '../utils/haptics';
 
 export default function NumberGuesser() {
-  const navigation = useNavigation();
   const { capture } = useAnalytics();
   const [randomNumber, setRandomNumber] = useState<number | null>(null);
   const [isRevealing, setIsRevealing] = useState(false);
   const [animatedNumber, setAnimatedNumber] = useState('?');
-  
+
   // Animation values
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const bounceAnim = useRef(new Animated.Value(0)).current;
-  const headerFadeAnim = useRef(new Animated.Value(0)).current;
-  const headerSlideAnim = useRef(new Animated.Value(20)).current;
-  const buttonFadeAnim = useRef(new Animated.Value(0)).current;
-  const buttonSlideAnim = useRef(new Animated.Value(30)).current;
-  const cardFadeAnim = useRef(new Animated.Value(0)).current;
-  const cardSlideAnim = useRef(new Animated.Value(20)).current;
   const revealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Quick preset ranges
@@ -59,69 +53,15 @@ export default function NumberGuesser() {
     impact(Haptics.ImpactFeedbackStyle.Light);
   };
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'Random Number',
-      headerStyle: {
-        backgroundColor: Design.colors.background.light,
-        borderBottomWidth: 0,
-        shadowOpacity: 0,
-        elevation: 0,
-      },
-      headerTintColor: Design.colors.text.primary,
-      headerTitleStyle: {
-        fontWeight: Design.typography.weights.bold,
-        fontSize: Design.typography.sizes.xl,
-      },
-    });
-  }, [navigation]);
+  useGameScreenHeader('Random Number');
+
+  const { fade: headerFadeAnim, slide: headerSlideAnim } = useEntranceAnimation({ distance: 20, duration: Design.animation.normal });
+  const { fade: cardFadeAnim, slide: cardSlideAnim } = useEntranceAnimation({ distance: 20, duration: Design.animation.normal, delay: 100 });
+  const { fade: buttonFadeAnim, slide: buttonSlideAnim } = useEntranceAnimation({ distance: 30, duration: Design.animation.normal, delay: 200 });
 
   useEffect(() => {
     capture('entered_number_guesser');
   }, [capture]);
-
-  // Entrance animations
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(headerFadeAnim, {
-        toValue: 1,
-        duration: Design.animation.normal,
-        useNativeDriver: true,
-      }),
-      Animated.timing(headerSlideAnim, {
-        toValue: 0,
-        duration: Design.animation.normal,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-      Animated.timing(cardFadeAnim, {
-        toValue: 1,
-        duration: Design.animation.normal,
-        delay: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(cardSlideAnim, {
-        toValue: 0,
-        duration: Design.animation.normal,
-        delay: 100,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-      Animated.timing(buttonFadeAnim, {
-        toValue: 1,
-        duration: Design.animation.normal,
-        delay: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(buttonSlideAnim, {
-        toValue: 0,
-        duration: Design.animation.normal,
-        delay: 200,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
 
 
   const revealNumber = () => {

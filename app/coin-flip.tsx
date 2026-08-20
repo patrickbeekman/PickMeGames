@@ -3,18 +3,18 @@ import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useEntranceAnimation } from '../hooks/useEntranceAnimation';
+import { useGameScreenHeader } from '../hooks/useGameScreenHeader';
 import { impact, notify } from '../utils/haptics';
 
 type CoinSide = 'heads' | 'tails' | null;
 
 export default function CoinFlipScreen() {
-  const navigation = useNavigation();
   const { capture } = useAnalytics();
   const [result, setResult] = useState<CoinSide>(null);
   const [isFlipping, setIsFlipping] = useState(false);
@@ -31,61 +31,15 @@ export default function CoinFlipScreen() {
   const bounceAnim = useRef(new Animated.Value(0)).current;
   const headsOpacity = useRef(new Animated.Value(1)).current;
   const tailsOpacity = useRef(new Animated.Value(0)).current;
-  const headerFadeAnim = useRef(new Animated.Value(0)).current;
-  const headerSlideAnim = useRef(new Animated.Value(20)).current;
-  const buttonFadeAnim = useRef(new Animated.Value(0)).current;
-  const buttonSlideAnim = useRef(new Animated.Value(30)).current;
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'Coin Flip',
-      headerStyle: {
-        backgroundColor: Design.colors.background.light,
-        borderBottomWidth: 0,
-        shadowOpacity: 0,
-        elevation: 0,
-      },
-      headerTintColor: Design.colors.text.primary,
-      headerTitleStyle: {
-        fontWeight: Design.typography.weights.bold,
-        fontSize: Design.typography.sizes.xl,
-      },
-    });
-  }, [navigation]);
+  useGameScreenHeader('Coin Flip');
+
+  const { fade: headerFadeAnim, slide: headerSlideAnim } = useEntranceAnimation({ distance: 20, duration: Design.animation.normal });
+  const { fade: buttonFadeAnim, slide: buttonSlideAnim } = useEntranceAnimation({ distance: 30, duration: Design.animation.normal, delay: 200 });
 
   useEffect(() => {
     capture('entered_coin_flip');
   }, [capture]);
-
-  // Entrance animations
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(headerFadeAnim, {
-        toValue: 1,
-        duration: Design.animation.normal,
-        useNativeDriver: true,
-      }),
-      Animated.timing(headerSlideAnim, {
-        toValue: 0,
-        duration: Design.animation.normal,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-      Animated.timing(buttonFadeAnim, {
-        toValue: 1,
-        duration: Design.animation.normal,
-        delay: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(buttonSlideAnim, {
-        toValue: 0,
-        duration: Design.animation.normal,
-        delay: 200,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
 
   // Unmount cleanup
   useEffect(() => {

@@ -3,7 +3,6 @@ import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
@@ -20,6 +19,8 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useEntranceAnimation } from '../hooks/useEntranceAnimation';
+import { useGameScreenHeader } from '../hooks/useGameScreenHeader';
 import { impact, notify } from '../utils/haptics';
 
 const { width, height } = Dimensions.get('window');
@@ -31,7 +32,6 @@ const WINNER_BADGE_SIZE = 120;
 type Phase = 'waiting' | 'ready' | 'flashing' | 'winner';
 
 export default function TimerCountdownScreen() {
-  const navigation = useNavigation();
   const { capture } = useAnalytics();
   const [phase, setPhase] = useState<Phase>('waiting');
   const [touches, setTouches] = useState<{ identifier: number; x: number; y: number; timestamp: number }[]>([]);
@@ -46,10 +46,6 @@ export default function TimerCountdownScreen() {
 
   const backgroundColor = useRef(new Animated.Value(0)).current;
   const flashAnim = useRef(new Animated.Value(0)).current;
-  const headerFadeAnim = useRef(new Animated.Value(0)).current;
-  const headerSlideAnim = useRef(new Animated.Value(20)).current;
-  const buttonFadeAnim = useRef(new Animated.Value(0)).current;
-  const buttonSlideAnim = useRef(new Animated.Value(30)).current;
   const readyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const phaseRef = useRef(phase);
@@ -60,56 +56,14 @@ export default function TimerCountdownScreen() {
   useEffect(() => { touchesRef.current = touches; }, [touches]);
   useEffect(() => { particlesRef.current = particles; }, [particles]);
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'Timer Countdown',
-      headerStyle: {
-        backgroundColor: Design.colors.background.light,
-        borderBottomWidth: 0,
-        shadowOpacity: 0,
-        elevation: 0,
-      },
-      headerTintColor: Design.colors.text.primary,
-      headerTitleStyle: {
-        fontWeight: Design.typography.weights.bold,
-        fontSize: Design.typography.sizes.xl,
-      },
-    });
-  }, [navigation]);
+  useGameScreenHeader('Timer Countdown');
+
+  const { fade: headerFadeAnim, slide: headerSlideAnim } = useEntranceAnimation({ distance: 20, duration: Design.animation.normal });
+  const { fade: buttonFadeAnim, slide: buttonSlideAnim } = useEntranceAnimation({ distance: 30, duration: Design.animation.normal, delay: 200 });
 
   useEffect(() => {
     capture('entered_timer_countdown');
   }, [capture]);
-
-  // Entrance animations
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(headerFadeAnim, {
-        toValue: 1,
-        duration: Design.animation.normal,
-        useNativeDriver: true,
-      }),
-      Animated.timing(headerSlideAnim, {
-        toValue: 0,
-        duration: Design.animation.normal,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-      Animated.timing(buttonFadeAnim, {
-        toValue: 1,
-        duration: Design.animation.normal,
-        delay: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(buttonSlideAnim, {
-        toValue: 0,
-        duration: Design.animation.normal,
-        delay: 200,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
 
   // Background color animation based on phase
   useEffect(() => {

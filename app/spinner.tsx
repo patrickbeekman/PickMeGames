@@ -3,7 +3,6 @@ import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   AccessibilityInfo,
@@ -18,6 +17,8 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import { SpinnerArrow } from '../components/SpinnerArrow';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useEntranceAnimation } from '../hooks/useEntranceAnimation';
+import { useGameScreenHeader } from '../hooks/useGameScreenHeader';
 import { impact, notify } from '../utils/haptics';
 
 const { width, height } = Dimensions.get('window');
@@ -28,7 +29,6 @@ const SPINNER_CENTER_X = width / 2;
 const SPINNER_CENTER_Y = height / 2;
 
 const TwisterSpinner = () => {
-  const navigation = useNavigation();
   const { capture } = useAnalytics();
   const rotation = useRef(new Animated.Value(0)).current;
   const [spinning, setSpinning] = useState(false);
@@ -42,26 +42,11 @@ const TwisterSpinner = () => {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
-  const headerFadeAnim = useRef(new Animated.Value(0)).current;
-  const headerSlideAnim = useRef(new Animated.Value(20)).current;
   const successBounceAnim = useRef(new Animated.Value(1)).current;
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'Spinner',
-      headerStyle: {
-        backgroundColor: Design.colors.background.light,
-        borderBottomWidth: 0,
-        shadowOpacity: 0,
-        elevation: 0,
-      },
-      headerTintColor: Design.colors.text.primary,
-      headerTitleStyle: {
-        fontWeight: Design.typography.weights.bold,
-        fontSize: Design.typography.sizes.xl,
-      },
-    });
-  }, [navigation]);
+  useGameScreenHeader('Spinner');
+
+  const { fade: headerFadeAnim, slide: headerSlideAnim } = useEntranceAnimation({ distance: 20 });
 
   useEffect(() => {
     capture('entered_spinner');
@@ -81,23 +66,6 @@ const TwisterSpinner = () => {
         clearTimeout(confettiTimeoutRef.current);
       }
     };
-  }, []);
-
-  // Header entrance animation
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(headerFadeAnim, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }),
-      Animated.timing(headerSlideAnim, {
-        toValue: 0,
-        duration: 500,
-        easing: Easing.out(Easing.ease),
-        useNativeDriver: true,
-      }),
-    ]).start();
   }, []);
 
   const spin = () => {

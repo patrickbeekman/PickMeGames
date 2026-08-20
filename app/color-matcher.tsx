@@ -3,13 +3,14 @@ import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AccessibilityInfo, Animated, Dimensions, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, Animated, Dimensions, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import Svg, { Circle, Defs, Path, Stop, LinearGradient as SvgLinearGradient } from 'react-native-svg';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useEntranceAnimation } from '../hooks/useEntranceAnimation';
+import { useGameScreenHeader } from '../hooks/useGameScreenHeader';
 import { impact, notify } from '../utils/haptics';
 
 const { width } = Dimensions.get('window');
@@ -143,7 +144,6 @@ interface PlayerGuess {
 }
 
 export default function ColorMatcherScreen() {
-  const navigation = useNavigation();
   const { capture } = useAnalytics();
   const [playerCount, setPlayerCount] = useState(2);
   const [phase, setPhase] = useState<GamePhase>('setup');
@@ -155,66 +155,20 @@ export default function ColorMatcherScreen() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [currentPickColor, setCurrentPickColor] = useState<string | null>(null);
 
-  const headerFadeAnim = useRef(new Animated.Value(0)).current;
-  const headerSlideAnim = useRef(new Animated.Value(20)).current;
-  const buttonFadeAnim = useRef(new Animated.Value(0)).current;
-  const buttonSlideAnim = useRef(new Animated.Value(30)).current;
   const targetColorOpacity = useRef(new Animated.Value(0)).current;
   const targetColorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const flashDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pickLockRef = useRef(false);
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'Color Matcher',
-      headerStyle: {
-        backgroundColor: Design.colors.background.light,
-        borderBottomWidth: 0,
-        shadowOpacity: 0,
-        elevation: 0,
-      },
-      headerTintColor: Design.colors.text.primary,
-      headerTitleStyle: {
-        fontWeight: Design.typography.weights.bold,
-        fontSize: Design.typography.sizes.xl,
-      },
-    });
-  }, [navigation]);
+  useGameScreenHeader('Color Matcher');
+
+  const { fade: headerFadeAnim, slide: headerSlideAnim } = useEntranceAnimation({ distance: 20, duration: Design.animation.normal });
+  const { fade: buttonFadeAnim, slide: buttonSlideAnim } = useEntranceAnimation({ distance: 30, duration: Design.animation.normal, delay: 200 });
 
   useEffect(() => {
     capture('entered_color_matcher');
   }, [capture]);
-
-  // Entrance animations
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(headerFadeAnim, {
-        toValue: 1,
-        duration: Design.animation.normal,
-        useNativeDriver: true,
-      }),
-      Animated.timing(headerSlideAnim, {
-        toValue: 0,
-        duration: Design.animation.normal,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-      Animated.timing(buttonFadeAnim, {
-        toValue: 1,
-        duration: Design.animation.normal,
-        delay: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(buttonSlideAnim, {
-        toValue: 0,
-        duration: Design.animation.normal,
-        delay: 200,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, []);
 
   // Clear any pending timers on unmount to avoid setState-after-unmount
   useEffect(() => {

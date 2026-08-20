@@ -4,15 +4,14 @@ import { Text } from '@tamagui/core';
 import { Input } from '@tamagui/input';
 import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, Keyboard, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useGameScreenHeader } from '../hooks/useGameScreenHeader';
 import { usePrompts } from '../hooks/usePrompts';
 
 export default function PromptSettings() {
-  const navigation = useNavigation();
   const { capture } = useAnalytics();
   const { 
     prompts, 
@@ -108,21 +107,7 @@ export default function PromptSettings() {
     );
   };
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'Prompt Settings',
-      headerStyle: {
-        backgroundColor: '#F3E889',
-        borderBottomWidth: 0,
-        shadowOpacity: 0,
-        elevation: 0,
-      },
-      headerTintColor: '#1A1A1A',
-      headerTitleStyle: {
-        fontWeight: 'bold',
-      },
-    });
-  }, [navigation]);
+  useGameScreenHeader('Prompt Settings');
 
   useEffect(() => {
     capture('entered_prompt_settings');

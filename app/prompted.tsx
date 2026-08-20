@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useGameScreenHeader } from '../hooks/useGameScreenHeader';
 import { usePrompts } from '../hooks/usePrompts';
 import { impact } from '../utils/haptics';
 
@@ -57,24 +58,10 @@ export default function PromptSelector() {
     };
   }, [navigation, loading, capture]); // getFilteredPrompts is stable, so not needed in deps
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'Prompt to pick',
-      headerStyle: {
-        backgroundColor: Design.colors.background.light,
-        borderBottomWidth: 0,
-        shadowOpacity: 0,
-        elevation: 0,
-      },
-      headerTintColor: Design.colors.text.primary,
-      headerTitleStyle: {
-        fontWeight: Design.typography.weights.bold,
-        fontSize: Design.typography.sizes.xl,
-      },
-    });
-  }, [navigation]);
+  useGameScreenHeader('Prompt to pick');
 
-  // Entrance animations
+  // Entrance animations (gated on prompts finishing load; not migrated to
+  // useEntranceAnimation because that hook always starts on mount)
   useEffect(() => {
     if (!loading && filteredPrompts.length > 0) {
       Animated.parallel([

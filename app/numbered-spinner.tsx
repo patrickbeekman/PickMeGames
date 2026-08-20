@@ -3,14 +3,15 @@ import { Text } from '@tamagui/core';
 import { Image } from '@tamagui/image';
 import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigation } from 'expo-router';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Dimensions, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import Svg, { G, Path, Text as SvgText } from 'react-native-svg';
 import { SpinnerArrow } from '../components/SpinnerArrow';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useEntranceAnimation } from '../hooks/useEntranceAnimation';
+import { useGameScreenHeader } from '../hooks/useGameScreenHeader';
 
 // Modern color palette with gradients - well-distributed variety across color families
 const SEGMENT_COLORS = [
@@ -49,7 +50,6 @@ const getSpinnerSize = () => {
 const { width, height } = Dimensions.get('window');
 
 export default function SpinnerSelector() {
-  const navigation = useNavigation();
   const { capture } = useAnalytics();
   const [playerCount, setPlayerCount] = useState(6);
   const [spinning, setSpinning] = useState(false);
@@ -58,13 +58,15 @@ export default function SpinnerSelector() {
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const glowAnim = useRef(new Animated.Value(0)).current;
-  const headerFadeAnim = useRef(new Animated.Value(0)).current;
-  const headerSlideAnim = useRef(new Animated.Value(20)).current;
   const [spinnerSize, setSpinnerSize] = useState(getSpinnerSize());
   const isMounted = useRef(true);
   const pulseLoopRef = useRef<Animated.CompositeAnimation | null>(null);
   const glowLoopRef = useRef<Animated.CompositeAnimation | null>(null);
   const confettiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useGameScreenHeader('Numbered Spinner');
+
+  const { fade: headerFadeAnim, slide: headerSlideAnim } = useEntranceAnimation({ distance: 20 });
 
   useEffect(() => {
     return () => {
@@ -74,23 +76,6 @@ export default function SpinnerSelector() {
       if (confettiTimerRef.current) clearTimeout(confettiTimerRef.current);
     };
   }, []);
-
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerTitle: 'Numbered Spinner',
-      headerStyle: {
-        backgroundColor: Design.colors.background.light,
-        borderBottomWidth: 0,
-        shadowOpacity: 0,
-        elevation: 0,
-      },
-      headerTintColor: Design.colors.text.primary,
-      headerTitleStyle: {
-        fontWeight: Design.typography.weights.bold,
-        fontSize: Design.typography.sizes.xl,
-      },
-    });
-  }, [navigation]);
 
   useEffect(() => {
     capture('entered_numbered_spinner');
@@ -102,23 +87,6 @@ export default function SpinnerSelector() {
       setSpinnerSize(getSpinnerSize());
     });
     return () => subscription?.remove();
-  }, []);
-
-  // Header entrance animation
-  useEffect(() => {
-    Animated.parallel([
-      Animated.timing(headerFadeAnim, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }),
-      Animated.timing(headerSlideAnim, {
-        toValue: 0,
-        duration: 500,
-        easing: Easing.out(Easing.ease),
-        useNativeDriver: true,
-      }),
-    ]).start();
   }, []);
 
   const spin = () => {
