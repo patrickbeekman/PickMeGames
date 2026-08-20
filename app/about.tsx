@@ -6,16 +6,19 @@ import { XStack, YStack } from '@tamagui/stacks';
 import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Linking } from 'react-native';
+import { Design } from '../constants/Design';
+import { useGameScreenHeader } from '../hooks/useGameScreenHeader';
 
 export default function AboutScreen() {
+  useGameScreenHeader('About');
   const openGitHub = () => {
     Linking.openURL('https://github.com/patrickbeekman/PickMeGames/tree/master');
   };
 
   return (
-    <YStack flex={1} backgroundColor="#F3E889" padding={24}>
+    <YStack flex={1} backgroundColor={Design.colors.background.light} padding={24}>
       <LinearGradient
-        colors={['#F3E889', '#FFE082', '#FFF9C4']}
+        colors={[Design.colors.background.light, '#FFE082', '#FFF9C4']}
         style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }}
       />
       
@@ -26,7 +29,7 @@ export default function AboutScreen() {
             width={80}
             height={80}
             borderRadius={40}
-            backgroundColor="#4CAF50"
+            backgroundColor={Design.colors.primary}
             alignItems="center"
             justifyContent="center"
             padding={8}
@@ -39,11 +42,11 @@ export default function AboutScreen() {
             />
           </YStack>
           
-          <Text fontSize={32} fontWeight="800" color="#1A1A1A" textAlign="center">
+          <Text fontSize={32} fontWeight="800" color={Design.colors.text.primary} textAlign="center">
             PickMe Games
           </Text>
           
-          <Text fontSize={18} color="#4A4A4A" textAlign="center" maxWidth={280}>
+          <Text fontSize={18} color={Design.colors.text.secondary} textAlign="center" maxWidth={280}>
             Making decisions fun, one game at a time
           </Text>
         </YStack>
@@ -60,7 +63,7 @@ export default function AboutScreen() {
                 width={40}
                 height={40}
                 borderRadius={20}
-                backgroundColor="#1976D2"
+                backgroundColor={Design.colors.accent.blue}
                 alignItems="center"
                 justifyContent="center"
               >
@@ -68,7 +71,7 @@ export default function AboutScreen() {
               </YStack>
               <YStack flex={1}>
                 <Text fontWeight="600" fontSize={16}>Version {Constants.expoConfig?.version ?? '1.1.0'}</Text>
-                <Text color="#4A4A4A" fontSize={14}>Latest & Greatest</Text>
+                <Text color={Design.colors.text.secondary} fontSize={14}>Latest & Greatest</Text>
               </YStack>
             </XStack>
           </YStack>
@@ -83,7 +86,7 @@ export default function AboutScreen() {
                 width={40}
                 height={40}
                 borderRadius={20}
-                backgroundColor="#F57C00"
+                backgroundColor={Design.colors.accent.orange}
                 alignItems="center"
                 justifyContent="center"
               >
@@ -91,7 +94,7 @@ export default function AboutScreen() {
               </YStack>
               <YStack flex={1}>
                 <Text fontWeight="600" fontSize={16}>Created by Patrick Beekman</Text>
-                <Text color="#4A4A4A" fontSize={14}>With ❤️ for learning & fun</Text>
+                <Text color={Design.colors.text.secondary} fontSize={14}>With ❤️ for learning & fun</Text>
               </YStack>
             </XStack>
           </YStack>
@@ -106,7 +109,7 @@ export default function AboutScreen() {
                 width={40}
                 height={40}
                 borderRadius={20}
-                backgroundColor="#4CAF50"
+                backgroundColor={Design.colors.primary}
                 alignItems="center"
                 justifyContent="center"
               >
@@ -114,7 +117,7 @@ export default function AboutScreen() {
               </YStack>
               <YStack flex={1}>
                 <Text fontWeight="600" fontSize={16}>No Ads. Just Games.</Text>
-                <Text color="#4A4A4A" fontSize={14}>Pure fun experience</Text>
+                <Text color={Design.colors.text.secondary} fontSize={14}>Pure fun experience</Text>
               </YStack>
             </XStack>
           </YStack>
@@ -123,7 +126,7 @@ export default function AboutScreen() {
         {/* Action Buttons */}
         <YStack space={12} width="100%" maxWidth={320} marginTop={32}>
           <Button
-            backgroundColor="#333"
+            backgroundColor={Design.colors.text.primary}
             borderRadius={8}
             pressStyle={{ scale: 0.95, backgroundColor: "#555" }}
             onPress={openGitHub}
@@ -139,10 +142,10 @@ export default function AboutScreen() {
 
         {/* Footer */}
         <YStack alignItems="center" marginTop={10} marginBottom={30}>
-          <Text fontSize={12} color="#6B6B6B" textAlign="center">
+          <Text fontSize={12} color={Design.colors.text.tertiary} textAlign="center">
             Made with React Native & Tamagui
           </Text>
-          <Text fontSize={12} color="#6B6B6B" textAlign="center">
+          <Text fontSize={12} color={Design.colors.text.tertiary} textAlign="center">
             Open source • MIT License
           </Text>
         </YStack>

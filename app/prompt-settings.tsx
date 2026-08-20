@@ -7,6 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, Keyboard, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { useGameScreenHeader } from '../hooks/useGameScreenHeader';
 import { usePrompts } from '../hooks/usePrompts';
@@ -87,15 +88,15 @@ export default function PromptSettings() {
       >
         <XStack alignItems="center" justifyContent="space-between">
           <YStack flex={1} marginRight={12}>
-            <Text fontSize={16} color="#1A1A1A" lineHeight={22}>
+            <Text fontSize={16} color={Design.colors.text.primary} lineHeight={22}>
               {item}
             </Text>
           </YStack>
           <Button
             size="$2"
-            backgroundColor={isDefault ? "#4CAF50" : "#F57C00"}
+            backgroundColor={isDefault ? Design.colors.primary : Design.colors.accent.orange}
             borderRadius={20}
-            pressStyle={{ scale: 0.95, backgroundColor: isDefault ? "#388E3C" : "#E65100" }}
+            pressStyle={{ scale: 0.95, backgroundColor: isDefault ? Design.colors.primaryDark : "#E65100" }}
             onPress={() => handleRemovePrompt(realIndex, item, isDefault)}
           >
             <Text color="white" fontSize={12} fontWeight="bold">
@@ -169,8 +170,8 @@ export default function PromptSettings() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <YStack flex={1} backgroundColor="#F3E889" alignItems="center" justifyContent="center">
-          <Text fontSize={18} color="#1A1A1A">Loading prompts...</Text>
+        <YStack flex={1} backgroundColor={Design.colors.background.light} alignItems="center" justifyContent="center">
+          <Text fontSize={18} color={Design.colors.text.primary}>Loading prompts...</Text>
         </YStack>
       </SafeAreaView>
     );
@@ -178,19 +179,19 @@ export default function PromptSettings() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <YStack flex={1} backgroundColor="#F3E889">
+      <YStack flex={1} backgroundColor={Design.colors.background.light}>
         <LinearGradient
-          colors={['#F3E889', '#FFE082', '#FFF9C4']}
+          colors={[Design.colors.background.light, '#FFE082', '#FFF9C4']}
           style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: -40 }}
         />
         
         {/* Header */}
         <YStack padding={1} alignItems="center">
           <Text fontSize={32} marginBottom={8}>⚙️💭⚙️</Text>
-          <Text fontSize={20} fontWeight="700" color="#1A1A1A" textAlign="center" marginBottom={2}>
+          <Text fontSize={20} fontWeight="700" color={Design.colors.text.primary} textAlign="center" marginBottom={2}>
             Manage Your Prompts
           </Text>
-          <Text fontSize={14} color="#4A4A4A" textAlign="center" maxWidth={300} marginBottom={8}>
+          <Text fontSize={14} color={Design.colors.text.secondary} textAlign="center" maxWidth={300} marginBottom={8}>
             Add custom prompts or remove ones you don't like!
           </Text>
         </YStack>
@@ -206,7 +207,7 @@ export default function PromptSettings() {
           shadowOffset={{ width: 0, height: 4 }}
           shadowRadius={8}
         >
-          <Text fontSize={16} fontWeight="600" color="#1A1A1A" marginBottom={12}>
+          <Text fontSize={16} fontWeight="600" color={Design.colors.text.primary} marginBottom={12}>
             ✨ Add New Prompt
           </Text>
           
@@ -232,9 +233,9 @@ export default function PromptSettings() {
           />
           
           <Button
-            backgroundColor="#4CAF50"
+            backgroundColor={Design.colors.primary}
             borderRadius={8}
-            pressStyle={{ scale: 0.95, backgroundColor: "#45a049" }}
+            pressStyle={{ scale: 0.95, backgroundColor: Design.colors.primaryDark }}
             onPress={handleAddPrompt}
             disabled={!newPrompt.trim()}
             opacity={newPrompt.trim() ? 1 : 0.5}
@@ -250,7 +251,7 @@ export default function PromptSettings() {
           <Button
             flex={1}
             backgroundColor={showCustom ? "rgba(76, 175, 80, 0.08)" : "#E8F5E9"}
-            borderColor="#4CAF50"
+            borderColor={Design.colors.primary}
             borderWidth={showCustom ? 1 : 2}
             borderRadius={12}
             padding={0}
@@ -261,8 +262,8 @@ export default function PromptSettings() {
             pressStyle={{ scale: 0.97, backgroundColor: "#C8E6C9" }}
           >
             <YStack alignItems="center" paddingVertical={8} paddingHorizontal={4}>
-              <Text fontSize={12} color="#4A4A4A" marginBottom={2}>Default Prompts</Text>
-              <Text fontSize={20} fontWeight="bold" color="#4CAF50">
+              <Text fontSize={12} color={Design.colors.text.secondary} marginBottom={2}>Default Prompts</Text>
+              <Text fontSize={20} fontWeight="bold" color={Design.colors.primary}>
                 {filteredDefaultPrompts.length}
               </Text>
             </YStack>
@@ -270,7 +271,7 @@ export default function PromptSettings() {
           <Button
             flex={1}
             backgroundColor={showCustom ? "#FFF3E0" : "rgba(255, 193, 7, 0.08)"}
-            borderColor="#F57C00"
+            borderColor={Design.colors.accent.orange}
             borderWidth={showCustom ? 2 : 1}
             borderRadius={12}
             padding={0}
@@ -281,8 +282,8 @@ export default function PromptSettings() {
             pressStyle={{ scale: 0.97, backgroundColor: "#FFE0B2" }}
           >
             <YStack alignItems="center" paddingVertical={8} paddingHorizontal={4}>
-              <Text fontSize={12} color="#4A4A4A" marginBottom={2}>Custom Prompts</Text>
-              <Text fontSize={20} fontWeight="bold" color="#F57C00">
+              <Text fontSize={12} color={Design.colors.text.secondary} marginBottom={2}>Custom Prompts</Text>
+              <Text fontSize={20} fontWeight="bold" color={Design.colors.accent.orange}>
                 {getCustomPrompts().length}
               </Text>
             </YStack>
@@ -302,7 +303,7 @@ export default function PromptSettings() {
         {/* Reset/Delete Buttons */}
         <XStack margin={16} gap={12} justifyContent="center">
           <Button
-            backgroundColor="#F57C00"
+            backgroundColor={Design.colors.accent.orange}
             borderRadius={12}
             pressStyle={{ scale: 0.95, backgroundColor: "#E65100" }}
             onPress={hideAllDefaults}
@@ -314,9 +315,9 @@ export default function PromptSettings() {
           </Button>
           {getCustomPrompts().length > 0 || hiddenDefaults.length > 0 ? (
             <Button
-              backgroundColor="#4CAF50"
+              backgroundColor={Design.colors.primary}
               borderRadius={12}
-              pressStyle={{ scale: 0.95, backgroundColor: "#388E3C" }}
+              pressStyle={{ scale: 0.95, backgroundColor: Design.colors.primaryDark }}
               onPress={handleResetToDefaults}
               flex={1}
             >
