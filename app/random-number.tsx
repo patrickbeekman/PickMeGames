@@ -9,6 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, Animated, Easing, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { impact, notify } from '../utils/haptics';
 
 export default function NumberGuesser() {
   const navigation = useNavigation();
@@ -55,7 +56,7 @@ export default function NumberGuesser() {
     setMinNumber(preset.min);
     setMaxNumber(preset.max);
     setSelectedPreset(presetIndex);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    impact(Haptics.ImpactFeedbackStyle.Light);
   };
 
   useEffect(() => {
@@ -126,15 +127,15 @@ export default function NumberGuesser() {
   const revealNumber = () => {
     if (isRevealing) return;
     if (minNumber >= maxNumber) return; // Validate range
-    
+
     // Clear any pending timeout
     if (revealTimeoutRef.current) {
       clearTimeout(revealTimeoutRef.current);
       revealTimeoutRef.current = null;
     }
-    
+
     // Haptic feedback on press
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    impact();
     
     // Generate random number immediately
     const range = maxNumber - minNumber + 1;
@@ -175,9 +176,9 @@ export default function NumberGuesser() {
       setAnimatedNumber(newNumberStr);
       setIsRevealing(false);
       revealTimeoutRef.current = null;
-      
+
       // Haptic feedback on completion
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      notify(Haptics.NotificationFeedbackType.Success);
       
       // Screen reader announcement
       AccessibilityInfo.announceForAccessibility(`Random number revealed: ${newNumber.toLocaleString()}`);
@@ -237,6 +238,13 @@ export default function NumberGuesser() {
       };
     }
   }, [isRevealing]);
+
+  // Unmount cleanup for reveal timeout
+  useEffect(() => {
+    return () => {
+      if (revealTimeoutRef.current) clearTimeout(revealTimeoutRef.current);
+    };
+  }, []);
 
   const spin = rotateAnim.interpolate({
     inputRange: [0, 1],
