@@ -10,6 +10,7 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import Svg, { Circle, Defs, Path, Stop, LinearGradient as SvgLinearGradient } from 'react-native-svg';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { impact, notify } from '../utils/haptics';
 
 const { width } = Dimensions.get('window');
 const COLOR_WHEEL_SIZE = Math.min(width - 48, 300);
@@ -160,6 +161,9 @@ export default function ColorMatcherScreen() {
   const buttonSlideAnim = useRef(new Animated.Value(30)).current;
   const targetColorOpacity = useRef(new Animated.Value(0)).current;
   const targetColorTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const flashDelayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pickLockRef = useRef(false);
 
   useEffect(() => {
     navigation.setOptions({
@@ -212,25 +216,30 @@ export default function ColorMatcherScreen() {
     ]).start();
   }, []);
 
+  // Clear any pending timers on unmount to avoid setState-after-unmount
+  useEffect(() => {
+    return () => {
+      if (targetColorTimerRef.current) clearTimeout(targetColorTimerRef.current);
+      if (flashDelayTimerRef.current) clearTimeout(flashDelayTimerRef.current);
+      if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+    };
+  }, []);
+
   // Generate random target color and calculate position
   const [targetPosition, setTargetPosition] = useState<{ x: number; y: number } | null>(null);
 
   const generateTargetColor = (): string => {
     const hue = Math.floor(Math.random() * 360);
-    // Allow full range of saturation (30-100%) to allow center picks
-    const saturation = 30 + Math.floor(Math.random() * 70); // 30-100%
-    // Allow wider range of lightness (30-70%) for more variety
-    const lightness = 30 + Math.floor(Math.random() * 40); // 30-70%
+    // Sample a radius on the wheel so the target always corresponds to a tappable point
+    const normalizedDistance = 0.3 + Math.random() * 0.7; // skip the washed-out center
+    const saturation = Math.min(normalizedDistance * 100, 100);
+    const lightness = 50 + (1 - normalizedDistance) * 30;
     const [r, g, b] = hslToRgb(hue, saturation, lightness);
-    
-    // Calculate position on wheel for the target color
-    const normalizedDistance = saturation / 100; // 0.3-1.0 (now includes center area)
+
     const distance = normalizedDistance * RADIUS;
     const angleRad = (hue * Math.PI) / 180;
-    const x = CENTER_X + distance * Math.cos(angleRad);
-    const y = CENTER_Y + distance * Math.sin(angleRad);
-    setTargetPosition({ x, y });
-    
+    setTargetPosition({ x: CENTER_X + distance * Math.cos(angleRad), y: CENTER_Y + distance * Math.sin(angleRad) });
+
     return rgbToHex(r, g, b);
   };
 
@@ -262,17 +271,19 @@ export default function ColorMatcherScreen() {
     setWinner(null);
     setShowConfetti(false);
     setCurrentPickColor(null);
-    
+    pickLockRef.current = false;
+
     // Flash target color for 0.5s
-    setTimeout(() => {
+    flashDelayTimerRef.current = setTimeout(() => {
       flashTargetColor();
     }, 300);
 
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    impact(Haptics.ImpactFeedbackStyle.Medium);
   };
 
   const handleColorPick = (x: number, y: number) => {
-    if (phase !== 'playing') return;
+    if (pickLockRef.current || phase !== 'playing') return;
+    pickLockRef.current = true;
 
     // Coordinates are relative to the View, which should match SVG size
     const { angle, distance } = cartesianToPolar(x, y);
@@ -312,34 +323,35 @@ export default function ColorMatcherScreen() {
 
     setGuesses(prev => [...prev, newGuess]);
 
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    impact(Haptics.ImpactFeedbackStyle.Light);
 
     // Move to next player or show results
     if (currentPlayer < playerCount - 1) {
-      setTimeout(() => {
+      transitionTimerRef.current = setTimeout(() => {
         setCurrentPlayer(prev => prev + 1);
         setCurrentPickColor(null); // Clear pick for next player
+        pickLockRef.current = false; // unlock for the next player
       }, 500);
     } else {
       // All players have guessed, show results after 0.5s
-      setTimeout(() => {
-        showResults();
+      transitionTimerRef.current = setTimeout(() => {
+        showResults([...guesses, newGuess]);
       }, 500);
     }
   };
 
-  const showResults = () => {
+  const showResults = (finalGuesses: PlayerGuess[]) => {
     // Find winner (lowest distance = closest match = winner)
     // Sort by distance ascending (lowest first)
-    const sortedGuesses = [...guesses].sort((a, b) => a.distance - b.distance);
-    
+    const sortedGuesses = [...finalGuesses].sort((a, b) => a.distance - b.distance);
+
     // Winner is the one with the LOWEST distance (closest match)
     const winnerIndex = sortedGuesses[0].playerIndex;
     setWinner(winnerIndex);
     setPhase('results');
     setShowConfetti(true);
 
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    notify(Haptics.NotificationFeedbackType.Success);
     AccessibilityInfo.announceForAccessibility(`Player ${winnerIndex + 1} wins with the closest color match!`);
 
     capture('color_matcher_complete', {
@@ -351,6 +363,9 @@ export default function ColorMatcherScreen() {
 
   const reset = () => {
     if (targetColorTimerRef.current) clearTimeout(targetColorTimerRef.current);
+    if (flashDelayTimerRef.current) clearTimeout(flashDelayTimerRef.current);
+    if (transitionTimerRef.current) clearTimeout(transitionTimerRef.current);
+    pickLockRef.current = false;
     setPhase('setup');
     setCurrentPlayer(0);
     setGuesses([]);
@@ -528,7 +543,9 @@ export default function ColorMatcherScreen() {
             </Text>
             <View
               onTouchStart={(e) => {
-                const { locationX, locationY } = e.nativeEvent.touches[0];
+                const touch = e.nativeEvent.touches[0];
+                if (!touch) return;
+                const { locationX, locationY } = touch;
                 handleColorPick(locationX, locationY);
               }}
               style={{
