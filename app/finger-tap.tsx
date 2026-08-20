@@ -20,6 +20,7 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import { Ripple } from '../components/Ripple';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { impact, notify } from '../utils/haptics';
 
 // TypeScript interfaces for touch events
 interface TouchData {
@@ -160,7 +161,7 @@ export default function FingerTapScreen() {
 
     if (phase === 'waiting' && newTouches.length > 0) {
       // Haptic feedback when game starts
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      impact(Haptics.ImpactFeedbackStyle.Light);
       setPhase('countdown');
       setCountdown(COUNTDOWN_SECONDS);
     }
@@ -203,7 +204,7 @@ export default function FingerTapScreen() {
     setPhase('winner');
     
     // Haptic feedback on winner selection
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    notify(Haptics.NotificationFeedbackType.Success);
     
     // Screen reader announcement
     AccessibilityInfo.announceForAccessibility(`Winner selected! ${touches.length} player${touches.length !== 1 ? 's' : ''} participated.`);
@@ -232,19 +233,22 @@ export default function FingerTapScreen() {
     setParticles(newParticles);
   };
 
+  // Keep a live ref of particles so unmount cleanup can access the latest value
+  // without re-running (and aborting in-flight animations) on every change.
+  const particlesRef = useRef(particles);
+  useEffect(() => {
+    particlesRef.current = particles;
+  }, [particles]);
+
   // Cleanup particles and animations on unmount
   useEffect(() => {
     return () => {
-      // Stop all particle animations
-      if (particles.length > 0) {
-        particles.forEach((particle) => {
-          particle.stopAnimation();
-        });
-      }
-      // Stop background color animation
+      particlesRef.current.forEach((particle) => {
+        particle.stopAnimation();
+      });
       backgroundColor.stopAnimation();
     };
-  }, [particles]);
+  }, []);
 
   const reset = () => {
     setTouches([]);
@@ -409,8 +413,8 @@ export default function FingerTapScreen() {
         {winner && (
           <YStack
             position="absolute"
-            left={winner.x - 55}
-            top={winner.y - 55}
+            left={Math.min(Math.max(winner.x - 55, 8), width - 128)}
+            top={Math.min(Math.max(winner.y - 55, 8), height - 128)}
             width={120}
             height={120}
             borderRadius={60}
@@ -485,7 +489,7 @@ export default function FingerTapScreen() {
         >
           <Pressable
             onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              impact(Haptics.ImpactFeedbackStyle.Medium);
               reset();
             }}
             onTouchStart={(e) => e.stopPropagation()}
