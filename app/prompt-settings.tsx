@@ -5,7 +5,6 @@ import { Input } from '@tamagui/input';
 import { XStack, YStack } from '@tamagui/stacks';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from 'expo-router';
-import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, Keyboard, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
