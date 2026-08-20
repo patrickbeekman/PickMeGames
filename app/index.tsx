@@ -5,12 +5,13 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useNavigation } from 'expo-router';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Linking, Modal, Pressable, ScrollView, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
-import DraggableFlatList, { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
+import { Animated, Linking, Modal, Pressable, StatusBar, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { NestableDraggableFlatList, NestableScrollContainer, RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlist';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Design } from '../constants/Design';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { GameModeOption, useGameModeOrder } from '../hooks/useGameModeOrder';
+import { impact, notify } from '../utils/haptics';
 
 export default function HomeScreen() {
   const navigation = useNavigation();
@@ -71,7 +72,7 @@ export default function HomeScreen() {
 
   const handleLongPress = () => {
     if (isEditMode) return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    impact(Haptics.ImpactFeedbackStyle.Medium);
     setIsEditMode(true);
     if (showHelpTip) {
       setShowHelpTip(false);
@@ -81,14 +82,14 @@ export default function HomeScreen() {
   };
 
   const handleDone = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    impact(Haptics.ImpactFeedbackStyle.Light);
     setIsEditMode(false);
     capture('exited_edit_mode');
   };
 
   const handleDragEnd = ({ data }: { data: GameModeOption[] }) => {
     saveOrder(data);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    notify(Haptics.NotificationFeedbackType.Success);
     capture('reordered_game_modes', { newOrder: data.map(opt => opt.route) });
   };
 
@@ -149,8 +150,11 @@ export default function HomeScreen() {
       <StatusBar barStyle="dark-content" backgroundColor={Design.colors.background.light} />
       <SafeAreaView style={{ flex: 1 }}>
         <YStack flex={1} paddingHorizontal={Design.spacing.lg}>
-          {/* Scrollable Content Area */}
-          <ScrollView
+          {/* Scrollable Content Area. NestableScrollContainer is used unconditionally
+              (not just in edit mode) so toggling edit mode doesn't remount the whole
+              tree — its default outerScrollEnabled is true, so it behaves like a plain
+              ScrollView except when a nested drag is actually in progress. */}
+          <NestableScrollContainer
             contentContainerStyle={{
               paddingTop: Design.spacing.md,
               paddingBottom: Design.spacing.xl,
@@ -221,10 +225,13 @@ export default function HomeScreen() {
                     Loading...
                   </Text>
                 </View>
-              ) : (
-              <View style={{ width: '100%', maxWidth: 360 }}>
-                {isEditMode ? (
-                  <DraggableFlatList
+              ) : isEditMode ? (
+                // Edit mode: single-column nestable drag list. DraggableFlatList doesn't
+                // support multiple columns, and it can't sit inside a plain ScrollView
+                // (that's what caused the flaky Android drags) — so this list and its
+                // scroll container are both the "Nestable" variants from the library.
+                <View style={{ width: '100%', maxWidth: 360 }}>
+                  <NestableDraggableFlatList
                     data={orderedOptions}
                     onDragEnd={handleDragEnd}
                     keyExtractor={(item) => item.route}
@@ -262,13 +269,13 @@ export default function HomeScreen() {
                                 alignItems: 'center',
                               }}
                             >
-                              <XStack 
-                                alignItems="center" 
-                                justifyContent="space-between" 
+                              <XStack
+                                alignItems="center"
+                                justifyContent="space-between"
                                 width="100%"
                                 gap={Design.spacing.sm}
                               >
-                                {/* Hamburger icon */}
+                                {/* Drag handle */}
                                 <View
                                   style={{
                                     width: 24,
@@ -277,8 +284,8 @@ export default function HomeScreen() {
                                     justifyContent: 'center',
                                   }}
                                 >
-                                  <Text 
-                                    color={Design.colors.text.white} 
+                                  <Text
+                                    color={Design.colors.text.white}
                                     fontSize={Design.typography.sizes.lg}
                                     fontWeight={Design.typography.weights.bold}
                                     style={{ opacity: 0.9 }}
@@ -294,11 +301,11 @@ export default function HomeScreen() {
                                   resizeMode="contain"
                                   accessibilityLabel={`${item.title} icon`}
                                 />
-                                <Text 
-                                  color={Design.colors.text.white} 
-                                  fontSize={Design.typography.sizes.md} 
-                                  fontWeight={Design.typography.weights.bold} 
-                                  flex={1} 
+                                <Text
+                                  color={Design.colors.text.white}
+                                  fontSize={Design.typography.sizes.md}
+                                  fontWeight={Design.typography.weights.bold}
+                                  flex={1}
                                   textAlign="left"
                                   letterSpacing={Design.typography.letterSpacing.normal}
                                 >
@@ -311,103 +318,93 @@ export default function HomeScreen() {
                         </Pressable>
                       </ScaleDecorator>
                     )}
-                    scrollEnabled={false}
                   />
-                ) : (
-                  <YStack width="100%" alignItems="center" gap={Design.spacing.sm}>
-                    {orderedOptions.map((opt) => {
-                      const anim = buttonAnimsMap.get(opt.route);
-                      return (
-                        <Animated.View
-                          key={opt.route}
-                          style={{
-                            width: '100%',
-                            opacity: anim?.fade || 1,
-                            transform: [{ translateY: anim?.slide || 0 }],
-                          }}
-                        >
-                          <Link href={opt.route as any} asChild>
-                            <Pressable
-                              onLongPress={handleLongPress}
-                              accessibilityRole="button"
-                              accessibilityLabel={`Open ${opt.title} game mode`}
-                              accessibilityHint={`Long press to reorder. Starts the ${opt.title} game mode to help decide who goes first`}
-                              style={({ pressed }) => [
-                                {
-                                  borderRadius: Design.borderRadius.lg,
-                                  overflow: 'hidden',
-                                  backgroundColor: '#FFFFFF',
-                                  ...Design.shadows.md,
-                                  transform: [{ scale: pressed ? Design.pressScale.md : 1 }],
-                                  opacity: pressed ? 0.95 : 1,
-                                },
-                              ]}
+                </View>
+              ) : (
+                // Normal mode: two-column grid (Option 6 of HOMEPAGE_REDESIGN.md) — all
+                // 8 game modes visible without scrolling on typical phones.
+                <View
+                  style={{
+                    width: '100%',
+                    maxWidth: 420,
+                    flexDirection: 'row',
+                    flexWrap: 'wrap',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  {orderedOptions.map((opt) => {
+                    const anim = buttonAnimsMap.get(opt.route);
+                    return (
+                      <Animated.View
+                        key={opt.route}
+                        style={{
+                          width: '48%',
+                          marginBottom: Design.spacing.sm,
+                          opacity: anim?.fade || 1,
+                          transform: [{ translateY: anim?.slide || 0 }],
+                        }}
+                      >
+                        <Link href={opt.route as any} asChild>
+                          <Pressable
+                            onLongPress={handleLongPress}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Open ${opt.title} game mode`}
+                            accessibilityHint={`Long press to reorder. Starts the ${opt.title} game mode to help decide who goes first`}
+                            style={({ pressed }) => [
+                              {
+                                borderRadius: Design.borderRadius.lg,
+                                overflow: 'hidden',
+                                backgroundColor: '#FFFFFF',
+                                ...Design.shadows.md,
+                                transform: [{ scale: pressed ? Design.pressScale.md : 1 }],
+                                opacity: pressed ? 0.95 : 1,
+                              },
+                            ]}
+                          >
+                            <LinearGradient
+                              colors={opt.gradient as [string, string]}
+                              start={{ x: 0, y: 0 }}
+                              end={{ x: 1, y: 1 }}
+                              style={{
+                                aspectRatio: 1.05,
+                                borderRadius: Design.borderRadius.lg,
+                                paddingVertical: Design.spacing.md,
+                                paddingHorizontal: Design.spacing.sm,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                              }}
                             >
-                              <LinearGradient
-                                colors={opt.gradient as [string, string]}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 1 }}
+                              <Image
+                                source={opt.icon}
+                                width={64}
+                                height={64}
+                                objectFit="contain"
+                                resizeMode="contain"
+                                accessibilityLabel={`${opt.title} icon`}
+                              />
+                              <Text
+                                color={Design.colors.text.white}
+                                fontSize={Design.typography.sizes.md}
+                                fontWeight={Design.typography.weights.bold}
+                                textAlign="center"
+                                numberOfLines={2}
+                                marginTop={Design.spacing.sm}
+                                letterSpacing={Design.typography.letterSpacing.normal}
                                 style={{
-                                  paddingVertical: Design.spacing.md,
-                                  paddingHorizontal: Design.spacing.md,
-                                  borderRadius: Design.borderRadius.lg,
-                                  minHeight: 56,
-                                  justifyContent: 'center',
-                                  alignItems: 'center',
+                                  textShadowColor: 'rgba(0, 0, 0, 0.25)',
+                                  textShadowOffset: { width: 0, height: 1 },
+                                  textShadowRadius: 2,
                                 }}
                               >
-                                <XStack 
-                                  alignItems="center" 
-                                  justifyContent="space-between" 
-                                  width="100%"
-                                  gap={Design.spacing.sm}
-                                >
-                                  <Image
-                                    source={opt.icon}
-                                    width={44}
-                                    height={44}
-                                    objectFit="contain"
-                                    resizeMode="contain"
-                                    accessibilityLabel={`${opt.title} icon`}
-                                  />
-                                  <Text 
-                                    color={Design.colors.text.white} 
-                                    fontSize={Design.typography.sizes.md} 
-                                    fontWeight={Design.typography.weights.bold} 
-                                    flex={1} 
-                                    textAlign="left"
-                                    letterSpacing={Design.typography.letterSpacing.normal}
-                                  >
-                                    {opt.title}
-                                  </Text>
-                                  <View
-                                    style={{
-                                      width: 24,
-                                      height: 24,
-                                      borderRadius: Design.borderRadius.full,
-                                      backgroundColor: 'rgba(255, 255, 255, 0.35)',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                    }}
-                                  >
-                                    <Text 
-                                      color={Design.colors.text.white} 
-                                      fontSize={Design.typography.sizes.md}
-                                      fontWeight={Design.typography.weights.bold}
-                                    >
-                                      →
-                                    </Text>
-                                  </View>
-                                </XStack>
-                              </LinearGradient>
-                            </Pressable>
-                          </Link>
-                        </Animated.View>
-                      );
-                    })}
-                  </YStack>
-                )}
-              </View>
+                                {opt.title}
+                              </Text>
+                            </LinearGradient>
+                          </Pressable>
+                        </Link>
+                      </Animated.View>
+                    );
+                  })}
+                </View>
               )}
 
               {/* Edit Mode Done Button */}
@@ -575,7 +572,7 @@ export default function HomeScreen() {
                 </XStack>
               </Animated.View>
             </Animated.View>
-          </ScrollView>
+          </NestableScrollContainer>
         </YStack>
       </SafeAreaView>
 
