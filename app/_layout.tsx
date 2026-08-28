@@ -75,7 +75,7 @@ export default function RootLayout() {
             <Stack.Screen name="+not-found" />
           </Stack>
         </TamaguiProvider>
-        <StatusBar backgroundColor={Design.colors.background.light} translucent={true} style='dark' />
+        <StatusBar backgroundColor={Design.colors.background.light} translucent={false} style='dark' />
       </ThemeProvider>
     </GestureHandlerRootView>
   );

@@ -202,10 +202,7 @@ export default function PromptSettings() {
           backgroundColor="rgba(255,255,255,0.95)"
           borderRadius={16}
           padding={20}
-          shadowColor="#000"
-          shadowOpacity={0.1}
-          shadowOffset={{ width: 0, height: 4 }}
-          shadowRadius={8}
+          style={Design.shadows.md}
         >
           <Text fontSize={16} fontWeight="600" color={Design.colors.text.primary} marginBottom={12}>
             ✨ Add New Prompt
