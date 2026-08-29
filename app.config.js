@@ -25,7 +25,16 @@ export default {
           backgroundColor: "#F3E889"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-build-properties",
+        {
+          android: {
+            compileSdkVersion: 36,
+            targetSdkVersion: 36
+          }
+        }
+      ]
     ],
     splash: {
       image: "./assets/images/pickmelogo.png",
