@@ -16,6 +16,9 @@ export default {
     },
     plugins: [
       "expo-router",
+      "expo-asset",
+      "expo-font",
+      "expo-localization",
       [
         "expo-splash-screen",
         {
@@ -26,6 +29,7 @@ export default {
         }
       ],
       "expo-web-browser",
+      "./plugins/withFrescoAlignmentFix",
       [
         "expo-build-properties",
         {
@@ -43,6 +47,7 @@ export default {
     },
     android: {
       package: "com.pattar.readyplayerone",
+      edgeToEdgeEnabled: true,
       adaptiveIcon: {
         foregroundImage: "./assets/images/pickmelogo.png",
         backgroundColor: "#F3E889"
